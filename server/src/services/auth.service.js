@@ -1,5 +1,5 @@
-import userRepository from "../repositories/user.repository";
-import ApiError from "../utils/ApiError";
+import userRepository from "../repositories/user.repository.js";
+import ApiError from "../utils/ApiError.js";
 
 const register = async (userData) => {
   const userExists = await userRepository.findUserByEmail(userData.email);
@@ -21,3 +21,9 @@ const register = async (userData) => {
     refreshToken,
   };
 };
+
+const authService = {
+  register,
+};
+
+export default authService;

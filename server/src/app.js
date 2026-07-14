@@ -3,11 +3,12 @@ import helmet from "helmet";
 import cors from "cors";
 import compression from "compression";
 import cookieParser from "cookie-parser";
-import rateLimiter from "./middlewares/rateLimiter";
-import env from "./config/env";
 import morgan from "morgan";
-import ApiError from "./utils/ApirError";
-import errorHandler from "./middlewares/errorHandler";
+import rateLimiter from "./middlewares/rateLimiter.js";
+import env from "./config/env.js";
+import ApiError from "./utils/ApiError.js";
+import errorHandler from "./middlewares/errorHandler.js";
+import authRoutes from "./routes/auth.routes.js";
 
 const app = express();
 
@@ -41,10 +42,12 @@ if (env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
-app.use(rateLimit);
+app.use(rateLimiter);
+
+app.use("/api/v1/auth", authRoutes);
 
 app.use((req, res, next) => {
-  throw new ApiError("Invalid route, please try again!");
+  next(new ApiError(404, "Invalid route, please try again!"));
 });
 
 app.use(errorHandler);

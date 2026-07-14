@@ -2,7 +2,7 @@ import { ZodError } from "zod";
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 
-import ApiError from "../errors/ApiError.js";
+import ApiError from "../utils/ApiError.js";
 import env from "../config/env.js";
 
 const errorHandler = (err, req, res, next) => {
