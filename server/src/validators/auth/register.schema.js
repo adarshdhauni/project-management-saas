@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { PASSWORD_REGEX } from "../../constants/regex";
+import { PASSWORD_REGEX } from "../../constants/regex.js";
 
 const registerSchema = z.object({
   name: z.string().min(2).max(50).trim(),

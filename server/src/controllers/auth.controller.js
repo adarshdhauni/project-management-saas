@@ -1,23 +1,26 @@
 import authService from "../services/auth.service.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import ApiResponse from "../utils/ApiResponse.js";
-import env from "../config/env.js";
 import {
   accessTokenCookieOptions,
   refreshTokenCookieOptions,
 } from "../constants/cookieOptions.js";
 
-const registerUser = asyncHandler(async (req, res) => {
-  const { user, accessToken, refreshToken } = await authService.register(
-    req.body,
-  );
-
+const sendAuthResponse = (
+  res,
+  user,
+  accessToken,
+  refreshToken,
+  message,
+  statusCode,
+) => {
   const userObject = user.toObject();
 
   delete userObject.password;
   delete userObject.refreshToken;
 
-  res
+  return res
+    .status(statusCode)
     .cookie("accessToken", accessToken, accessTokenCookieOptions)
     .cookie("refreshToken", refreshToken, refreshTokenCookieOptions)
     .json(
@@ -25,11 +28,39 @@ const registerUser = asyncHandler(async (req, res) => {
         {
           user: userObject,
         },
-        "User registered successfully.",
+        message,
       ),
     );
+};
+
+const registerUser = asyncHandler(async (req, res) => {
+  const { user, accessToken, refreshToken } = await authService.register(
+    req.body,
+  );
+
+  return sendAuthResponse(
+    res,
+    user,
+    accessToken,
+    refreshToken,
+    "User registered successfully.",
+    201,
+  );
 });
 
-const authController = { registerUser };
+const loginUser = asyncHandler(async (req, res) => {
+  const { user, accessToken, refreshToken } = await authService.login(req.body);
+
+  return sendAuthResponse(
+    res,
+    user,
+    accessToken,
+    refreshToken,
+    "Login successfull.",
+    200,
+  );
+});
+
+const authController = { registerUser, loginUser };
 
 export default authController;
