@@ -4,6 +4,7 @@ import registerSchema from "../validators/auth/register.schema.js";
 import loginSchema from "../validators/auth/login.schema.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import authController from "../controllers/auth.controller.js";
+import { protect } from "../middlewares/protect.js";
 
 const router = express.Router();
 
@@ -20,5 +21,9 @@ router.post(
 );
 
 router.post("/refresh-token", authController.refreshUserToken);
+
+router.get("/me", protect, authController.getCurrentUser);
+
+router.post("/logout", protect, authController.logoutUser);
 
 export default router;

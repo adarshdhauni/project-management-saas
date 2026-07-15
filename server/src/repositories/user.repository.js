@@ -24,12 +24,26 @@ const updateRefreshToken = (userId, refreshToken) => {
   return User.findByIdAndUpdate(userId, { refreshToken }, { new: true });
 };
 
+const clearRefreshToken = async (userId) => {
+  await User.findByIdAndUpdate(
+    userId,
+    {
+      refreshToken: null,
+    },
+    {
+      new: true,
+    },
+  );
+};
+
 const userRepository = {
   findUserByEmail,
-  createUser,
-  findUserById,
-  updateRefreshToken,
   findUserByEmailWithPassword,
+  findUserById,
+  findUserByIdWithRefreshToken,
+  createUser,
+  updateRefreshToken,
+  clearRefreshToken,
 };
 
 export default userRepository;

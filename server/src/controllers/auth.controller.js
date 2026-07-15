@@ -75,6 +75,35 @@ const refreshUserToken = asyncHandler(async (req, res) => {
   );
 });
 
-const authController = { registerUser, loginUser, refreshUserToken };
+const getCurrentUser = asyncHandler(async (req, res) => {
+  const user = await authService.getCurrentUser(req.user);
+
+  return res.status(200).json(
+    new ApiResponse(
+      {
+        user: req.user,
+      },
+      "Current user fetched successfully.",
+    ),
+  );
+});
+
+const logoutUser = asyncHandler(async (req, res) => {
+  await authService.logout(req.user._id);
+
+  return res
+    .status(200)
+    .clearCookie("accessToken", accessTokenCookieOptions)
+    .clearCookie("refreshToken", refreshTokenCookieOptions)
+    .json(new ApiResponse({}, "Logged out successfully."));
+});
+
+const authController = {
+  registerUser,
+  loginUser,
+  refreshUserToken,
+  getCurrentUser,
+  logoutUser,
+};
 
 export default authController;

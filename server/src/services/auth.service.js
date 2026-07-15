@@ -1,6 +1,7 @@
 import env from "../config/env.js";
 import userRepository from "../repositories/user.repository.js";
 import ApiError from "../utils/ApiError.js";
+import jwt from "jsonwebtoken"
 
 const generateTokens = async (user) => {
   const accessToken = user.generateAccessToken();
@@ -52,13 +53,13 @@ const login = async (userData) => {
 };
 
 const refreshAccessToken = async (incomingRefreshToken) => {
-  if (!token) {
+  if (!incomingRefreshToken) {
     throw new ApiError(401, "Invalid refresh token");
   }
 
   const decoded = jwt.verify(incomingRefreshToken, env.JWT_REFRESH_SECRET);
 
-  const user = await userRepository.findUserByIdWithRefreshToken(decoded._id);
+  const user = await userRepository.findUserByIdWithRefreshToken(decoded.sub);
 
   if (!user) {
     throw new ApiError(401, "Invalid refresh token");
@@ -77,10 +78,20 @@ const refreshAccessToken = async (incomingRefreshToken) => {
   };
 };
 
+const getCurrentUser = async (user) => {
+  return user;
+};
+
+const logout = async (userId) => {
+  await userRepository.clearRefreshToken(userId);
+};
+
 const authService = {
   register,
   login,
-  refresAccessToken,
+  refreshAccessToken,
+  getCurrentUser,
+  logout,
 };
 
 export default authService;
