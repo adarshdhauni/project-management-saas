@@ -1,3 +1,4 @@
+import env from "../config/env.js";
 import userRepository from "../repositories/user.repository.js";
 import ApiError from "../utils/ApiError.js";
 
@@ -50,9 +51,36 @@ const login = async (userData) => {
   };
 };
 
+const refreshAccessToken = async (incomingRefreshToken) => {
+  if (!token) {
+    throw new ApiError(401, "Invalid refresh token");
+  }
+
+  const decoded = jwt.verify(incomingRefreshToken, env.JWT_REFRESH_SECRET);
+
+  const user = await userRepository.findUserByIdWithRefreshToken(decoded._id);
+
+  if (!user) {
+    throw new ApiError(401, "Invalid refresh token");
+  }
+
+  if (user.refreshToken !== incomingRefreshToken) {
+    throw new ApiError(401, "Invalid refresh token");
+  }
+
+  const { accessToken, refreshToken } = await generateTokens(user);
+
+  return {
+    user,
+    accessToken,
+    refreshToken,
+  };
+};
+
 const authService = {
   register,
   login,
+  refresAccessToken,
 };
 
 export default authService;

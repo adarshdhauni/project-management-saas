@@ -61,6 +61,20 @@ const loginUser = asyncHandler(async (req, res) => {
   );
 });
 
-const authController = { registerUser, loginUser };
+const refreshUserToken = asyncHandler(async (req, res) => {
+  const { user, accessToken, refreshToken } =
+    await authService.refreshAccessToken(req.cookies.refreshToken);
+
+  return sendAuthResponse(
+    res,
+    user,
+    accessToken,
+    refreshToken,
+    "Access token refreshed successfully.",
+    200,
+  );
+});
+
+const authController = { registerUser, loginUser, refreshUserToken };
 
 export default authController;

@@ -12,6 +12,10 @@ const findUserById = (id) => {
   return User.findById(id);
 };
 
+const findUserByIdWithRefreshToken = (id) => {
+  return User.findById(id).select("+refreshToken");
+};
+
 const createUser = (userData) => {
   return User.create(userData);
 };
