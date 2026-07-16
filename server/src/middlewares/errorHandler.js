@@ -5,10 +5,7 @@ import jwt from "jsonwebtoken";
 import ApiError from "../utils/ApiError.js";
 import env from "../config/env.js";
 
-
 const errorHandler = (err, req, res, next) => {
-   console.error("ORIGINAL ERROR:");
-  console.error(err);
   let error = err;
 
   if (error instanceof ZodError) {

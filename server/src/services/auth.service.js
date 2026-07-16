@@ -1,7 +1,9 @@
 import env from "../config/env.js";
 import userRepository from "../repositories/user.repository.js";
 import ApiError from "../utils/ApiError.js";
-import jwt from "jsonwebtoken"
+import jwt from "jsonwebtoken";
+import crypto from "crypto";
+import emailService from "../services/email.service.js";
 
 const generateTokens = async (user) => {
   const accessToken = user.generateAccessToken();
@@ -86,12 +88,67 @@ const logout = async (userId) => {
   await userRepository.clearRefreshToken(userId);
 };
 
+const forgotPassword = async (userData) => {
+  const user = await userRepository.findUserByEmail(userData.email);
+
+  if (!user) {
+    return;
+  }
+
+  const resetToken = crypto.randomBytes(32).toString("hex");
+
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  const passwordResetExpires = new Date(Date.now() + 15 * 60 * 1000);
+
+  await userRepository.updatePasswordResetToken(
+    user._id,
+    hashedToken,
+    passwordResetExpires,
+  );
+
+  const resetUrl = `${env.CLIENT_URL}/reset-password?token=${resetToken}`;
+
+  await emailService.sendPasswordResetEmail({
+    email: user.email,
+    resetUrl,
+  });
+
+  
+};
+
+const resetPassword = async (userData) => {
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(userData.token)
+    .digest("hex");
+
+  const user = await userRepository.findUserByPasswordResetToken(hashedToken);
+
+  if (!user) {
+    throw new ApiError(400, "Invalid or expired password reset token.");
+  }
+
+  user.password = userData.password;
+
+  user.passwordResetToken = undefined;
+  user.passwordResetExpires = undefined;
+  user.refreshToken = undefined;
+
+  await user.save();
+};
+
 const authService = {
   register,
   login,
   refreshAccessToken,
   getCurrentUser,
   logout,
+  forgotPassword,
+  resetPassword,
 };
 
 export default authService;

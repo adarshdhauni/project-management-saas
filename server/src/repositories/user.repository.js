@@ -21,7 +21,11 @@ const createUser = (userData) => {
 };
 
 const updateRefreshToken = (userId, refreshToken) => {
-  return User.findByIdAndUpdate(userId, { refreshToken }, { new: true });
+  return User.findByIdAndUpdate(
+    userId,
+    { refreshToken },
+    { returnDocument: "after" },
+  );
 };
 
 const clearRefreshToken = async (userId) => {
@@ -31,9 +35,31 @@ const clearRefreshToken = async (userId) => {
       refreshToken: null,
     },
     {
-      new: true,
+      returnDocument: "after",
     },
   );
+};
+
+const updatePasswordResetToken = (
+  userId,
+  hashedToken,
+  passwordResetExpires,
+) => {
+  return User.findByIdAndUpdate(
+    userId,
+    {
+      passwordResetToken: hashedToken,
+      passwordResetExpires,
+    },
+    { returnDocument: "after" },
+  );
+};
+
+const findUserByPasswordResetToken = (passwordResetToken) => {
+  return User.findOne({
+    passwordResetToken,
+    passwordResetExpires: { $gt: Date.now() },
+  });
 };
 
 const userRepository = {
@@ -44,6 +70,8 @@ const userRepository = {
   createUser,
   updateRefreshToken,
   clearRefreshToken,
+  updatePasswordResetToken,
+  findUserByPasswordResetToken,
 };
 
 export default userRepository;

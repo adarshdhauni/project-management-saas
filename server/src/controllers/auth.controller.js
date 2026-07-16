@@ -98,12 +98,40 @@ const logoutUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse({}, "Logged out successfully."));
 });
 
+const forgotPassword = asyncHandler(async (req, res) => {
+  await authService.forgotPassword(req.body);
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        {},
+        "If an account with that email exists, a password reset link has been sent.",
+      ),
+    );
+});
+
+const resetPassword = asyncHandler(async (req, res) => {
+  await authService.resetPassword(req.body);
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        {},
+        "Password has been reset successfully. Please log in with your new password.",
+      ),
+    );
+});
+
 const authController = {
   registerUser,
   loginUser,
   refreshUserToken,
   getCurrentUser,
   logoutUser,
+  forgotPassword,
+  resetPassword,
 };
 
 export default authController;
