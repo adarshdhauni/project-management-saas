@@ -79,7 +79,7 @@ const sendPasswordResetEmail = async ({ email, resetUrl }) => {
   `,
     });
   } catch (error) {
-    throw new ApiError(500, "Failed to send password reset email");
+    throw new ApiError(500, "Failed to send password reset email.");
   }
 };
 

@@ -5,6 +5,7 @@ import { protect } from "../middlewares/protect.js";
 import validate from "../middlewares/validate.js";
 import createWorkspaceSchema from "../validators/workspace/create-workspace.schema.js";
 import getWorkspaceSchema from "../validators/workspace/get-workspace.schema.js";
+import updateWorkspaceSchema from "../validators/workspace/update-workspace.schema.js";
 
 const router = express.Router();
 
@@ -22,6 +23,14 @@ router.get(
   protect,
   validate({ params: getWorkspaceSchema }),
   workspaceController.getWorkspaceById,
+);
+
+router.patch(
+  "/:workspaceId",
+  protect,
+  validate({ params: getWorkspaceSchema }),
+  validate({ body: updateWorkspaceSchema }),
+  workspaceController.updateWorkspace,
 );
 
 export default router;

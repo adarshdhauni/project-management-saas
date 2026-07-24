@@ -18,7 +18,7 @@ const register = async (userData) => {
   const userExists = await userRepository.findUserByEmail(userData.email);
 
   if (userExists) {
-    throw new ApiError(409, "User already exists");
+    throw new ApiError(409, "User already exists.");
   }
 
   const user = await userRepository.createUser(userData);
@@ -36,13 +36,13 @@ const login = async (userData) => {
   const user = await userRepository.findUserByEmailWithPassword(userData.email);
 
   if (!user) {
-    throw new ApiError(401, "Invalid email or password");
+    throw new ApiError(401, "Invalid email or password.");
   }
 
   const isMatch = await user.comparePassword(userData.password);
 
   if (!isMatch) {
-    throw new ApiError(401, "Invalid email or password");
+    throw new ApiError(401, "Invalid email or password.");
   }
 
   const { accessToken, refreshToken } = await generateTokens(user);
@@ -56,7 +56,7 @@ const login = async (userData) => {
 
 const refreshAccessToken = async (incomingRefreshToken) => {
   if (!incomingRefreshToken) {
-    throw new ApiError(401, "Invalid refresh token");
+    throw new ApiError(401, "Invalid refresh token.");
   }
 
   const decoded = jwt.verify(incomingRefreshToken, env.JWT_REFRESH_SECRET);
@@ -64,11 +64,11 @@ const refreshAccessToken = async (incomingRefreshToken) => {
   const user = await userRepository.findUserByIdWithRefreshToken(decoded.sub);
 
   if (!user) {
-    throw new ApiError(401, "Invalid refresh token");
+    throw new ApiError(401, "Invalid refresh token.");
   }
 
   if (user.refreshToken !== incomingRefreshToken) {
-    throw new ApiError(401, "Invalid refresh token");
+    throw new ApiError(401, "Invalid refresh token.");
   }
 
   const { accessToken, refreshToken } = await generateTokens(user);
