@@ -20,7 +20,7 @@ const findAllByWorkspace = (workspaceId) => {
 };
 
 const findAllByUser = (userId) => {
-  return WorkspaceMember.find({ user: userId });
+  return WorkspaceMember.find({ user: userId }).populate("workspace");
 };
 
 const updateById = (memberId, updateData) => {

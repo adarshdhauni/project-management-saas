@@ -56,8 +56,17 @@ const createWorkspace = async (userId, workspaceData) => {
   }
 };
 
+const getUserWorkspaces = async (userId) => {
+  const memberships = await workspaceMemberRepository.findAllByUser(userId);
+
+  const workspaces = memberships.map((membership) => membership.workspace);
+
+  return workspaces;
+};
+
 const workspaceService = {
   createWorkspace,
+  getUserWorkspaces
 };
 
 export default workspaceService;

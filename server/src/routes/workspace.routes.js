@@ -14,4 +14,10 @@ router.post(
   workspaceController.createWorkspace,
 );
 
+router.get(
+  "/",
+  protect,
+  workspaceController.getUserWorkspaces
+)
+
 export default router;
