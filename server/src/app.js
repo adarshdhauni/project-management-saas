@@ -9,6 +9,7 @@ import env from "./config/env.js";
 import ApiError from "./utils/ApiError.js";
 import errorHandler from "./middlewares/errorHandler.js";
 import authRoutes from "./routes/auth.routes.js";
+import workspaceRoutes from "./routes/workspace.routes.js"
 
 const app = express();
 
@@ -45,6 +46,7 @@ if (env.NODE_ENV === "development") {
 app.use(rateLimiter);
 
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/workspaces", workspaceRoutes);
 
 app.use((req, res, next) => {
   next(new ApiError(404, "Invalid route, please try again!"));

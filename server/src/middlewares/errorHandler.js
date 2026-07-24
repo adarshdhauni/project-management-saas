@@ -7,6 +7,7 @@ import env from "../config/env.js";
 
 const errorHandler = (err, req, res, next) => {
   let error = err;
+  console.error(error.stack);
 
   if (error instanceof ZodError) {
     let formattedErrors = {};

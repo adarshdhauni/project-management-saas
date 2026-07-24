@@ -1,11 +1,17 @@
 import express from "express";
-import createWorkspaceSchema from "../validators/workspace/create-workspace.schema";
-import authController from "../controllers/workspace.controller";
+
+import workspaceController from "../controllers/workspace.controller.js";
+import { protect } from "../middlewares/protect.js";
+import validate from "../middlewares/validate.js";
+import createWorkspaceSchema from "../validators/workspace/create-workspace.schema.js";
 
 const router = express.Router();
 
 router.post(
-  "/workspaces",
+  "/",
+  protect,
   validate({ body: createWorkspaceSchema }),
-  authController.createWorkspace,
+  workspaceController.createWorkspace,
 );
+
+export default router;

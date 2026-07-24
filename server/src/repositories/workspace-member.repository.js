@@ -1,4 +1,4 @@
-import WorkspaceMember from "../models/workspace-member.model";
+import WorkspaceMember from "../models/workspace-member.model.js";
 
 const create = (memberData) => {
   return WorkspaceMember.create(memberData);
