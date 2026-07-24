@@ -64,9 +64,29 @@ const getUserWorkspaces = async (userId) => {
   return workspaces;
 };
 
+const getWorkspaceById = async (userId, workspaceId) => {
+  const workspace = await workspaceRepository.findById(workspaceId);
+
+  if (!workspace) {
+    throw new ApiError(404, "Workspace not found");
+  }
+
+  const membership = await workspaceMemberRepository.findByWorkspaceAndUser(
+    workspaceId,
+    userId,
+  );
+
+  if (!membership) {
+    throw new ApiError(403, "You do not have access to this workspace.");
+  }
+
+  return workspace;
+};
+
 const workspaceService = {
   createWorkspace,
-  getUserWorkspaces
+  getUserWorkspaces,
+  getWorkspaceById,
 };
 
 export default workspaceService;

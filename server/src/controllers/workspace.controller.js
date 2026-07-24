@@ -22,9 +22,24 @@ const getUserWorkspaces = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, workspaces, "Workspaces fetched successfully."));
 });
 
+const getWorkspaceById = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  const workspaceId = req.params.workspaceId;
+
+  const workspace = await workspaceService.getWorkspaceById(
+    userId,
+    workspaceId,
+  );
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, workspace, "Workspace fetched successfully."));
+});
+
 const workspaceController = {
   createWorkspace,
   getUserWorkspaces,
+  getWorkspaceById
 };
 
 export default workspaceController;

@@ -4,6 +4,7 @@ import workspaceController from "../controllers/workspace.controller.js";
 import { protect } from "../middlewares/protect.js";
 import validate from "../middlewares/validate.js";
 import createWorkspaceSchema from "../validators/workspace/create-workspace.schema.js";
+import getWorkspaceSchema from "../validators/workspace/get-workspace.schema.js";
 
 const router = express.Router();
 
@@ -14,10 +15,13 @@ router.post(
   workspaceController.createWorkspace,
 );
 
+router.get("/", protect, workspaceController.getUserWorkspaces);
+
 router.get(
-  "/",
+  "/:workspaceId",
   protect,
-  workspaceController.getUserWorkspaces
-)
+  validate({ params: getWorkspaceSchema }),
+  workspaceController.getWorkspaceById,
+);
 
 export default router;
