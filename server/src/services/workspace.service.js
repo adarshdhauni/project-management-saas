@@ -8,30 +8,28 @@ import mongoose from "mongoose";
 import userRepository from "../repositories/user.repository.js";
 
 const createWorkspace = async (userId, workspaceData) => {
+  const slug = slugify(workspaceData.name, {
+    lower: true,
+    strict: true,
+    trim: true,
+  });
+
+  const existingWorkspace = await workspaceRepository.findBySlug(slug);
+
+  if (existingWorkspace) {
+    throw new ApiError(409, "Workspace with this name already exists.");
+  }
+
+  const workspaceToCreate = {
+    ...workspaceData,
+    slug,
+    owner: userId,
+  };
+
   const session = await mongoose.startSession();
 
-  session.startTransaction();
-
   try {
-    const slug = slugify(workspaceData.name, {
-      lower: true,
-      strict: true,
-      trim: true,
-    });
-
-    const existingWorkspace = await workspaceRepository.findBySlug(slug, {
-      session,
-    });
-
-    if (existingWorkspace) {
-      throw new ApiError(409, "Workspace with this name already exists.");
-    }
-
-    const workspaceToCreate = {
-      ...workspaceData,
-      slug,
-      owner: userId,
-    };
+    session.startTransaction();
 
     const workspace = await workspaceRepository.create(workspaceToCreate, {
       session,
@@ -133,35 +131,32 @@ const updateWorkspace = async (userId, workspaceId, updateData) => {
 };
 
 const deleteWorkspace = async (userId, workspaceId) => {
+  const workspace = await workspaceRepository.findById(workspaceId);
+
+  if (!workspace) {
+    throw new ApiError(404, "Workspace not found.");
+  }
+
+  const membership = await workspaceMemberRepository.findByWorkspaceAndUser(
+    workspaceId,
+    userId,
+  );
+
+  if (!membership) {
+    throw new ApiError(403, "You do not have access to this workspace.");
+  }
+
+  if (membership.role !== "owner") {
+    throw new ApiError(
+      403,
+      "Only the workspace owner can delete this workspace.",
+    );
+  }
+
   const session = await mongoose.startSession();
 
-  session.startTransaction();
-
   try {
-    const workspace = await workspaceRepository.findById(workspaceId, {
-      session,
-    });
-
-    if (!workspace) {
-      throw new ApiError(404, "Workspace not found.");
-    }
-
-    const membership = await workspaceMemberRepository.findByWorkspaceAndUser(
-      workspaceId,
-      userId,
-      { session },
-    );
-
-    if (!membership) {
-      throw new ApiError(403, "You do not have access to this workspace.");
-    }
-
-    if (membership.role !== "owner") {
-      throw new ApiError(
-        403,
-        "Only the workspace owner can delete this workspace.",
-      );
-    }
+    session.startTransaction();
 
     await workspaceMemberRepository.deleteAllByWorkspace(workspaceId, {
       session,
@@ -245,6 +240,78 @@ const inviteMember = async (userId, workspaceId, inviteData) => {
   return invitation;
 };
 
+const acceptInvitation = async (userId, invitationId) => {
+  const invitation = await workspaceInvitationRepository.findById(invitationId);
+
+  if (!invitation) {
+    throw new ApiError(404, "Invitation does not exist.");
+  }
+
+  if (invitation.status !== "pending") {
+    throw new ApiError(409, "This invitation has already been processed.");
+  }
+
+  if (invitation.expiresAt < new Date()) {
+    throw new ApiError(410, "This invitation has expired.");
+  }
+
+  const user = await userRepository.findUserById(userId);
+
+  if (!user) {
+    throw new ApiError(404, "User not found.");
+  }
+
+  if (invitation.email !== user.email) {
+    throw new ApiError(403, "This invitation does not belong to you.");
+  }
+
+  const isMember = await workspaceMemberRepository.findByWorkspaceAndUser(
+    invitation.workspace,
+    userId,
+  );
+
+  if (isMember) {
+    throw new ApiError(409, "User is already a member.");
+  }
+
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
+
+    const workspaceMember = await workspaceMemberRepository.create(
+      {
+        workspace: invitation.workspace,
+        user: userId,
+        role: invitation.role,
+        invitedBy: invitation.invitedBy,
+      },
+      { session },
+    );
+
+    await workspaceInvitationRepository.updateById(
+      invitationId,
+      {
+        status: "accepted",
+      },
+      { session },
+    );
+
+    await session.commitTransaction();
+
+    return workspaceMember;
+  } catch (error) {
+    await session.abortTransaction();
+
+    if (error.code === 11000) {
+      throw new ApiError(409, "User is already a member.");
+    }
+
+    throw error;
+  } finally {
+    await session.endSession();
+  }
+};
+
 const workspaceService = {
   createWorkspace,
   getUserWorkspaces,
@@ -252,6 +319,7 @@ const workspaceService = {
   updateWorkspace,
   deleteWorkspace,
   inviteMember,
+  acceptInvitation,
 };
 
 export default workspaceService;

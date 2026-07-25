@@ -7,6 +7,7 @@ import createWorkspaceSchema from "../validators/workspace/create-workspace.sche
 import getWorkspaceSchema from "../validators/workspace/get-workspace.schema.js";
 import updateWorkspaceSchema from "../validators/workspace/update-workspace.schema.js";
 import inviteMemberSchema from "../validators/workspace/invite-member.schema.js";
+import acceptInvitationSchema from "../validators/workspace/accept-workspace.schema.js";
 
 const router = express.Router();
 
@@ -47,6 +48,15 @@ router.post(
   validate({ params: getWorkspaceSchema }),
   validate({ body: inviteMemberSchema }),
   workspaceController.inviteMember,
+);
+
+router.post(
+  "/invitations/:invitationId/accept",
+  protect,
+  validate({
+    params: acceptInvitationSchema,
+  }),
+  workspaceController.acceptInvitation,
 );
 
 export default router;

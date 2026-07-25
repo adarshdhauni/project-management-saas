@@ -79,13 +79,31 @@ const inviteMember = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, invitation, "Invitation sent successfully."));
 });
 
+const acceptInvitation = asyncHandler(async (req, res) => {
+  const workspaceMember = await workspaceService.acceptInvitation(
+    req.user._id,
+    req.params.invitationId,
+  );
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        workspaceMember,
+        "Invitation accepted successfully.",
+      ),
+    );
+});
+
 const workspaceController = {
   createWorkspace,
   getUserWorkspaces,
   getWorkspaceById,
   updateWorkspace,
   deleteWorkspace,
-  inviteMember
+  inviteMember,
+  acceptInvitation
 };
 
 export default workspaceController;
