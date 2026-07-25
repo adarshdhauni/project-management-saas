@@ -6,6 +6,7 @@ import validate from "../middlewares/validate.js";
 import createWorkspaceSchema from "../validators/workspace/create-workspace.schema.js";
 import getWorkspaceSchema from "../validators/workspace/get-workspace.schema.js";
 import updateWorkspaceSchema from "../validators/workspace/update-workspace.schema.js";
+import inviteMemberSchema from "../validators/workspace/invite-member.schema.js";
 
 const router = express.Router();
 
@@ -38,6 +39,14 @@ router.delete(
   protect,
   validate({ params: getWorkspaceSchema }),
   workspaceController.deleteWorkspace,
+);
+
+router.post(
+  "/:workspaceId/invite",
+  protect,
+  validate({ params: getWorkspaceSchema }),
+  validate({ body: inviteMemberSchema }),
+  workspaceController.inviteMember,
 );
 
 export default router;

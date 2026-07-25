@@ -3,7 +3,9 @@ import slugify from "slugify";
 import ApiError from "../utils/ApiError.js";
 import workspaceRepository from "../repositories/workspace.repository.js";
 import workspaceMemberRepository from "../repositories/workspace-member.repository.js";
+import workspaceInvitationRepository from "../repositories/workspace-invitation.repository.js";
 import mongoose from "mongoose";
+import userRepository from "../repositories/user.repository.js";
 
 const createWorkspace = async (userId, workspaceData) => {
   const session = await mongoose.startSession();
@@ -179,12 +181,77 @@ const deleteWorkspace = async (userId, workspaceId) => {
   }
 };
 
+const inviteMember = async (userId, workspaceId, inviteData) => {
+  const { email, role } = inviteData;
+
+  const workspace = await workspaceRepository.findById(workspaceId);
+
+  if (!workspace) {
+    throw new ApiError(404, "Workspace not found.");
+  }
+
+  const membership = await workspaceMemberRepository.findByWorkspaceAndUser(
+    workspaceId,
+    userId,
+  );
+
+  if (!membership) {
+    throw new ApiError(403, "You do not have access to this workspace.");
+  }
+
+  if (membership.role !== "owner") {
+    throw new ApiError(403, "Only the workspace owner can invite members.");
+  }
+
+  const user = await userRepository.findUserByEmail(email);
+
+  if (!user) {
+    throw new ApiError(404, "User not found.");
+  }
+
+  if (user._id.equals(userId)) {
+    throw new ApiError(400, "You cannot invite yourself.");
+  }
+
+  const isMember = await workspaceMemberRepository.findByWorkspaceAndUser(
+    workspaceId,
+    user._id,
+  );
+
+  if (isMember) {
+    throw new ApiError(409, "User is already a member.");
+  }
+
+  const isPending =
+    await workspaceInvitationRepository.findPendingByWorkspaceAndEmail(
+      workspaceId,
+      email,
+    );
+
+  if (isPending) {
+    throw new ApiError(
+      409,
+      "A pending invitation already exists for this user.",
+    );
+  }
+
+  const invitation = await workspaceInvitationRepository.create({
+    workspace: workspaceId,
+    invitedBy: userId,
+    email,
+    role,
+  });
+
+  return invitation;
+};
+
 const workspaceService = {
   createWorkspace,
   getUserWorkspaces,
   getWorkspaceById,
   updateWorkspace,
-  deleteWorkspace
+  deleteWorkspace,
+  inviteMember,
 };
 
 export default workspaceService;

@@ -64,12 +64,28 @@ const deleteWorkspace = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, null, "Workspace deleted successfully."));
 });
 
+const inviteMember = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  const workspaceId = req.params.workspaceId;
+
+  const invitation = await workspaceService.inviteMember(
+    userId,
+    workspaceId,
+    req.body,
+  );
+
+  return res
+    .status(201)
+    .json(new ApiResponse(201, invitation, "Invitation sent successfully."));
+});
+
 const workspaceController = {
   createWorkspace,
   getUserWorkspaces,
   getWorkspaceById,
   updateWorkspace,
-  deleteWorkspace
+  deleteWorkspace,
+  inviteMember
 };
 
 export default workspaceController;
