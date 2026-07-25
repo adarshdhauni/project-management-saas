@@ -33,4 +33,11 @@ router.patch(
   workspaceController.updateWorkspace,
 );
 
+router.delete(
+  "/:workspaceId",
+  protect,
+  validate({ params: getWorkspaceSchema }),
+  workspaceController.deleteWorkspace,
+);
+
 export default router;

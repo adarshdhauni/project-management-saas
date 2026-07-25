@@ -53,11 +53,23 @@ const updateWorkspace = asyncHandler(async (req, res) => {
     );
 });
 
+const deleteWorkspace = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  const workspaceId = req.params.workspaceId;
+
+  await workspaceService.deleteWorkspace(userId, workspaceId);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, null, "Workspace deleted successfully."));
+});
+
 const workspaceController = {
   createWorkspace,
   getUserWorkspaces,
   getWorkspaceById,
-  updateWorkspace
+  updateWorkspace,
+  deleteWorkspace
 };
 
 export default workspaceController;

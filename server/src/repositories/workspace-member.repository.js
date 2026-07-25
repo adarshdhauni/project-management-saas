@@ -1,37 +1,55 @@
 import WorkspaceMember from "../models/workspace-member.model.js";
 
-const create = (memberData) => {
-  return WorkspaceMember.create(memberData);
+const create = async (memberData, options = {}) => {
+  const [member] = await WorkspaceMember.create([memberData], options);
+
+  return member;
 };
 
-const findById = (memberId) => {
-  return WorkspaceMember.findById(memberId);
+const findById = (memberId, options = {}) => {
+  return WorkspaceMember.findById(memberId, null, options);
 };
 
-const findByWorkspaceAndUser = (workspaceId, userId) => {
-  return WorkspaceMember.findOne({
-    workspace: workspaceId,
-    user: userId,
-  });
+const findByWorkspaceAndUser = (workspaceId, userId, options = {}) => {
+  return WorkspaceMember.findOne(
+    {
+      workspace: workspaceId,
+      user: userId,
+    },
+    null,
+    options,
+  );
 };
 
-const findAllByWorkspace = (workspaceId) => {
-  return WorkspaceMember.find({ workspace: workspaceId });
+const findAllByWorkspace = (workspaceId, options = {}) => {
+  return WorkspaceMember.find({ workspace: workspaceId }, null, options);
 };
 
-const findAllByUser = (userId) => {
-  return WorkspaceMember.find({ user: userId }).populate("workspace");
+const findAllByUser = (userId, options = {}) => {
+  return WorkspaceMember.find({ user: userId }, null, options).populate(
+    "workspace",
+  );
 };
 
-const updateById = (memberId, updateData) => {
+const updateById = (memberId, updateData, options = {}) => {
   return WorkspaceMember.findByIdAndUpdate(memberId, updateData, {
     new: true,
     runValidators: true,
+    ...options,
   });
 };
 
-const deleteById = (memberId) => {
-  return WorkspaceMember.findByIdAndDelete(memberId);
+const deleteById = (memberId, options = {}) => {
+  return WorkspaceMember.findByIdAndDelete(memberId, options);
+};
+
+const deleteAllByWorkspace = (workspaceId, options = {}) => {
+  return WorkspaceMember.deleteMany(
+    {
+      workspace: workspaceId,
+    },
+    options,
+  );
 };
 
 const workspaceMemberRepository = {
@@ -42,6 +60,7 @@ const workspaceMemberRepository = {
   findAllByUser,
   updateById,
   deleteById,
+  deleteAllByWorkspace,
 };
 
 export default workspaceMemberRepository;

@@ -130,11 +130,61 @@ const updateWorkspace = async (userId, workspaceId, updateData) => {
   return updatedWorkspace;
 };
 
+const deleteWorkspace = async (userId, workspaceId) => {
+  const session = await mongoose.startSession();
+
+  session.startTransaction();
+
+  try {
+    const workspace = await workspaceRepository.findById(workspaceId, {
+      session,
+    });
+
+    if (!workspace) {
+      throw new ApiError(404, "Workspace not found.");
+    }
+
+    const membership = await workspaceMemberRepository.findByWorkspaceAndUser(
+      workspaceId,
+      userId,
+      { session },
+    );
+
+    if (!membership) {
+      throw new ApiError(403, "You do not have access to this workspace.");
+    }
+
+    if (membership.role !== "owner") {
+      throw new ApiError(
+        403,
+        "Only the workspace owner can delete this workspace.",
+      );
+    }
+
+    await workspaceMemberRepository.deleteAllByWorkspace(workspaceId, {
+      session,
+    });
+
+    await workspaceRepository.deleteById(workspaceId, { session });
+
+    await session.commitTransaction();
+
+    return;
+  } catch (error) {
+    await session.abortTransaction();
+
+    throw error;
+  } finally {
+    await session.endSession();
+  }
+};
+
 const workspaceService = {
   createWorkspace,
   getUserWorkspaces,
   getWorkspaceById,
   updateWorkspace,
+  deleteWorkspace
 };
 
 export default workspaceService;
