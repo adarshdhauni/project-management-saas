@@ -312,6 +312,38 @@ const acceptInvitation = async (userId, invitationId) => {
   }
 };
 
+const rejectInvitation = async (userId, invitationId) => {
+  const invitation = await workspaceInvitationRepository.findById(invitationId);
+
+  if (!invitation) {
+    throw new ApiError(404, "Invitation does not exist.");
+  }
+
+  if (invitation.status !== "pending") {
+    throw new ApiError(409, "This invitation has already been processed.");
+  }
+
+  if (invitation.expiresAt < new Date()) {
+    throw new ApiError(410, "This invitation has expired.");
+  }
+
+  const user = await userRepository.findUserById(userId);
+
+  if (!user) {
+    throw new ApiError(404, "User not found.");
+  }
+
+  if (invitation.email !== user.email) {
+    throw new ApiError(403, "This invitation does not belong to you.");
+  }
+
+  await workspaceInvitationRepository.updateById(invitationId, {
+    status: "rejected",
+  });
+
+  return;
+};
+
 const workspaceService = {
   createWorkspace,
   getUserWorkspaces,
@@ -320,6 +352,7 @@ const workspaceService = {
   deleteWorkspace,
   inviteMember,
   acceptInvitation,
+  rejectInvitation
 };
 
 export default workspaceService;

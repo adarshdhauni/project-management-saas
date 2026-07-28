@@ -96,6 +96,17 @@ const acceptInvitation = asyncHandler(async (req, res) => {
     );
 });
 
+const rejectInvitation = asyncHandler(async (req, res) => {
+  await workspaceService.rejectInvitation(
+    req.user._id,
+    req.params.invitationId,
+  );
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, null, "Invitation rejected successfully."));
+});
+
 const workspaceController = {
   createWorkspace,
   getUserWorkspaces,
@@ -103,7 +114,8 @@ const workspaceController = {
   updateWorkspace,
   deleteWorkspace,
   inviteMember,
-  acceptInvitation
+  acceptInvitation,
+  rejectInvitation
 };
 
 export default workspaceController;
