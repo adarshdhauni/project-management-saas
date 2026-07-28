@@ -7,7 +7,10 @@ const create = async (memberData, options = {}) => {
 };
 
 const findById = (memberId, options = {}) => {
-  return WorkspaceMember.findById(memberId, null, options);
+  return WorkspaceMember.findById(memberId, null, options).populate(
+    "user",
+    "name email avatar",
+  );
 };
 
 const findByWorkspaceAndUser = (workspaceId, userId, options = {}) => {
@@ -22,7 +25,11 @@ const findByWorkspaceAndUser = (workspaceId, userId, options = {}) => {
 };
 
 const findAllByWorkspace = (workspaceId, options = {}) => {
-  return WorkspaceMember.find({ workspace: workspaceId }, null, options);
+  return WorkspaceMember.find(
+    { workspace: workspaceId },
+    null,
+    options,
+  ).populate("user", "name email");
 };
 
 const findAllByUser = (userId, options = {}) => {

@@ -357,6 +357,74 @@ const getMyPendingInvitations = async (userId) => {
   return pendingInvitations;
 };
 
+const getWorkspaceMembers = async (userId, workspaceId) => {
+  const workspace = await workspaceRepository.findById(workspaceId);
+
+  if (!workspace) {
+    throw new ApiError(404, "Workspace not found.");
+  }
+
+  const isMember = await workspaceMemberRepository.findByWorkspaceAndUser(
+    workspaceId,
+    userId,
+  );
+
+  if (!isMember) {
+    throw new ApiError(403, "You do not have access to this workspace.");
+  }
+
+  const workspaceMembers =
+    await workspaceMemberRepository.findAllByWorkspace(workspaceId);
+
+  return workspaceMembers;
+};
+
+const updateMemberRole = async (userId, workspaceId, memberId, role) => {
+  const workspace = await workspaceRepository.findById(workspaceId);
+
+  if (!workspace) {
+    throw new ApiError(404, "Workspace not found.");
+  }
+
+  const requesterMembership =
+    await workspaceMemberRepository.findByWorkspaceAndUser(workspaceId, userId);
+
+  if (!requesterMembership) {
+    throw new ApiError(403, "You do not have access to this workspace.");
+  }
+
+  if (requesterMembership.role !== "owner") {
+    throw new ApiError(
+      403,
+      "Only the workspace owner can update member roles.",
+    );
+  }
+
+  const targetMember = await workspaceMemberRepository.findById(memberId);
+
+  if (!targetMember) {
+    throw new ApiError(404, "Member not found.");
+  }
+
+  if (!targetMember.workspace.equals(workspaceId)) {
+    throw new ApiError(400, "Member does not belong to this workspace.");
+  }
+
+  if (targetMember.role === "owner") {
+    throw new ApiError(409, "Owner role cannot be modified.");
+  }
+
+  if (targetMember.role === role) {
+    throw new ApiError(409, "Member already has this role.");
+  }
+
+  const updatedMember = await workspaceMemberRepository.updateById(memberId, {
+    role,
+  });
+
+  return updatedMember;
+};
+
 const workspaceService = {
   createWorkspace,
   getUserWorkspaces,
@@ -366,7 +434,9 @@ const workspaceService = {
   inviteMember,
   acceptInvitation,
   rejectInvitation,
-  getMyPendingInvitations
+  getMyPendingInvitations,
+  getWorkspaceMembers,
+  updateMemberRole
 };
 
 export default workspaceService;

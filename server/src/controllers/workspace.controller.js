@@ -123,6 +123,34 @@ const getMyPendingInvitations = asyncHandler(async (req, res) => {
     );
 });
 
+const getWorkspaceMembers = asyncHandler(async (req, res) => {
+  const members = await workspaceService.getWorkspaceMembers(
+    req.user._id,
+    req.params.workspaceId,
+  );
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, members, "Workspace members fetched successfully."),
+    );
+});
+
+const updateMemberRole = asyncHandler(async (req, res) => {
+  const updatedMember = await workspaceService.updateMemberRole(
+    req.user._id,
+    req.params.workspaceId,
+    req.params.memberId,
+    req.body.role,
+  );
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, updatedMember, "Member role updated successfully."),
+    );
+});
+
 const workspaceController = {
   createWorkspace,
   getUserWorkspaces,
@@ -132,7 +160,9 @@ const workspaceController = {
   inviteMember,
   acceptInvitation,
   rejectInvitation,
-  getMyPendingInvitations
+  getMyPendingInvitations,
+  getWorkspaceMembers,
+  updateMemberRole,
 };
 
 export default workspaceController;
