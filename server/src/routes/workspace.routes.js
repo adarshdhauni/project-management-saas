@@ -8,7 +8,7 @@ import workspaceIdSchema from "../validators/workspace/workspace-id.schema.js";
 import updateWorkspaceSchema from "../validators/workspace/update-workspace.schema.js";
 import inviteMemberSchema from "../validators/workspace/invite-member.schema.js";
 import invitationIdSchema from "../validators/workspace/invitation-id.schema.js";
-import updateMemberRoleParamsSchema from "../validators/workspace/update-member-role-params.schema.js";
+import workspaceMemberParamsSchema from "../validators/workspace/workspace-member-params.schema.js";
 import updateMemberRoleSchema from "../validators/workspace/update-member-role.schema.js";
 
 const router = express.Router();
@@ -89,12 +89,21 @@ router.patch(
   "/:workspaceId/members/:memberId",
   protect,
   validate({
-    params: updateMemberRoleParamsSchema,
+    params: workspaceMemberParamsSchema,
   }),
   validate({
     body: updateMemberRoleSchema,
   }),
   workspaceController.updateMemberRole,
+);
+
+router.delete(
+  "/:workspaceId/members/:memberId",
+  protect,
+  validate({
+    params: workspaceMemberParamsSchema,
+  }),
+  workspaceController.removeMember,
 );
 
 export default router;

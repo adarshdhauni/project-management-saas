@@ -340,8 +340,6 @@ const rejectInvitation = async (userId, invitationId) => {
   await workspaceInvitationRepository.updateById(invitationId, {
     status: "rejected",
   });
-
-  return;
 };
 
 const getMyPendingInvitations = async (userId) => {
@@ -425,6 +423,45 @@ const updateMemberRole = async (userId, workspaceId, memberId, role) => {
   return updatedMember;
 };
 
+const removeMember = async (userId, workspaceId, memberId) => {
+  const workspace = await workspaceRepository.findById(workspaceId);
+
+  if (!workspace) {
+    throw new ApiError(404, "Workspace not found.");
+  }
+
+  const requesterMembership =
+    await workspaceMemberRepository.findByWorkspaceAndUser(workspaceId, userId);
+
+  if (!requesterMembership) {
+    throw new ApiError(403, "You do not have access to this workspace.");
+  }
+
+  if (requesterMembership.role !== "owner") {
+    throw new ApiError(403, "Only the workspace owner can remove a member.");
+  }
+
+  const targetMember = await workspaceMemberRepository.findById(memberId);
+
+  if (!targetMember) {
+    throw new ApiError(404, "Member not found.");
+  }
+
+  if (!targetMember.workspace.equals(workspaceId)) {
+    throw new ApiError(400, "Member does not belong to this workspace.");
+  }
+
+  if (targetMember.role === "owner") {
+    throw new ApiError(409, "Owner cannot be removed.");
+  }
+
+  if (targetMember.user.equals(userId)) {
+    throw new ApiError(409, "Workspace owner cannot remove themselves.");
+  }
+
+  await workspaceMemberRepository.deleteById(memberId);
+};
+
 const workspaceService = {
   createWorkspace,
   getUserWorkspaces,
@@ -436,7 +473,8 @@ const workspaceService = {
   rejectInvitation,
   getMyPendingInvitations,
   getWorkspaceMembers,
-  updateMemberRole
+  updateMemberRole,
+  removeMember,
 };
 
 export default workspaceService;
