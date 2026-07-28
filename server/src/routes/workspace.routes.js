@@ -68,4 +68,10 @@ router.post(
   workspaceController.rejectInvitation,
 );
 
+router.get(
+  "/invitations",
+  protect,
+  workspaceController.getMyPendingInvitations,
+);
+
 export default router;

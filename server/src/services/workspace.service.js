@@ -344,6 +344,19 @@ const rejectInvitation = async (userId, invitationId) => {
   return;
 };
 
+const getMyPendingInvitations = async (userId) => {
+  const user = await userRepository.findUserById(userId);
+
+  if (!user) {
+    throw new ApiError(404, "User not found.");
+  }
+
+  const pendingInvitations =
+    await workspaceInvitationRepository.findPendingByEmail(user.email);
+
+  return pendingInvitations;
+};
+
 const workspaceService = {
   createWorkspace,
   getUserWorkspaces,
@@ -352,7 +365,8 @@ const workspaceService = {
   deleteWorkspace,
   inviteMember,
   acceptInvitation,
-  rejectInvitation
+  rejectInvitation,
+  getMyPendingInvitations
 };
 
 export default workspaceService;

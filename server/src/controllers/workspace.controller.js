@@ -107,6 +107,22 @@ const rejectInvitation = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, null, "Invitation rejected successfully."));
 });
 
+const getMyPendingInvitations = asyncHandler(async (req, res) => {
+  const invitations = await workspaceService.getMyPendingInvitations(
+    req.user._id,
+  );
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        invitations,
+        "Pending invitations fetched successfully.",
+      ),
+    );
+});
+
 const workspaceController = {
   createWorkspace,
   getUserWorkspaces,
@@ -115,7 +131,8 @@ const workspaceController = {
   deleteWorkspace,
   inviteMember,
   acceptInvitation,
-  rejectInvitation
+  rejectInvitation,
+  getMyPendingInvitations
 };
 
 export default workspaceController;
