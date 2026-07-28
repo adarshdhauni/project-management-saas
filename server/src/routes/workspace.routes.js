@@ -106,4 +106,13 @@ router.delete(
   workspaceController.removeMember,
 );
 
+router.delete(
+  "/:workspaceId/leave",
+  protect,
+  validate({
+    params: workspaceIdSchema,
+  }),
+  workspaceController.leaveWorkspace,
+);
+
 export default router;

@@ -462,6 +462,32 @@ const removeMember = async (userId, workspaceId, memberId) => {
   await workspaceMemberRepository.deleteById(memberId);
 };
 
+const leaveWorkspace = async (userId, workspaceId) => {
+  const workspace = await workspaceRepository.findById(workspaceId);
+
+  if (!workspace) {
+    throw new ApiError(404, "Workspace not found.");
+  }
+
+  const membership = await workspaceMemberRepository.findByWorkspaceAndUser(
+    workspaceId,
+    userId,
+  );
+
+  if (!membership) {
+    throw new ApiError(403, "You are not a member of this workspace.");
+  }
+
+  if (membership.role === "owner") {
+    throw new ApiError(
+      409,
+      "Workspace owner cannot leave the workspace. Transfer ownership or delete the workspace instead.",
+    );
+  }
+
+  await workspaceMemberRepository.deleteById(membership._id);
+};
+
 const workspaceService = {
   createWorkspace,
   getUserWorkspaces,
@@ -475,6 +501,7 @@ const workspaceService = {
   getWorkspaceMembers,
   updateMemberRole,
   removeMember,
+  leaveWorkspace
 };
 
 export default workspaceService;

@@ -163,6 +163,14 @@ const removeMember = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, null, "Member removed successfully."));
 });
 
+const leaveWorkspace = asyncHandler(async (req, res) => {
+  await workspaceService.leaveWorkspace(req.user._id, req.params.workspaceId);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, null, "Left workspace successfully."));
+});
+
 const workspaceController = {
   createWorkspace,
   getUserWorkspaces,
@@ -175,7 +183,8 @@ const workspaceController = {
   getMyPendingInvitations,
   getWorkspaceMembers,
   updateMemberRole,
-  removeMember
+  removeMember,
+  leaveWorkspace,
 };
 
 export default workspaceController;
