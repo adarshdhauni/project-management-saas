@@ -10,6 +10,8 @@ import inviteMemberSchema from "../validators/workspace/invite-member.schema.js"
 import invitationIdSchema from "../validators/workspace/invitation-id.schema.js";
 import workspaceMemberParamsSchema from "../validators/workspace/workspace-member-params.schema.js";
 import updateMemberRoleSchema from "../validators/workspace/update-member-role.schema.js";
+import createProjectSchema from "../validators/project/create-project.schema.js";
+import projectController from "../controllers/project.controller.js";
 
 const router = express.Router();
 
@@ -113,6 +115,27 @@ router.delete(
     params: workspaceIdSchema,
   }),
   workspaceController.leaveWorkspace,
+);
+
+router.post(
+  "/:workspaceId/projects",
+  protect,
+  validate({
+    params: workspaceIdSchema,
+  }),
+  validate({
+    body: createProjectSchema,
+  }),
+  projectController.createProject,
+);
+
+router.get(
+  "/:workspaceId/projects",
+  protect,
+  validate({
+    params: workspaceIdSchema,
+  }),
+  projectController.getProjects,
 );
 
 export default router;
