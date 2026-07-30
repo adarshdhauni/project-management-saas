@@ -54,7 +54,7 @@ const createProject = async (userId, workspaceId, projectData) => {
   }
 };
 
-const getProjects = async (userId, workspaceId) => {
+const getWorkspaceProjects = async (userId, workspaceId) => {
   const workspace = await workspaceRepository.findById(workspaceId);
 
   if (!workspace) {
@@ -75,9 +75,29 @@ const getProjects = async (userId, workspaceId) => {
   return projects;
 };
 
+const getProjectById = async (userId, projectId) => {
+  const project = await projectRepository.findById(projectId);
+
+  if (!project) {
+    throw new ApiError(404, "Project not found.");
+  }
+
+  const membership = await workspaceMemberRepository.findByWorkspaceAndUser(
+    project.workspace,
+    userId,
+  );
+
+  if (!membership) {
+    throw new ApiError(403, "You do not have access to this workspace.");
+  }
+
+  return project;
+};
+
 const projectService = {
   createProject,
-  getProjects
+  getWorkspaceProjects,
+  getProjectById,
 };
 
 export default projectService;

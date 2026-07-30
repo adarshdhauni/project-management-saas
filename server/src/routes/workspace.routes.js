@@ -135,7 +135,7 @@ router.get(
   validate({
     params: workspaceIdSchema,
   }),
-  projectController.getProjects,
+  projectController.getWorkspaceProjects,
 );
 
 export default router;
