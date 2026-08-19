@@ -4,6 +4,8 @@ import { protect } from "../middlewares/protect.js";
 import validate from "../middlewares/validate.js";
 import projectIdSchema from "../validators/project/project-id.schema.js";
 import updateProjectSchema from "../validators/project/update-project.schema.js";
+import createTaskSchema from "../validators/task/create-task.schema.js";
+import taskController from "../controllers/task.controller.js";
 
 const router = express.Router();
 
@@ -35,6 +37,18 @@ router.delete(
     params: projectIdSchema,
   }),
   projectController.deleteProject,
+);
+
+router.post(
+  "/:projectId/tasks",
+  protect,
+  validate({
+    params: projectIdSchema,
+  }),
+  validate({
+    body: createTaskSchema,
+  }),
+  taskController.createTask,
 );
 
 export default router;
