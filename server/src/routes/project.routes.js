@@ -51,4 +51,13 @@ router.post(
   taskController.createTask,
 );
 
+router.get(
+  "/:projectId/tasks",
+  protect,
+  validate({
+    params: projectIdSchema,
+  }),
+  taskController.getTasks,
+);
+
 export default router;

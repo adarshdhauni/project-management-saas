@@ -41,8 +41,30 @@ const createTask = async (userId, projectId, taskData) => {
   return task;
 };
 
+const getTasks = async (userId, projectId) => {
+  const project = await projectRepository.findById(projectId);
+
+  if (!project) {
+    throw new ApiError(404, "Project not found.");
+  }
+
+  const membership = await workspaceMemberRepository.findByWorkspaceAndUser(
+    project.workspace,
+    userId,
+  );
+
+  if (!membership) {
+    throw new ApiError(403, "You do not have access to this workspace.");
+  }
+
+  const tasks = await taskRepository.findAllByProject(projectId);
+
+  return tasks;
+};
+
 const taskService = {
   createTask,
+  getTasks
 };
 
 export default taskService;

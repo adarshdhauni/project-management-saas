@@ -14,8 +14,17 @@ const createTask = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, task, "Task created successfully."));
 });
 
-const taskController = {
-    createTask
-}
+const getTasks = asyncHandler(async (req, res) => {
+  const tasks = await taskService.getTasks(req.user._id, req.params.projectId);
 
-export default taskController
+  return res
+    .status(200)
+    .json(new ApiResponse(200, tasks, "Tasks retrieved successfully."));
+});
+
+const taskController = {
+  createTask,
+  getTasks
+};
+
+export default taskController;
