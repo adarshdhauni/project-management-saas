@@ -36,10 +36,34 @@ const getProjectById = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, project, "Project retrieved successfully."));
 });
 
+const updateProject = asyncHandler(async (req, res) => {
+  const updatedProject = await projectService.updateProject(
+    req.user._id,
+    req.params.projectId,
+    req.body,
+  );
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, updatedProject, "Project updated successfully."),
+    );
+});
+
+const deleteProject = asyncHandler(async (req, res) => {
+  await projectService.deleteProject(req.user._id, req.params.projectId);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, null, "Project deleted successfully."));
+});
+
 const projectController = {
   createProject,
   getWorkspaceProjects,
-  getProjectById
+  getProjectById,
+  updateProject,
+  deleteProject
 };
 
 export default projectController;

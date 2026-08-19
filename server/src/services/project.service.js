@@ -94,10 +94,89 @@ const getProjectById = async (userId, projectId) => {
   return project;
 };
 
+const updateProject = async (userId, projectId, projectData) => {
+  const project = await projectRepository.findById(projectId);
+
+  if (!project) {
+    throw new ApiError(404, "Project not found.");
+  }
+
+  const membership = await workspaceMemberRepository.findByWorkspaceAndUser(
+    project.workspace,
+    userId,
+  );
+
+  if (!membership) {
+    throw new ApiError(403, "You do not have access to this workspace.");
+  }
+
+  if (membership.role !== "owner" && membership.role !== "admin") {
+    throw new ApiError(
+      403,
+      "You do not have permission to update this project.",
+    );
+  }
+
+  if (projectData.name && projectData.name !== project.name) {
+    const existingProject = await projectRepository.findByWorkspaceAndName(
+      project.workspace,
+      projectData.name,
+    );
+
+    if (existingProject) {
+      throw new ApiError(
+        409,
+        "A project with this name already exists in the workspace.",
+      );
+    }
+  }
+
+  try {
+    return await projectRepository.updateById(projectId, projectData);
+  } catch (error) {
+    if (error.code === 11000) {
+      throw new ApiError(
+        409,
+        "A project with this name already exists in the workspace.",
+      );
+    }
+
+    throw error;
+  }
+};
+
+const deleteProject = async (userId, projectId) => {
+  const project = await projectRepository.findById(projectId);
+
+  if (!project) {
+    throw new ApiError(404, "Project not found.");
+  }
+
+  const membership = await workspaceMemberRepository.findByWorkspaceAndUser(
+    project.workspace,
+    userId,
+  );
+
+  if (!membership) {
+    throw new ApiError(403, "You do not have access to this workspace.");
+  }
+
+  if (membership.role !== "owner" && membership.role !== "admin") {
+    throw new ApiError(
+      403,
+      "You do not have permission to delete this project.",
+    );
+  }
+
+  return projectRepository.deleteById(projectId);
+};
+
 const projectService = {
   createProject,
   getWorkspaceProjects,
   getProjectById,
+  updateProject,
+  deleteProject
 };
 
 export default projectService;
