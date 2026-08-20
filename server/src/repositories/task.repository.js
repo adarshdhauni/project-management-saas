@@ -80,6 +80,12 @@ const findAllByProject = async (projectId, filters = {}, options = {}) => {
   };
 };
 
+const findLastByProject = (projectId, options = {}) => {
+  return Task.findOne({ project: projectId }, null, options).sort({
+    position: -1,
+  });
+};
+
 const updateById = (taskId, updateData, options = {}) => {
   return Task.findByIdAndUpdate(taskId, updateData, {
     new: true,
@@ -96,6 +102,7 @@ const taskRepository = {
   create,
   findById,
   findAllByProject,
+  findLastByProject,
   updateById,
   deleteById,
 };

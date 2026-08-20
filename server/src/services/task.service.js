@@ -31,11 +31,15 @@ const createTask = async (userId, projectId, taskData) => {
     }
   }
 
+  const lastTask = await taskRepository.findLastByProject(projectId);
+
+  const position = lastTask ? lastTask.position + 1000 : 1000;
+
   const task = await taskRepository.create({
     ...taskData,
     project: projectId,
     createdBy: userId,
-    position: 0,
+    position,
   });
 
   return task;
