@@ -62,9 +62,75 @@ const getTasks = async (userId, projectId) => {
   return tasks;
 };
 
+const getTaskById = async (userId, taskId) => {
+  const task = await taskRepository.findById(taskId);
+
+  if (!task) {
+    throw new ApiError(404, "Task not found.");
+  }
+
+  const project = await projectRepository.findById(task.project);
+
+  if (!project) {
+    throw new ApiError(404, "Project not found.");
+  }
+
+  const membership = await workspaceMemberRepository.findByWorkspaceAndUser(
+    project.workspace,
+    userId,
+  );
+
+  if (!membership) {
+    throw new ApiError(403, "You do not have access to this workspace.");
+  }
+
+  return task;
+};
+
+const updateTask = async (userId, taskId, taskData) => {
+  const task = await taskRepository.findById(taskId);
+
+  if (!task) {
+    throw new ApiError(404, "Task not found.");
+  }
+
+  const project = await projectRepository.findById(task.project);
+
+  if (!project) {
+    throw new ApiError(404, "Project not found.");
+  }
+
+  const membership = await workspaceMemberRepository.findByWorkspaceAndUser(
+    project.workspace,
+    userId,
+  );
+
+  if (!membership) {
+    throw new ApiError(403, "You do not have access to this workspace.");
+  }
+
+  if (taskData.assignee !== undefined && taskData.assignee !== null) {
+    const assigneeMembership =
+      await workspaceMemberRepository.findByWorkspaceAndUser(
+        project.workspace,
+        taskData.assignee,
+      );
+
+    if (!assigneeMembership) {
+      throw new ApiError(400, "Assignee must be a member of the workspace.");
+    }
+  }
+
+  const updatedTask = await taskRepository.updateById(taskId, taskData);
+
+  return updatedTask;
+};
+
 const taskService = {
   createTask,
-  getTasks
+  getTasks,
+  getTaskById,
+  updateTask,
 };
 
 export default taskService;
