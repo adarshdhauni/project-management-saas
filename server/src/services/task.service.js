@@ -126,11 +126,39 @@ const updateTask = async (userId, taskId, taskData) => {
   return updatedTask;
 };
 
+const deleteTask = async (userId, taskId) => {
+  const task = await taskRepository.findById(taskId);
+
+  if (!task) {
+    throw new ApiError(404, "Task not found.");
+  }
+
+  const project = await projectRepository.findById(task.project);
+
+  if (!project) {
+    throw new ApiError(404, "Project not found.");
+  }
+
+  const membership = await workspaceMemberRepository.findByWorkspaceAndUser(
+    project.workspace,
+    userId,
+  );
+
+  if (!membership) {
+    throw new ApiError(403, "You do not have access to this workspace.");
+  }
+
+  await taskRepository.deleteById(taskId);
+
+  return;
+};
+
 const taskService = {
   createTask,
   getTasks,
   getTaskById,
   updateTask,
+  deleteTask
 };
 
 export default taskService;

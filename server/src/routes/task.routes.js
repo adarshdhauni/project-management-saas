@@ -28,4 +28,13 @@ router.patch(
   taskController.updateTask,
 );
 
+router.delete(
+  "/:taskId",
+  protect,
+  validate({
+    params: taskIdSchema,
+  }),
+  taskController.deleteTask,
+);
+
 export default router;
