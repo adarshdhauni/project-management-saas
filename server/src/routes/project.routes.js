@@ -6,6 +6,7 @@ import projectIdSchema from "../validators/project/project-id.schema.js";
 import updateProjectSchema from "../validators/project/update-project.schema.js";
 import createTaskSchema from "../validators/task/create-task.schema.js";
 import taskController from "../controllers/task.controller.js";
+import getTasksSchema from "../validators/task/get-tasks.schema.js";
 
 const router = express.Router();
 
@@ -56,6 +57,9 @@ router.get(
   protect,
   validate({
     params: projectIdSchema,
+  }),
+  validate({
+    query: getTasksSchema,
   }),
   taskController.getTasks,
 );

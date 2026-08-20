@@ -15,11 +15,15 @@ const createTask = asyncHandler(async (req, res) => {
 });
 
 const getTasks = asyncHandler(async (req, res) => {
-  const tasks = await taskService.getTasks(req.user._id, req.params.projectId);
+  const result = await taskService.getTasks(
+    req.user._id,
+    req.params.projectId,
+    req.query,
+  );
 
   return res
     .status(200)
-    .json(new ApiResponse(200, tasks, "Tasks retrieved successfully."));
+    .json(new ApiResponse(200, result, "Tasks retrieved successfully."));
 });
 
 const getTaskById = asyncHandler(async (req, res) => {
@@ -55,7 +59,7 @@ const taskController = {
   getTasks,
   getTaskById,
   updateTask,
-  deleteTask
+  deleteTask,
 };
 
 export default taskController;

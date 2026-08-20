@@ -41,7 +41,7 @@ const createTask = async (userId, projectId, taskData) => {
   return task;
 };
 
-const getTasks = async (userId, projectId) => {
+const getTasks = async (userId, projectId, filters = {}) => {
   const project = await projectRepository.findById(projectId);
 
   if (!project) {
@@ -57,9 +57,9 @@ const getTasks = async (userId, projectId) => {
     throw new ApiError(403, "You do not have access to this workspace.");
   }
 
-  const tasks = await taskRepository.findAllByProject(projectId);
+  const result = await taskRepository.findAllByProject(projectId, filters);
 
-  return tasks;
+  return result;
 };
 
 const getTaskById = async (userId, taskId) => {
@@ -158,7 +158,7 @@ const taskService = {
   getTasks,
   getTaskById,
   updateTask,
-  deleteTask
+  deleteTask,
 };
 
 export default taskService;
