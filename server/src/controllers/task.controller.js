@@ -54,12 +54,25 @@ const deleteTask = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, null, "Task deleted successfully."));
 });
 
+const moveTask = asyncHandler(async (req, res) => {
+  const task = await taskService.moveTask(
+    req.user._id,
+    req.params.taskId,
+    req.body.beforeTaskId,
+  );
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, task, "Task position updated successfully."));
+});
+
 const taskController = {
   createTask,
   getTasks,
   getTaskById,
   updateTask,
   deleteTask,
+  moveTask
 };
 
 export default taskController;

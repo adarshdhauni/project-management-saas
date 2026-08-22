@@ -80,8 +80,35 @@ const findAllByProject = async (projectId, filters = {}, options = {}) => {
   };
 };
 
-const findLastByProject = (projectId, options = {}) => {
-  return Task.findOne({ project: projectId }, null, options).sort({
+const findPreviousByProjectAndPosition = (
+  projectId,
+  position,
+  excludeTaskId,
+  options = {},
+) => {
+  return Task.findOne(
+    {
+      project: projectId,
+      _id: { $ne: excludeTaskId },
+      position: { $lt: position },
+    },
+    null,
+    options,
+  ).sort({
+    position: -1,
+  });
+};
+
+const findLastByProject = (projectId, excludeTaskId = null, options = {}) => {
+  const query = {
+    project: projectId,
+  };
+
+  if (excludeTaskId) {
+    query._id = { $ne: excludeTaskId };
+  }
+
+  return Task.findOne(query, null, options).sort({
     position: -1,
   });
 };
@@ -102,6 +129,7 @@ const taskRepository = {
   create,
   findById,
   findAllByProject,
+  findPreviousByProjectAndPosition,
   findLastByProject,
   updateById,
   deleteById,

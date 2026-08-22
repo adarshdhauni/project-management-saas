@@ -4,6 +4,7 @@ import validate from "../middlewares/validate.js";
 import taskController from "../controllers/task.controller.js";
 import taskIdSchema from "../validators/task/task-id.schema.js";
 import updateTaskSchema from "../validators/task/update-task.schema.js";
+import moveTaskSchema from "../validators/task/move-task.schema.js";
 
 const router = express.Router();
 
@@ -35,6 +36,18 @@ router.delete(
     params: taskIdSchema,
   }),
   taskController.deleteTask,
+);
+
+router.patch(
+  "/:taskId/position",
+  protect,
+  validate({
+    params: taskIdSchema,
+  }),
+  validate({
+    body: moveTaskSchema,
+  }),
+  taskController.moveTask,
 );
 
 export default router;

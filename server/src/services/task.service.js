@@ -157,12 +157,80 @@ const deleteTask = async (userId, taskId) => {
   return;
 };
 
+const moveTask = async (userId, taskId, beforeTaskId = null) => {
+  const task = await taskRepository.findById(taskId);
+
+  if (!task) {
+    throw new ApiError(404, "Task not found.");
+  }
+
+  const project = await projectRepository.findById(task.project);
+
+  if (!project) {
+    throw new ApiError(404, "Project not found.");
+  }
+
+  const membership = await workspaceMemberRepository.findByWorkspaceAndUser(
+    project.workspace,
+    userId,
+  );
+
+  if (!membership) {
+    throw new ApiError(403, "You do not have access to this workspace.");
+  }
+
+  if (beforeTaskId === taskId) {
+    throw new ApiError(400, "A task cannot be moved before itself.");
+  }
+
+  let newPosition;
+
+  if (beforeTaskId) {
+    const beforeTask = await taskRepository.findById(beforeTaskId);
+
+    if (!beforeTask) {
+      throw new ApiError(404, "Target task not found.");
+    }
+
+    if (!beforeTask.project.equals(task.project)) {
+      throw new ApiError(
+        400,
+        "Target task does not belong to the same project.",
+      );
+    }
+
+    const previousTask = await taskRepository.findPreviousByProjectAndPosition(
+      task.project,
+      beforeTask.position,
+      taskId,
+    );
+
+    if (!previousTask) {
+      newPosition = beforeTask.position / 2;
+    } else {
+      newPosition = (previousTask.position + beforeTask.position) / 2;
+    }
+  } else {
+    const lastTask = await taskRepository.findLastByProject(
+      task.project,
+      taskId,
+    );
+
+    newPosition = lastTask ? lastTask.position + 1000 : 1000;
+  }
+
+  return taskRepository.updateById(taskId, {
+    position: newPosition,
+  });
+};
+
 const taskService = {
   createTask,
   getTasks,
   getTaskById,
   updateTask,
   deleteTask,
+  moveTask,
 };
 
 export default taskService;
