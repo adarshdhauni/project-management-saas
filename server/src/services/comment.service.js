@@ -132,11 +132,55 @@ const updateComment = async (userId, commentId, updatedContent) => {
   });
 };
 
+const deleteComment = async (userId, commentId) => {
+  const comment = await commentRepository.findById(commentId);
+
+  if (!comment) {
+    throw new ApiError(404, "Comment not found.");
+  }
+
+  const task = await taskRepository.findById(comment.task);
+
+  if (!task) {
+    throw new ApiError(404, "Task not found.");
+  }
+
+  const project = await projectRepository.findById(task.project);
+
+  if (!project) {
+    throw new ApiError(404, "Project not found.");
+  }
+
+  const membership = await workspaceMemberRepository.findByWorkspaceAndUser(
+    project.workspace,
+    userId,
+  );
+
+  if (!membership) {
+    throw new ApiError(403, "You do not have access to this workspace.");
+  }
+
+  const isAuthor = comment.user.toString() === userId.toString();
+
+  const isAdminOrOwner =
+    membership.role === "owner" || membership.role === "admin";
+
+  if (!isAuthor && !isAdminOrOwner) {
+    throw new ApiError(
+      403,
+      "You do not have permission to delete this comment.",
+    );
+  }
+
+  return commentRepository.deleteById(commentId);
+};
+
 const commentService = {
   createComment,
   getComments,
   getCommentById,
   updateComment,
+  deleteComment,
 };
 
 export default commentService;

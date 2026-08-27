@@ -28,4 +28,13 @@ router.patch(
   commentController.updateComment,
 );
 
+router.delete(
+  "/:commentId",
+  protect,
+  validate({
+    params: commentIdSchema,
+  }),
+  commentController.deleteComment,
+);
+
 export default router;

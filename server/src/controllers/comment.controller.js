@@ -49,11 +49,20 @@ const updateComment = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, comment, "Comment updated successfully."));
 });
 
+const deleteComment = asyncHandler(async (req, res) => {
+  await commentService.deleteComment(req.user._id, req.params.commentId);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, null, "Comment deleted successfully."));
+});
+
 const commentController = {
   createComment,
   getComments,
   getCommentById,
-  updateComment
+  updateComment,
+  deleteComment
 };
 
 export default commentController;
