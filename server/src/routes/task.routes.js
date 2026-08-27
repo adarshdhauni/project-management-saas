@@ -5,6 +5,8 @@ import taskController from "../controllers/task.controller.js";
 import taskIdSchema from "../validators/task/task-id.schema.js";
 import updateTaskSchema from "../validators/task/update-task.schema.js";
 import moveTaskSchema from "../validators/task/move-task.schema.js";
+import createCommentSchema from "../validators/comment/create-comment.schema.js";
+import commentController from "../controllers/comment.controller.js";
 
 const router = express.Router();
 
@@ -48,6 +50,18 @@ router.patch(
     body: moveTaskSchema,
   }),
   taskController.moveTask,
+);
+
+router.post(
+  "/:taskId/comments",
+  protect,
+  validate({
+    params: taskIdSchema,
+  }),
+  validate({
+    body: createCommentSchema,
+  }),
+  commentController.createComment,
 );
 
 export default router;

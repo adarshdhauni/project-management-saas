@@ -50,7 +50,7 @@ app.use(rateLimiter);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/workspaces", workspaceRoutes);
 app.use("/api/v1/projects", projectRoutes);
-app.use("/api/v1/tasks", projectRoutes);
+app.use("/api/v1/tasks", taskRoutes);
 
 app.use((req, res, next) => {
   next(new ApiError(404, "Invalid route, please try again!"));
