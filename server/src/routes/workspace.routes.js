@@ -12,6 +12,8 @@ import workspaceMemberParamsSchema from "../validators/workspace/workspace-membe
 import updateMemberRoleSchema from "../validators/workspace/update-member-role.schema.js";
 import createProjectSchema from "../validators/project/create-project.schema.js";
 import projectController from "../controllers/project.controller.js";
+import getActivitiesSchema from "../validators/activity/get-activity.schema.js";
+import activityController from "../controllers/activity.controller.js";
 
 const router = express.Router();
 
@@ -136,6 +138,18 @@ router.get(
     params: workspaceIdSchema,
   }),
   projectController.getWorkspaceProjects,
+);
+
+router.get(
+  "/:workspaceId/activities",
+  protect,
+  validate({
+    params: workspaceIdSchema,
+  }),
+  validate({
+    query: getActivitiesSchema,
+  }),
+  activityController.getActivities,
 );
 
 export default router;
