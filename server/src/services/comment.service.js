@@ -3,6 +3,7 @@ import projectRepository from "../repositories/project.repository.js";
 import workspaceMemberRepository from "../repositories/workspace-member.repository.js";
 import commentRepository from "../repositories/comment.repository.js";
 import ApiError from "../utils/ApiError.js";
+import workspaceRepository from "../repositories/workspace.repository.js";
 
 const createComment = async (userId, taskId, content) => {
   const task = await taskRepository.findById(taskId);
@@ -91,10 +92,51 @@ const getCommentById = async (userId, commentId) => {
   return comment;
 };
 
+const updateComment = async (userId, commentId, updatedContent) => {
+  const comment = await commentRepository.findById(commentId);
+
+  if (!comment) {
+    throw new ApiError(404, "Comment not found.");
+  }
+
+  const task = await taskRepository.findById(comment.task);
+
+  if (!task) {
+    throw new ApiError(404, "Task not found.");
+  }
+
+  const project = await projectRepository.findById(task.project);
+
+  if (!project) {
+    throw new ApiError(404, "Project not found.");
+  }
+
+  const membership = await workspaceMemberRepository.findByWorkspaceAndUser(
+    project.workspace,
+    userId,
+  );
+
+  if (!membership) {
+    throw new ApiError(403, "You do not have access to this workspace.");
+  }
+
+  if (userId.toString() !== comment.user.toString()) {
+    throw new ApiError(
+      403,
+      "You do not have permission to update this comment.",
+    );
+  }
+
+  return commentRepository.updateById(commentId, {
+    content: updatedContent,
+  });
+};
+
 const commentService = {
   createComment,
   getComments,
   getCommentById,
+  updateComment,
 };
 
 export default commentService;
