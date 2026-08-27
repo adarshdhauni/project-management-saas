@@ -26,9 +26,21 @@ const getComments = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, result, "Comments retrieved successfully."));
 });
 
+const getCommentById = asyncHandler(async (req, res) => {
+  const comment = await commentService.getCommentById(
+    req.user._id,
+    req.params.commentId,
+  );
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, comment, "Comment retrieved successfully."));
+});
+
 const commentController = {
   createComment,
   getComments,
+  getCommentById,
 };
 
 export default commentController;
