@@ -2,22 +2,21 @@ import ApiError from "../utils/ApiError.js";
 import activityRepository from "../repositories/activity.repository.js";
 import workspaceMemberRepository from "../repositories/workspace-member.repository.js";
 
-const createActivity = async ({
-  workspaceId,
-  userId,
-  action,
-  entityType,
-  entityId,
-  metadata = {},
-}) => {
-  return activityRepository.create({
-    workspace: workspaceId,
-    user: userId,
-    action,
-    entityType,
-    entityId,
-    metadata,
-  });
+const createActivity = async (
+  { workspaceId, userId, action, entityType, entityId, metadata = {} },
+  options = {},
+) => {
+  return activityRepository.create(
+    {
+      workspace: workspaceId,
+      user: userId,
+      action,
+      entityType,
+      entityId,
+      metadata,
+    },
+    options,
+  );
 };
 
 const getActivities = async (userId, workspaceId, filters = {}) => {

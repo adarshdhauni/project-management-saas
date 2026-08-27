@@ -3,7 +3,7 @@ import projectRepository from "../repositories/project.repository.js";
 import workspaceMemberRepository from "../repositories/workspace-member.repository.js";
 import commentRepository from "../repositories/comment.repository.js";
 import ApiError from "../utils/ApiError.js";
-import workspaceRepository from "../repositories/workspace.repository.js";
+import activityService from "./activity.service.js";
 
 const createComment = async (userId, taskId, content) => {
   const task = await taskRepository.findById(taskId);
@@ -27,11 +27,44 @@ const createComment = async (userId, taskId, content) => {
     throw new ApiError(403, "You do not have access to this workspace.");
   }
 
-  return commentRepository.create({
-    task: taskId,
-    user: userId,
-    content,
-  });
+  const session = await mongoose.startSession();
+
+  try {
+    session.startTransaction();
+
+    const comment = await commentRepository.create(
+      {
+        task: taskId,
+        user: userId,
+        content,
+      },
+      { session },
+    );
+
+    await activityService.createActivity(
+      {
+        workspaceId: project.workspace,
+        userId,
+        action: "comment.created",
+        entityType: "Comment",
+        entityId: comment._id,
+        metadata: {
+          preview: content.slice(0, 100),
+        },
+      },
+      { session },
+    );
+
+    await session.commitTransaction();
+
+    return comment;
+  } catch (error) {
+    await session.abortTransaction();
+
+    throw error;
+  } finally {
+    await session.endSession();
+  }
 };
 
 const getComments = async (userId, taskId, filters = {}) => {
@@ -127,9 +160,48 @@ const updateComment = async (userId, commentId, updatedContent) => {
     );
   }
 
-  return commentRepository.updateById(commentId, {
-    content: updatedContent,
-  });
+  if (comment.content === updatedContent) {
+    throw new ApiError(400, "No changes provided.");
+  }
+
+  const session = await mongoose.startSession();
+
+  try {
+    session.startTransaction();
+
+    const updatedComment = await commentRepository.updateById(
+      commentId,
+      {
+        content: updatedContent,
+      },
+      { session },
+    );
+
+    await activityService.createActivity(
+      {
+        workspaceId: project.workspace,
+        userId,
+        action: "comment.updated",
+        entityType: "Comment",
+        entityId: comment._id,
+        metadata: {
+          from: comment.content,
+          to: updatedContent,
+        },
+      },
+      { session },
+    );
+
+    await session.commitTransaction();
+
+    return updatedComment;
+  } catch (error) {
+    await session.abortTransaction();
+
+    throw error;
+  } finally {
+    await session.endSession();
+  }
 };
 
 const deleteComment = async (userId, commentId) => {
@@ -172,7 +244,35 @@ const deleteComment = async (userId, commentId) => {
     );
   }
 
-  return commentRepository.deleteById(commentId);
+  const session = await mongoose.startSession();
+
+  try {
+    session.startTransaction();
+
+    await commentRepository.deleteById(commentId, { session });
+
+    await activityService.createActivity(
+      {
+        workspaceId: project.workspace,
+        userId,
+        action: "comment.deleted",
+        entityType: "Comment",
+        entityId: comment._id,
+        metadata: {
+          preview: comment.content.slice(0, 100),
+        },
+      },
+      { session },
+    );
+
+    await session.commitTransaction();
+  } catch (error) {
+    await session.abortTransaction();
+
+    throw error;
+  } finally {
+    await session.endSession();
+  }
 };
 
 const commentService = {

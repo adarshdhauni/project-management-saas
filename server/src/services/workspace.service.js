@@ -6,6 +6,7 @@ import workspaceMemberRepository from "../repositories/workspace-member.reposito
 import workspaceInvitationRepository from "../repositories/workspace-invitation.repository.js";
 import mongoose from "mongoose";
 import userRepository from "../repositories/user.repository.js";
+import activityService from "./activity.service.js";
 
 const createWorkspace = async (userId, workspaceData) => {
   const slug = slugify(workspaceData.name, {
@@ -43,6 +44,20 @@ const createWorkspace = async (userId, workspaceData) => {
     };
 
     await workspaceMemberRepository.create(memberData, { session });
+
+    await activityService.createActivity(
+      {
+        workspaceId: workspace._id,
+        userId,
+        action: "workspace.created",
+        entityType: "Workspace",
+        entityId: workspace._id,
+        metadata: {
+          name: workspace.name,
+        },
+      },
+      { session },
+    );
 
     await session.commitTransaction();
 
@@ -122,12 +137,56 @@ const updateWorkspace = async (userId, workspaceId, updateData) => {
     updateData.slug = slug;
   }
 
-  const updatedWorkspace = await workspaceRepository.updateById(
-    workspaceId,
-    updateData,
-  );
+  const changes = {};
 
-  return updatedWorkspace;
+  for (const [key, value] of Object.entries(updateData)) {
+    if (workspace[key]?.toString() !== value?.toString()) {
+      changes[key] = {
+        from: workspace[key],
+        to: value,
+      };
+    }
+  }
+
+  if (Object.keys(changes).length === 0) {
+    throw new ApiError(400, "No changes provided.");
+  }
+
+  const session = await mongoose.startSession();
+
+  try {
+    session.startTransaction();
+
+    const updatedWorkspace = await workspaceRepository.updateById(
+      workspaceId,
+      updateData,
+      { session },
+    );
+
+    await activityService.createActivity(
+      {
+        workspaceId: workspace._id,
+        userId,
+        action: "workspace.updated",
+        entityType: "Workspace",
+        entityId: workspace._id,
+        metadata: {
+          changes,
+        },
+      },
+      { session },
+    );
+
+    await session.commitTransaction();
+
+    return updatedWorkspace;
+  } catch (error) {
+    await session.abortTransaction();
+
+    throw error;
+  } finally {
+    await session.endSession();
+  }
 };
 
 const deleteWorkspace = async (userId, workspaceId) => {
@@ -161,6 +220,20 @@ const deleteWorkspace = async (userId, workspaceId) => {
     await workspaceMemberRepository.deleteAllByWorkspace(workspaceId, {
       session,
     });
+
+    await activityService.createActivity(
+      {
+        workspaceId: workspace._id,
+        userId,
+        action: "workspace.deleted",
+        entityType: "Workspace",
+        entityId: workspace._id,
+        metadata: {
+          name: workspace.name,
+        },
+      },
+      { session },
+    );
 
     await workspaceRepository.deleteById(workspaceId, { session });
 
@@ -230,14 +303,46 @@ const inviteMember = async (userId, workspaceId, inviteData) => {
     );
   }
 
-  const invitation = await workspaceInvitationRepository.create({
-    workspace: workspaceId,
-    invitedBy: userId,
-    email,
-    role,
-  });
+  const session = await mongoose.startSession();
 
-  return invitation;
+  try {
+    session.startTransaction();
+
+    const invitation = await workspaceInvitationRepository.create(
+      {
+        workspace: workspaceId,
+        invitedBy: userId,
+        email,
+        role,
+      },
+      { session },
+    );
+
+    await activityService.createActivity(
+      {
+        workspaceId: workspace._id,
+        userId,
+        action: "member.invited",
+        entityType: "Workspace",
+        entityId: workspace._id,
+        metadata: {
+          email,
+          role,
+        },
+      },
+      { session },
+    );
+
+    await session.commitTransaction();
+
+    return invitation;
+  } catch (error) {
+    await session.abortTransaction();
+
+    throw error;
+  } finally {
+    await session.endSession();
+  }
 };
 
 const acceptInvitation = async (userId, invitationId) => {
@@ -296,6 +401,20 @@ const acceptInvitation = async (userId, invitationId) => {
       { session },
     );
 
+    await activityService.createActivity(
+      {
+        workspaceId: invitation.workspace,
+        userId,
+        action: "member.joined",
+        entityType: "WorkspaceMember",
+        entityId: workspaceMember._id,
+        metadata: {
+          role: workspaceMember.role,
+        },
+      },
+      { session },
+    );
+
     await session.commitTransaction();
 
     return workspaceMember;
@@ -337,9 +456,42 @@ const rejectInvitation = async (userId, invitationId) => {
     throw new ApiError(403, "This invitation does not belong to you.");
   }
 
-  await workspaceInvitationRepository.updateById(invitationId, {
-    status: "rejected",
-  });
+  const session = await mongoose.startSession();
+
+  try {
+    session.startTransaction();
+
+    await workspaceInvitationRepository.updateById(
+      invitationId,
+      {
+        status: "rejected",
+      },
+      { session },
+    );
+
+    await activityService.createActivity(
+      {
+        workspaceId: invitation.workspace,
+        userId,
+        action: "member.invitation_rejected",
+        entityType: "Workspace",
+        entityId: invitation.workspace,
+        metadata: {
+          email: invitation.email,
+          role: invitation.role,
+        },
+      },
+      { session },
+    );
+
+    await session.commitTransaction();
+  } catch (error) {
+    await session.abortTransaction();
+
+    throw error;
+  } finally {
+    await session.endSession();
+  }
 };
 
 const getMyPendingInvitations = async (userId) => {
@@ -416,11 +568,47 @@ const updateMemberRole = async (userId, workspaceId, memberId, role) => {
     throw new ApiError(409, "Member already has this role.");
   }
 
-  const updatedMember = await workspaceMemberRepository.updateById(memberId, {
-    role,
-  });
+  const previousRole = targetMember.role;
 
-  return updatedMember;
+  const session = await mongoose.startSession();
+
+  try {
+    session.startTransaction();
+
+    const updatedMember = await workspaceMemberRepository.updateById(
+      memberId,
+      {
+        role,
+      },
+      { session },
+    );
+
+    await activityService.createActivity(
+      {
+        workspaceId,
+        userId,
+        action: "member.role_changed",
+        entityType: "WorkspaceMember",
+        entityId: targetMember._id,
+        metadata: {
+          userId: targetMember.user,
+          from: previousRole,
+          to: role,
+        },
+      },
+      { session },
+    );
+
+    await session.commitTransaction();
+
+    return updatedMember;
+  } catch (error) {
+    await session.abortTransaction();
+
+    throw error;
+  } finally {
+    await session.endSession();
+  }
 };
 
 const removeMember = async (userId, workspaceId, memberId) => {
@@ -459,7 +647,36 @@ const removeMember = async (userId, workspaceId, memberId) => {
     throw new ApiError(409, "Workspace owner cannot remove themselves.");
   }
 
-  await workspaceMemberRepository.deleteById(memberId);
+  const session = await mongoose.startSession();
+
+  try {
+    session.startTransaction();
+
+    await workspaceMemberRepository.deleteById(memberId, { session });
+
+    await activityService.createActivity(
+      {
+        workspaceId,
+        userId,
+        action: "member.removed",
+        entityType: "WorkspaceMember",
+        entityId: targetMember._id,
+        metadata: {
+          userId: targetMember.user,
+          role: targetMember.role,
+        },
+      },
+      { session },
+    );
+
+    await session.commitTransaction();
+  } catch (error) {
+    await session.abortTransaction();
+
+    throw error;
+  } finally {
+    await session.endSession();
+  }
 };
 
 const leaveWorkspace = async (userId, workspaceId) => {
@@ -485,7 +702,35 @@ const leaveWorkspace = async (userId, workspaceId) => {
     );
   }
 
-  await workspaceMemberRepository.deleteById(membership._id);
+  const session = await mongoose.startSession();
+
+  try {
+    session.startTransaction();
+
+    await workspaceMemberRepository.deleteById(membership._id, { session });
+
+    await activityService.createActivity(
+      {
+        workspaceId,
+        userId,
+        action: "member.left",
+        entityType: "WorkspaceMember",
+        entityId: membership._id,
+        metadata: {
+          role: membership.role,
+        },
+      },
+      { session },
+    );
+
+    await session.commitTransaction();
+  } catch (error) {
+    await session.abortTransaction();
+
+    throw error;
+  } finally {
+    await session.endSession();
+  }
 };
 
 const workspaceService = {
@@ -501,7 +746,7 @@ const workspaceService = {
   getWorkspaceMembers,
   updateMemberRole,
   removeMember,
-  leaveWorkspace
+  leaveWorkspace,
 };
 
 export default workspaceService;

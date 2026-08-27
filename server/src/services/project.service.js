@@ -2,6 +2,8 @@ import projectRepository from "../repositories/project.repository.js";
 import workspaceRepository from "../repositories/workspace.repository.js";
 import workspaceMemberRepository from "../repositories/workspace-member.repository.js";
 import ApiError from "../utils/ApiError.js";
+import activityService from "./activity.service.js";
+import mongoose from "mongoose";
 
 const createProject = async (userId, workspaceId, projectData) => {
   const { name, description, color, icon } = projectData;
@@ -33,16 +35,42 @@ const createProject = async (userId, workspaceId, projectData) => {
     );
   }
 
+  const session = await mongoose.startSession();
+
   try {
-    return await projectRepository.create({
-      workspace: workspaceId,
-      name,
-      description,
-      color,
-      icon,
-      createdBy: userId,
-    });
+    session.startTransaction();
+
+    const project = await projectRepository.create(
+      {
+        workspace: workspaceId,
+        name,
+        description,
+        color,
+        icon,
+        createdBy: userId,
+      },
+      { session },
+    );
+    await activityService.createActivity(
+      {
+        workspaceId,
+        userId,
+        action: "project.created",
+        entityType: "Project",
+        entityId: project._id,
+        metadata: {
+          name: project.name,
+        },
+      },
+      { session },
+    );
+
+    await session.commitTransaction();
+
+    return project;
   } catch (error) {
+    await session.abortTransaction();
+
     if (error.code === 11000) {
       throw new ApiError(
         409,
@@ -51,6 +79,8 @@ const createProject = async (userId, workspaceId, projectData) => {
     }
 
     throw error;
+  } finally {
+    await session.endSession();
   }
 };
 
@@ -131,9 +161,52 @@ const updateProject = async (userId, projectId, projectData) => {
     }
   }
 
+  const changes = {};
+
+  for (const [key, value] of Object.entries(projectData)) {
+    if (project[key]?.toString() !== value?.toString()) {
+      changes[key] = {
+        from: project[key],
+        to: value,
+      };
+    }
+  }
+
+  if (Object.keys(changes).length === 0) {
+    throw new ApiError(400, "No changes provided.");
+  }
+
+  const session = await mongoose.startSession();
+
   try {
-    return await projectRepository.updateById(projectId, projectData);
+    session.startTransaction();
+
+    const updatedProject = await projectRepository.updateById(
+      projectId,
+      projectData,
+      { session },
+    );
+
+    await activityService.createActivity(
+      {
+        workspaceId: project.workspace,
+        userId,
+        action: "project.updated",
+        entityType: "Project",
+        entityId: project._id,
+        metadata: {
+          changes,
+        },
+      },
+      { session },
+    );
+
+    await session.commitTransaction();
+
+    return updatedProject;
   } catch (error) {
+    await session.abortTransaction();
+
     if (error.code === 11000) {
       throw new ApiError(
         409,
@@ -142,6 +215,8 @@ const updateProject = async (userId, projectId, projectData) => {
     }
 
     throw error;
+  } finally {
+    await session.endSession();
   }
 };
 
@@ -168,7 +243,37 @@ const deleteProject = async (userId, projectId) => {
     );
   }
 
-  return projectRepository.deleteById(projectId);
+  const session = await mongoose.startSession();
+
+  try {
+    session.startTransaction();
+
+    await projectRepository.deleteById(projectId, { session });
+
+    await activityService.createActivity(
+      {
+        workspaceId: project.workspace,
+        userId,
+        action: "project.deleted",
+        entityType: "Project",
+        entityId: project._id,
+        metadata: {
+          name: project.name,
+        },
+      },
+      { session },
+    );
+
+    await session.commitTransaction();
+
+    return;
+  } catch (error) {
+    await session.abortTransaction();
+
+    throw error;
+  } finally {
+    await session.endSession();
+  }
 };
 
 const projectService = {
@@ -176,7 +281,7 @@ const projectService = {
   getWorkspaceProjects,
   getProjectById,
   updateProject,
-  deleteProject
+  deleteProject,
 };
 
 export default projectService;

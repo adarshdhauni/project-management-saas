@@ -2,6 +2,7 @@ import taskRepository from "../repositories/task.repository.js";
 import projectRepository from "../repositories/project.repository.js";
 import workspaceMemberRepository from "../repositories/workspace-member.repository.js";
 import ApiError from "../utils/ApiError.js";
+import activityService from "./activity.service.js";
 
 const createTask = async (userId, projectId, taskData) => {
   const project = await projectRepository.findById(projectId);
@@ -35,14 +36,45 @@ const createTask = async (userId, projectId, taskData) => {
 
   const position = lastTask ? lastTask.position + 1000 : 1000;
 
-  const task = await taskRepository.create({
-    ...taskData,
-    project: projectId,
-    createdBy: userId,
-    position,
-  });
+  const session = await mongoose.startSession();
 
-  return task;
+  try {
+    session.startTransaction();
+
+    const task = await taskRepository.create(
+      {
+        ...taskData,
+        project: projectId,
+        createdBy: userId,
+        position,
+      },
+      { session },
+    );
+
+    await activityService.createActivity(
+      {
+        workspaceId: project.workspace,
+        userId,
+        action: "task.created",
+        entityType: "Task",
+        entityId: task._id,
+        metadata: {
+          title: task.title,
+        },
+      },
+      { session },
+    );
+
+    await session.commitTransaction();
+
+    return task;
+  } catch (error) {
+    await session.abortTransaction();
+
+    throw error;
+  } finally {
+    await session.endSession();
+  }
 };
 
 const getTasks = async (userId, projectId, filters = {}) => {
@@ -125,9 +157,95 @@ const updateTask = async (userId, taskId, taskData) => {
     }
   }
 
-  const updatedTask = await taskRepository.updateById(taskId, taskData);
+  const changes = {};
 
-  return updatedTask;
+  for (const [key, value] of Object.entries(taskData)) {
+    if (task[key]?.toString() !== value?.toString()) {
+      changes[key] = {
+        from: task[key],
+        to: value,
+      };
+    }
+  }
+
+  if (Object.keys(changes).length === 0) {
+    throw new ApiError(400, "No changes provided.");
+  }
+
+  const session = await mongoose.startSession();
+
+  try {
+    session.startTransaction();
+
+    const updatedTask = await taskRepository.updateById(taskId, taskData, {
+      session,
+    });
+
+    if (changes.status) {
+      await activityService.createActivity(
+        {
+          workspaceId: project.workspace,
+          userId,
+          action: "task.status_changed",
+          entityType: "Task",
+          entityId: task._id,
+          metadata: {
+            from: changes.status.from,
+            to: changes.status.to,
+          },
+        },
+        { session },
+      );
+    }
+
+    if (changes.assignee) {
+      await activityService.createActivity(
+        {
+          workspaceId: project.workspace,
+          userId,
+          action: "task.assigned",
+          entityType: "Task",
+          entityId: task._id,
+          metadata: {
+            from: changes.assignee.from,
+            to: changes.assignee.to,
+          },
+        },
+        { session },
+      );
+    }
+
+    const otherChanges = { ...changes };
+
+    delete otherChanges.status;
+    delete otherChanges.assignee;
+
+    if (Object.keys(otherChanges).length > 0) {
+      await activityService.createActivity(
+        {
+          workspaceId: project.workspace,
+          userId,
+          action: "task.updated",
+          entityType: "Task",
+          entityId: task._id,
+          metadata: {
+            changes: otherChanges,
+          },
+        },
+        { session },
+      );
+    }
+
+    await session.commitTransaction();
+
+    return updatedTask;
+  } catch (error) {
+    await session.abortTransaction();
+
+    throw error;
+  } finally {
+    await session.endSession();
+  }
 };
 
 const deleteTask = async (userId, taskId) => {
@@ -152,9 +270,37 @@ const deleteTask = async (userId, taskId) => {
     throw new ApiError(403, "You do not have access to this workspace.");
   }
 
-  await taskRepository.deleteById(taskId);
+  const session = await mongoose.startSession();
 
-  return;
+  try {
+    session.startTransaction();
+
+    await taskRepository.deleteById(taskId, { session });
+
+    await activityService.createActivity(
+      {
+        workspaceId: project.workspace,
+        userId,
+        action: "task.deleted",
+        entityType: "Task",
+        entityId: task._id,
+        metadata: {
+          title: task.title,
+        },
+      },
+      { session },
+    );
+
+    await session.commitTransaction();
+
+    return;
+  } catch (error) {
+    await session.abortTransaction();
+
+    throw error;
+  } finally {
+    await session.endSession();
+  }
 };
 
 const moveTask = async (userId, taskId, beforeTaskId = null) => {
@@ -219,9 +365,49 @@ const moveTask = async (userId, taskId, beforeTaskId = null) => {
     newPosition = lastTask ? lastTask.position + 1000 : 1000;
   }
 
-  return taskRepository.updateById(taskId, {
-    position: newPosition,
-  });
+  if (newPosition === task.position) {
+    throw new ApiError(400, "Task is already in this position.");
+  }
+
+  const session = await mongoose.startSession();
+
+  try {
+    session.startTransaction();
+
+    const updatedTask = await taskRepository.updateById(
+      taskId,
+      {
+        position: newPosition,
+      },
+      { session },
+    );
+
+    await activityService.createActivity(
+      {
+        workspaceId: project.workspace,
+        userId,
+        action: "task.reordered",
+        entityType: "Task",
+        entityId: task._id,
+        metadata: {
+          fromPosition: task.position,
+          toPosition: newPosition,
+          beforeTaskId,
+        },
+      },
+      { session },
+    );
+
+    await session.commitTransaction();
+
+    return updatedTask;
+  } catch (error) {
+    await session.abortTransaction();
+
+    throw error;
+  } finally {
+    await session.endSession();
+  }
 };
 
 const taskService = {
