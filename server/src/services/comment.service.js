@@ -33,8 +33,36 @@ const createComment = async (userId, taskId, content) => {
   });
 };
 
+const getComments = async (userId, taskId, filters = {}) => {
+  const task = await taskRepository.findById(taskId);
+
+  if (!task) {
+    throw new ApiError(404, "Task not found.");
+  }
+
+  const project = await projectRepository.findById(task.project);
+
+  if (!project) {
+    throw new ApiError(404, "Project not found.");
+  }
+
+  const membership = await workspaceMemberRepository.findByWorkspaceAndUser(
+    project.workspace,
+    userId,
+  );
+
+  if (!membership) {
+    throw new ApiError(403, "You do not have access to this workspace.");
+  }
+
+  const result = await commentRepository.findAllByTask(taskId, filters);
+
+  return result;
+};
+
 const commentService = {
   createComment,
+  getComments,
 };
 
 export default commentService;
