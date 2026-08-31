@@ -65,6 +65,26 @@ const createTask = async (userId, projectId, taskData) => {
       { session },
     );
 
+    if (
+      taskData.assignee &&
+      taskData.assignee.toString() !== userId.toString()
+    ) {
+      await notificationService.createNotification(
+        {
+          recipient: taskData.assignee,
+          actor: userId,
+          workspace: project.workspace,
+          type: "task.assigned",
+          entityType: "Task",
+          entityId: task._id,
+          metadata: {
+            taskTitle: task.title,
+          },
+        },
+        { session },
+      );
+    }
+
     await session.commitTransaction();
 
     return task;
@@ -213,6 +233,23 @@ const updateTask = async (userId, taskId, taskData) => {
         },
         { session },
       );
+
+      if (taskData.assignee) {
+        await notificationService.createNotification(
+          {
+            recipient: taskData.assignee,
+            actor: userId,
+            workspace: project.workspace,
+            type: "task.assigned",
+            entityType: "Task",
+            entityId: task._id,
+            metadata: {
+              taskTitle: task.title,
+            },
+          },
+          { session },
+        );
+      }
     }
 
     const otherChanges = { ...changes };

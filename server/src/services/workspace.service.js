@@ -7,6 +7,7 @@ import workspaceInvitationRepository from "../repositories/workspace-invitation.
 import mongoose from "mongoose";
 import userRepository from "../repositories/user.repository.js";
 import activityService from "./activity.service.js";
+import notificationService from "./notification.services.js";
 
 const createWorkspace = async (userId, workspaceData) => {
   const slug = slugify(workspaceData.name, {
@@ -333,6 +334,23 @@ const inviteMember = async (userId, workspaceId, inviteData) => {
       { session },
     );
 
+    await notificationService.createNotification(
+      {
+        recipient: user._id,
+        actor: userId,
+        workspace: workspace._id,
+        type: "workspace.invited",
+        entityType: "Workspace",
+        entityId: workspace._id,
+        metadata: {
+          workspaceName: workspace.name,
+          role,
+          invitationId: invitation._id,
+        },
+      },
+      { session },
+    );
+
     await session.commitTransaction();
 
     return invitation;
@@ -599,6 +617,22 @@ const updateMemberRole = async (userId, workspaceId, memberId, role) => {
       { session },
     );
 
+    await notificationService.createNotification(
+      {
+        recipient: targetMember.user,
+        actor: userId,
+        workspace: workspaceId,
+        type: "member.role_changed",
+        entityType: "WorkspaceMember",
+        entityId: targetMember._id,
+        metadata: {
+          previousRole,
+          newRole: role,
+        },
+      },
+      { session },
+    );
+
     await session.commitTransaction();
 
     return updatedMember;
@@ -664,6 +698,21 @@ const removeMember = async (userId, workspaceId, memberId) => {
         metadata: {
           userId: targetMember.user,
           role: targetMember.role,
+        },
+      },
+      { session },
+    );
+
+    await notificationService.createNotification(
+      {
+        recipient: targetMember.user,
+        actor: userId,
+        workspace: workspaceId,
+        type: "member.removed",
+        entityType: "WorkspaceMember",
+        entityId: targetMember._id,
+        metadata: {
+          workspaceName: workspace.name,
         },
       },
       { session },
