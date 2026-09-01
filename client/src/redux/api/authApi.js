@@ -16,6 +16,12 @@ const authApi = apiSlice.injectEndpoints({
         body: credentials,
       }),
     }),
+    refreshToken: builder.mutation({
+      query: () => ({
+        url: "/api/v1/auth/refresh-token",
+        method: "POST",
+      }),
+    }),
     getMe: builder.query({
       query: () => ({
         url: "/api/v1/auth/me",
@@ -50,17 +56,13 @@ const authApi = apiSlice.injectEndpoints({
         },
       }),
     }),
-    getMe: builder.query({
-      query: () => ({
-        url: "/api/v1/auth/me",
-      }),
-    }),
   }),
 });
 
 export const {
   useRegisterUserMutation,
   useLoginUserMutation,
+  useRefreshTokenMutation,
   useGetMeQuery,
   useLogoutMutation,
   useForgotPasswordMutation,
