@@ -56,6 +56,13 @@ app.use("/api/v1/tasks", taskRoutes);
 app.use("/api/v1/comments", commentRoutes);
 app.use("/api/v1/notifications", notificationRoutes);
 
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "OK",
+  });
+});
+
 app.use((req, res, next) => {
   next(new ApiError(404, "Invalid route, please try again!"));
 });
