@@ -56,6 +56,12 @@ app.use("/api/v1/tasks", taskRoutes);
 app.use("/api/v1/comments", commentRoutes);
 app.use("/api/v1/notifications", notificationRoutes);
 
+app.get("/", (req, res) => {
+  res.status(200).json({
+    message: "Project Management SaaS API is running.",
+  });
+});
+
 app.get("/health", (req, res) => {
   res.status(200).json({
     success: true,
