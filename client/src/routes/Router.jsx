@@ -18,7 +18,15 @@ const AppLayout = () => {
 };
 
 const AuthLayout = () => {
-  return <Outlet />;
+  return (
+    <div className="animate-fadeIn bg-white text-black min-h-screen flex items-center justify-center px-4 ">
+      <div className="w-full max-w-125">
+        <div className="animate-step">
+          <Outlet />
+        </div>
+      </div>
+    </div>
+  );
 };
 
 const router = createBrowserRouter([
