@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useResetPasswordMutation } from "@/redux/api/authApi";
+import { Eye, EyeOff } from "lucide-react";
 import { toast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
@@ -27,6 +28,10 @@ const ResetPassword = () => {
   const [resetPassword, { isLoading: isResetting }] =
     useResetPasswordMutation();
 
+  const { passwordRules, passwordStrength } = getPasswordValidation(
+    values.password,
+  );
+
   const handleChange = (e) => {
     setValues((prev) => ({ ...prev, [e.target.id]: e.target.value }));
   };
@@ -35,7 +40,7 @@ const ResetPassword = () => {
     values.password && values.password === values.confirmPassword;
 
   const validateForm = () => {
-    const { password, confirmPassword } = userData;
+    const { password, confirmPassword } = values;
 
     if (!password.trim()) {
       focusField("password");
@@ -146,7 +151,7 @@ const ResetPassword = () => {
                 id="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter your new password"
-                value={userData.password}
+                value={values.password}
                 onChange={handleChange}
                 disabled={isResetting}
                 required
@@ -174,7 +179,7 @@ const ResetPassword = () => {
           <PasswordRequirements passwordRules={passwordRules} />
 
           <PasswordStrength
-            password={userData.password}
+            password={values.password}
             passwordStrength={passwordStrength}
           />
         </div>
@@ -182,7 +187,7 @@ const ResetPassword = () => {
         <Field
           data-disabled={isResetting}
           data-invalid={
-            userData.confirmPassword.trim() !== "" && !isPasswordMatch
+            values.confirmPassword.trim() !== "" && !isPasswordMatch
           }
         >
           <FieldLabel htmlFor="confirmPassword">
@@ -193,11 +198,11 @@ const ResetPassword = () => {
               id="confirmPassword"
               type={showConfirm ? "text" : "password"}
               placeholder="Re-enter your new password"
-              value={userData.confirmPassword}
+              value={values.confirmPassword}
               onChange={handleChange}
               disabled={isResetting}
               aria-invalid={
-                userData.confirmPassword.trim() !== "" && !isPasswordMatch
+                values.confirmPassword.trim() !== "" && !isPasswordMatch
               }
               required
             />
@@ -211,7 +216,7 @@ const ResetPassword = () => {
             </button>
           </div>
 
-          {userData.confirmPassword.trim() !== "" && !isPasswordMatch && (
+          {values.confirmPassword.trim() !== "" && !isPasswordMatch && (
             <p className="text-xs text-red-500">Passwords do not match</p>
           )}
 
