@@ -19,11 +19,9 @@ const AppLayout = () => {
 
 const AuthLayout = () => {
   return (
-    <div className="animate-fadeIn bg-white text-black min-h-screen flex items-center justify-center px-4 ">
+    <div className="bg-white text-black min-h-screen flex items-center justify-center">
       <div className="w-full max-w-125">
-        <div className="animate-step">
-          <Outlet />
-        </div>
+        <Outlet />
       </div>
     </div>
   );
