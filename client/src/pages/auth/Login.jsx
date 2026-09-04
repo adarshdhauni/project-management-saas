@@ -80,7 +80,7 @@ const Login = () => {
     } catch (err) {
       toast.add({
         type: "error",
-        title: err?.data?.message || "Lofgin failed",
+        title: err?.data?.message || "Login failed",
         priority: "high",
       });
     }
@@ -98,7 +98,7 @@ const Login = () => {
       <form onSubmit={handleLogin} className="space-y-10">
         <Field
           data-disabled={isSigningIn}
-          data-invalid={!isEmailValid && credentials.email}
+          data-invalid={!isEmailValid && credentials.email.trim() !== ""}
         >
           <FieldLabel htmlFor="email">
             Email <span className="text-destructive">*</span>
@@ -111,11 +111,11 @@ const Login = () => {
             value={credentials.email}
             onChange={handleChange}
             disabled={isSigningIn}
-            aria-invalid={!isEmailValid && credentials.email}
+            aria-invalid={!isEmailValid && credentials.email.trim() !== ""}
             required
           />
 
-          {credentials.email && !isEmailValid && (
+          {credentials.email.trim() !== "" && !isEmailValid && (
             <p className="text-xs text-red-500">Invalid email</p>
           )}
           <FieldDescription>
@@ -174,6 +174,7 @@ const Login = () => {
             {isSigningIn ? (
               <>
                 <Spinner data-icon="inline-start" />
+                Signing in...
               </>
             ) : (
               "Sign in"

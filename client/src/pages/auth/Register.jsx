@@ -194,7 +194,7 @@ const Register = () => {
 
         <Field
           data-disabled={isRegistering}
-          data-invalid={!isEmailValid && userData.email}
+          data-invalid={!isEmailValid && userData.email.trim() !== ""}
         >
           <FieldLabel htmlFor="email">
             Email <span className="text-destructive">*</span>
@@ -207,11 +207,11 @@ const Register = () => {
             value={userData.email}
             onChange={handleChange}
             disabled={isRegistering}
-            aria-invalid={!isEmailValid && userData.email}
+            aria-invalid={!isEmailValid && userData.email.trim() !== ""}
             required
           />
 
-          {userData.email && !isEmailValid && (
+          {userData.email.trim() !== "" && !isEmailValid && (
             <p className="text-xs text-red-500">Invalid email</p>
           )}
           <FieldDescription>
@@ -265,7 +265,9 @@ const Register = () => {
 
         <Field
           data-disabled={isRegistering}
-          data-invalid={userData.confirmPassword && !isPasswordMatch}
+          data-invalid={
+            userData.confirmPassword.trim() !== "" && !isPasswordMatch
+          }
         >
           <FieldLabel htmlFor="confirmPassword">
             Confirm Password <span className="text-destructive">*</span>
@@ -278,7 +280,9 @@ const Register = () => {
               value={userData.confirmPassword}
               onChange={handleChange}
               disabled={isRegistering}
-              aria-invalid={userData.confirmPassword && !isPasswordMatch}
+              aria-invalid={
+                userData.confirmPassword.trim() !== "" && !isPasswordMatch
+              }
               required
             />
 
@@ -291,7 +295,7 @@ const Register = () => {
             </button>
           </div>
 
-          {userData.confirmPassword && !isPasswordMatch && (
+          {userData.confirmPassword.trim() !== "" && !isPasswordMatch && (
             <p className="text-xs text-red-500">Passwords do not match</p>
           )}
 
@@ -310,6 +314,7 @@ const Register = () => {
             {isRegistering ? (
               <>
                 <Spinner data-icon="inline-start" />
+                Creating account...
               </>
             ) : (
               "Create Account"

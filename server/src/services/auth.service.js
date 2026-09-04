@@ -110,7 +110,7 @@ const forgotPassword = async (userData) => {
     passwordResetExpires,
   );
 
-  const resetUrl = `${env.CLIENT_URL}/reset-password?token=${resetToken}`;
+  const resetUrl = `${env.CLIENT_URL}/auth/reset-password?token=${resetToken}`;
 
   await emailService.sendPasswordResetEmail({
     email: user.email,
