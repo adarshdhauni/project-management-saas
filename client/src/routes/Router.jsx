@@ -21,7 +21,7 @@ const AppLayout = () => {
 };
 
 const AuthLayout = () => (
-  <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
+  <div className="flex min-h-screen items-center justify-center bg-background px-5 py-8 text-foreground sm:px-6 sm:py-12">
     <div className="w-full max-w-125">
       <Outlet />
     </div>
