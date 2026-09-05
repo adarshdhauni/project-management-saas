@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useLoginUserMutation } from "@/redux/api/authApi";
+import { useLoginUserMutation } from "@/features/auth/authApi";
 import { Eye, EyeOff } from "lucide-react";
 import { toast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
@@ -76,7 +76,7 @@ const Login = () => {
         password: "",
       });
 
-      navigate("/");
+      navigate("/dashboard", { replace: true });
     } catch (err) {
       toast.add({
         type: "error",
@@ -185,7 +185,7 @@ const Login = () => {
             variant="secondary"
             size="lg"
             type="button"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/")}
             className="w-full cursor-pointer"
           >
             Cancel

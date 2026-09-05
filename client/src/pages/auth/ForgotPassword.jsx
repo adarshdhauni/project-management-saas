@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useForgotPasswordMutation } from "@/redux/api/authApi";
+import { useForgotPasswordMutation } from "@/features/auth/authApi";
 import { toast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
@@ -135,7 +135,7 @@ const ForgotPassword = () => {
             variant="secondary"
             size="lg"
             type="button"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/auth/login")}
             className="w-full cursor-pointer"
           >
             Cancel

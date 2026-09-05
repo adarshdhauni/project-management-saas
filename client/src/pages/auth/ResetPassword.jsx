@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useResetPasswordMutation } from "@/redux/api/authApi";
+import { useResetPasswordMutation } from "@/features/auth/authApi";
 import { Eye, EyeOff } from "lucide-react";
 import { toast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
@@ -246,7 +246,7 @@ const ResetPassword = () => {
             variant="secondary"
             size="lg"
             type="button"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/auth/login", { replace: true })}
             className="w-full cursor-pointer"
           >
             Cancel

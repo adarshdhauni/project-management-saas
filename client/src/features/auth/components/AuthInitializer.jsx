@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 
-import { useGetMeQuery } from "@/redux/api/authApi";
+import { useGetMeQuery } from "../authApi";
 import { setCredentials, clearCredentials } from "../authSlice";
 import GlobalLoader from "@/components/feedback/loading/GlobalLoader";
 

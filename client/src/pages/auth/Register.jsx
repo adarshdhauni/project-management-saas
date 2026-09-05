@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useRegisterUserMutation } from "@/redux/api/authApi";
+import { useRegisterUserMutation } from "@/features/auth/authApi";
 import { Eye, EyeOff } from "lucide-react";
 import { toast } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
@@ -153,7 +153,7 @@ const Register = () => {
         confirmPassword: "",
       });
 
-      navigate("/");
+      navigate("/dashboard", { replace: true });
     } catch (err) {
       toast.add({
         type: "error",
@@ -325,7 +325,7 @@ const Register = () => {
             variant="secondary"
             size="lg"
             type="button"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/")}
             className="w-full cursor-pointer"
           >
             Cancel
