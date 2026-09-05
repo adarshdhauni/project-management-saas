@@ -85,63 +85,65 @@ const PublicNavbar = () => {
         <div className="hidden items-center gap-2.5 md:flex">
           <ThemeToggle />
 
-          <Link
-            to="/auth/login"
-            className="rounded-lg px-3.5 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          >
+          <Button size="lg" variant="ghost" render={<Link to="/auth/login" />}>
             Log in
-          </Link>
+          </Button>
 
-          <Link
-            to="/auth/register"
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-all hover:opacity-85"
-          >
+          <Button size="lg" render={<Link to="/auth/register" />}>
             Get started
-          </Link>
+          </Button>
         </div>
 
         <div className="flex items-center gap-1 md:hidden">
           <ThemeToggle />
 
           <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label="Open navigation menu"
-              >
-                <Menu className="size-5" />
-              </Button>
+            <SheetTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Open navigation menu"
+                />
+              }
+            >
+              <Menu className="size-5" />
             </SheetTrigger>
 
-            <SheetContent side="right" className="w-full max-w-sm p-6">
-              <SheetTitle className="sr-only">Mobile navigation</SheetTitle>
+            <SheetContent side="right" className="w-full max-w-sm p-0">
+              <SheetTitle className="sr-only">TaskFlow navigation</SheetTitle>
 
               <SheetDescription className="sr-only">
-                Navigate to a section or access your account.
+                Navigate the TaskFlow website or access your account.
               </SheetDescription>
 
-              <div className="flex h-full flex-col overflow-y-auto">
-                <div className="border-b border-border/50 pb-6">
+              <div className="flex h-full flex-col">
+                <div className="border-b border-border px-6 py-6">
                   <a
                     href="#top"
                     onClick={closeSheet}
-                    className="text-2xl font-semibold tracking-[-0.03em]"
+                    className="flex items-center gap-2.5"
                   >
-                    TaskFlow
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                      <span className="text-sm font-semibold">T</span>
+                    </div>
+
+                    <span className="text-[15px] font-semibold tracking-tight">
+                      TaskFlow
+                    </span>
                   </a>
 
-                  <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  <p className="mt-3 text-sm leading-6 text-muted-foreground">
                     Project management, simplified.
                   </p>
                 </div>
 
-                <div className="mt-8">
-                  <p className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-                    Navigation
+                <div className="px-4 py-6">
+                  <p className="px-2 mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                    Navigate
                   </p>
 
-                  <nav className="space-y-2">
+                  <nav className="space-y-1">
                     {NAV_LINKS.map((link) => {
                       const isActive = activeSection === link.id;
 
@@ -152,23 +154,21 @@ const PublicNavbar = () => {
                           aria-current={isActive ? "location" : undefined}
                           onClick={closeSheet}
                           className={cn(
-                            "group flex items-center justify-between rounded-2xl border border-transparent px-4 py-3.5 transition-all duration-150",
+                            "group flex items-center justify-between rounded-lg px-3 py-3 text-sm font-medium transition-colors",
                             "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
                             isActive
-                              ? "border-primary/20 bg-primary/10 text-primary"
-                              : "hover:border-border hover:bg-muted/60",
+                              ? "bg-muted text-foreground"
+                              : "text-muted-foreground hover:bg-muted hover:text-foreground",
                           )}
                         >
-                          <span className="text-base font-medium">
-                            {link.label}
-                          </span>
+                          <span>{link.label}</span>
 
                           <ChevronRight
                             className={cn(
-                              "size-4 transition-transform duration-150 group-hover:translate-x-1",
+                              "size-4 transition-transform duration-150",
                               isActive
-                                ? "text-primary"
-                                : "text-muted-foreground",
+                                ? "text-foreground"
+                                : "text-muted-foreground group-hover:translate-x-0.5",
                             )}
                           />
                         </a>
@@ -177,18 +177,29 @@ const PublicNavbar = () => {
                   </nav>
                 </div>
 
-                <div className="mt-auto border-t border-border/50 pt-6">
+                <div className="mt-auto border-t border-border px-6 py-6">
+                  <p className="mb-3 text-xs font-medium text-muted-foreground">
+                    Get started with TaskFlow
+                  </p>
+
                   <div className="grid gap-2">
-                    <Button asChild variant="outline" className="w-full">
-                      <Link to="/auth/login" onClick={closeSheet}>
-                        Log in
-                      </Link>
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      onClick={closeSheet}
+                      render={<Link to="/auth/login" />}
+                      className="w-full"
+                    >
+                      Log in
                     </Button>
 
-                    <Button asChild className="w-full">
-                      <Link to="/auth/register" onClick={closeSheet}>
-                        Get started
-                      </Link>
+                    <Button
+                      size="lg"
+                      render={<Link to="/auth/register" />}
+                      onClick={closeSheet}
+                      className="w-full"
+                    >
+                      Get started
                     </Button>
                   </div>
                 </div>
