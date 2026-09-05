@@ -77,11 +77,12 @@ const ForgotPassword = () => {
 
   return (
     <PageTransition className="space-y-12">
-      <div className="text-center space-y-3">
-        <h1 className="text-2xl sm:text-3xl font-light tracking-wide">
+      <div className="space-y-3 text-center">
+        <h1 className="text-2xl font-light tracking-wide sm:text-3xl">
           Forgot Your Password
         </h1>
-        <p className="text-sm text-gray-500">
+
+        <p className="text-sm text-muted-foreground">
           We'll send you a link to reset your password.
         </p>
       </div>
@@ -94,6 +95,7 @@ const ForgotPassword = () => {
           <FieldLabel htmlFor="email">
             Email <span className="text-destructive">*</span>
           </FieldLabel>
+
           <Input
             id="email"
             type="email"
@@ -107,8 +109,9 @@ const ForgotPassword = () => {
           />
 
           {userData.email.trim() !== "" && !isEmailValid && (
-            <p className="text-xs text-red-500">Invalid email</p>
+            <p className="text-xs text-destructive">Invalid email</p>
           )}
+
           <FieldDescription>
             Enter the email associated with your account.
           </FieldDescription>

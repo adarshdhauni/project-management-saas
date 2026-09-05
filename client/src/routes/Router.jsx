@@ -20,15 +20,13 @@ const AppLayout = () => {
   );
 };
 
-const AuthLayout = () => {
-  return (
-    <div className="bg-white text-black min-h-screen flex items-center justify-center">
-      <div className="w-full max-w-125">
-        <Outlet />
-      </div>
+const AuthLayout = () => (
+  <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
+    <div className="w-full max-w-125">
+      <Outlet />
     </div>
-  );
-};
+  </div>
+);
 
 const RootLayout = () => {
   return (

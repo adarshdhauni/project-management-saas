@@ -88,11 +88,12 @@ const Login = () => {
 
   return (
     <PageTransition className="space-y-12">
-      <div className="text-center space-y-3">
-        <h1 className="text-2xl sm:text-3xl font-light tracking-wide">
+      <div className="space-y-3 text-center">
+        <h1 className="text-2xl font-light tracking-wide sm:text-3xl">
           Sign In
         </h1>
-        <p className="text-sm text-gray-500">Welcome back</p>
+
+        <p className="text-sm text-muted-foreground">Welcome back</p>
       </div>
 
       <form onSubmit={handleLogin} className="space-y-10">
@@ -103,6 +104,7 @@ const Login = () => {
           <FieldLabel htmlFor="email">
             Email <span className="text-destructive">*</span>
           </FieldLabel>
+
           <Input
             id="email"
             type="email"
@@ -116,8 +118,9 @@ const Login = () => {
           />
 
           {credentials.email.trim() !== "" && !isEmailValid && (
-            <p className="text-xs text-red-500">Invalid email</p>
+            <p className="text-xs text-destructive">Invalid email</p>
           )}
+
           <FieldDescription>
             Enter the email associated with your account.
           </FieldDescription>
@@ -143,7 +146,7 @@ const Login = () => {
               <button
                 type="button"
                 onClick={() => setShowPassword((p) => !p)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-black/50 transition-colors duration-150 hover:text-black cursor-pointer"
+                className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer text-muted-foreground transition-colors duration-150 hover:text-foreground"
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
@@ -156,7 +159,7 @@ const Login = () => {
                 type="button"
                 variant="link"
                 onClick={() => navigate("/auth/forgot-password")}
-                className="h-auto p-0 text-sm cursor-pointer"
+                className="h-auto cursor-pointer p-0 text-sm"
               >
                 Forgot password?
               </Button>
@@ -193,7 +196,7 @@ const Login = () => {
         </div>
       </form>
 
-      <p className="text-center text-sm text-black/50">
+      <p className="text-center text-sm text-muted-foreground">
         Don't have an account?{" "}
         <Button
           onClick={() => navigate("/auth/register")}

@@ -132,11 +132,12 @@ const ResetPassword = () => {
 
   return (
     <PageTransition className="space-y-12">
-      <div className="text-center space-y-3">
-        <h1 className="text-2xl sm:text-3xl font-light tracking-wide">
+      <div className="space-y-3 text-center">
+        <h1 className="text-2xl font-light tracking-wide sm:text-3xl">
           Reset Password
         </h1>
-        <p className="text-sm text-gray-500">Enter your new password</p>
+
+        <p className="text-sm text-muted-foreground">Enter your new password</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-10">
@@ -160,17 +161,12 @@ const ResetPassword = () => {
               <button
                 type="button"
                 onClick={() => setShowPassword((p) => !p)}
-                className="absolute right-2 top-1/2
-    -translate-y-1/2
-    text-black/50
-    transition-colors duration-150
-    hover:text-black
-    cursor-pointer
-  "
+                className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer text-muted-foreground transition-colors duration-150 hover:text-foreground"
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
+
             <FieldDescription>
               Choose a strong password for your account.
             </FieldDescription>
@@ -193,6 +189,7 @@ const ResetPassword = () => {
           <FieldLabel htmlFor="confirmPassword">
             Confirm Password <span className="text-destructive">*</span>
           </FieldLabel>
+
           <div className="relative">
             <Input
               id="confirmPassword"
@@ -210,14 +207,14 @@ const ResetPassword = () => {
             <button
               type="button"
               onClick={() => setShowConfirm((p) => !p)}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-black/50 transition-colors duration-150 hover:text-black cursor-pointer"
+              className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer text-muted-foreground transition-colors duration-150 hover:text-foreground"
             >
               {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
 
           {values.confirmPassword.trim() !== "" && !isPasswordMatch && (
-            <p className="text-xs text-red-500">Passwords do not match</p>
+            <p className="text-xs text-destructive">Passwords do not match</p>
           )}
 
           <FieldDescription>

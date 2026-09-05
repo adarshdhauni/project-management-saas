@@ -129,6 +129,15 @@
   }
 }
 
+:root {
+  --header-offset: 4rem;
+}
+
+html {
+  scroll-behavior: smooth;
+  scrollbar-gutter: stable;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -142,21 +151,6 @@
 
 .animate-fadeIn {
   animation: fadeIn 0.4s ease;
-}
-
-@keyframes fadeSlide {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-step {
-  animation: fadeSlide 0.3s ease-out;
 }
 
 ::-webkit-scrollbar {
@@ -183,4 +177,19 @@
 
 .summary::-webkit-scrollbar-track {
   background-color: rgba(0, 0, 0, 0.05);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }

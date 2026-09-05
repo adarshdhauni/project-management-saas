@@ -165,11 +165,14 @@ const Register = () => {
 
   return (
     <PageTransition className="space-y-12">
-      <div className="text-center space-y-3">
-        <h1 className="text-2xl sm:text-3xl font-light tracking-wide">
+      <div className="space-y-3 text-center">
+        <h1 className="text-2xl font-light tracking-wide sm:text-3xl">
           Create Account
         </h1>
-        <p className="text-sm text-gray-500">Start your journey with us</p>
+
+        <p className="text-sm text-muted-foreground">
+          Start your journey with us
+        </p>
       </div>
 
       <form onSubmit={handleRegister} className="space-y-10">
@@ -177,6 +180,7 @@ const Register = () => {
           <FieldLabel htmlFor="name">
             Name <span className="text-destructive">*</span>
           </FieldLabel>
+
           <Input
             id="name"
             type="text"
@@ -187,6 +191,7 @@ const Register = () => {
             disabled={isRegistering}
             required
           />
+
           <FieldDescription>
             Enter your name as you'd like it displayed.
           </FieldDescription>
@@ -199,6 +204,7 @@ const Register = () => {
           <FieldLabel htmlFor="email">
             Email <span className="text-destructive">*</span>
           </FieldLabel>
+
           <Input
             id="email"
             type="email"
@@ -212,8 +218,9 @@ const Register = () => {
           />
 
           {userData.email.trim() !== "" && !isEmailValid && (
-            <p className="text-xs text-red-500">Invalid email</p>
+            <p className="text-xs text-destructive">Invalid email</p>
           )}
+
           <FieldDescription>
             We'll use this email to manage your account.
           </FieldDescription>
@@ -239,17 +246,12 @@ const Register = () => {
               <button
                 type="button"
                 onClick={() => setShowPassword((p) => !p)}
-                className="absolute right-2 top-1/2
-  -translate-y-1/2
-  text-black/50
-  transition-colors duration-150
-  hover:text-black
-  cursor-pointer
-"
+                className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer text-muted-foreground transition-colors duration-150 hover:text-foreground"
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
+
             <FieldDescription>
               Choose a unique password for your account.
             </FieldDescription>
@@ -272,6 +274,7 @@ const Register = () => {
           <FieldLabel htmlFor="confirmPassword">
             Confirm Password <span className="text-destructive">*</span>
           </FieldLabel>
+
           <div className="relative">
             <Input
               id="confirmPassword"
@@ -289,14 +292,14 @@ const Register = () => {
             <button
               type="button"
               onClick={() => setShowConfirm((p) => !p)}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-black/50 transition-colors duration-150 hover:text-black cursor-pointer"
+              className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer text-muted-foreground transition-colors duration-150 hover:text-foreground"
             >
               {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
 
           {userData.confirmPassword.trim() !== "" && !isPasswordMatch && (
-            <p className="text-xs text-red-500">Passwords do not match</p>
+            <p className="text-xs text-destructive">Passwords do not match</p>
           )}
 
           <FieldDescription>
@@ -333,7 +336,7 @@ const Register = () => {
         </div>
       </form>
 
-      <p className="text-center text-sm text-black/50">
+      <p className="text-center text-sm text-muted-foreground">
         Already have an account?{" "}
         <Button
           onClick={() => navigate("/auth/login")}
