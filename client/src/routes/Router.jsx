@@ -7,6 +7,7 @@ const ForgotPassword = lazy(() => import("@/pages/auth/ForgotPassword"));
 const ResetPassword = lazy(() => import("@/pages/auth/ResetPassword"));
 
 import ScrollToTop from "./ScrollToTop";
+import ProtectedRoute from "./ProtectedRoute";
 
 const AppLayout = () => {
   return (
@@ -27,14 +28,18 @@ const AuthLayout = () => {
   );
 };
 
+const RootLayout = () => {
+  return (
+    <div className="min-h-screen">
+      <Outlet />
+    </div>
+  );
+};
+
 const router = createBrowserRouter([
   {
     element: <AppLayout />,
     children: [
-      {
-        path: "/",
-        element: <div>Home</div>,
-      },
       {
         path: "/auth",
         element: <AuthLayout />,
@@ -54,6 +59,20 @@ const router = createBrowserRouter([
           {
             path: "reset-password/:token",
             element: <ResetPassword />,
+          },
+        ],
+      },
+      {
+        element: <ProtectedRoute />,
+        children: [
+          {
+            element: <RootLayout />,
+            children: [
+              {
+                path: "/",
+                element: <Dashboard />,
+              },
+            ],
           },
         ],
       },

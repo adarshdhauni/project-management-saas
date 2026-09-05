@@ -4,13 +4,16 @@ import { RouterProvider } from "react-router-dom";
 import router from "./routes/Router";
 import GlobalLoader from "./components/feedback/loading/GlobalLoader";
 import { Toaster } from "@/components/ui/toast";
+import AuthInitializer from "./features/auth/components/AuthInitializer";
 
 function App() {
   return (
     <Toaster>
-      <Suspense fallback={<GlobalLoader />}>
-        <RouterProvider router={router} />
-      </Suspense>
+      <AuthInitializer>
+        <Suspense fallback={<GlobalLoader />}>
+          <RouterProvider router={router} />
+        </Suspense>
+      </AuthInitializer>
     </Toaster>
   );
 }
