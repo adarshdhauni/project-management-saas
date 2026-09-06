@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { ArrowRight, ChevronRight } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
@@ -26,21 +27,18 @@ const Hero = () => {
         </p>
 
         <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <Link
-            to="/auth/register"
-            className="group flex h-11 items-center justify-center gap-2 rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground transition-all hover:opacity-85"
+          <Button
+            className="group"
+            render={<Link to="/auth/register" />}
           >
             Start for free
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-          </Link>
+            <ArrowRight className="transition-transform group-hover:translate-x-0.5" />
+          </Button>
 
-          <a
-            href="#features"
-            className="flex h-11 items-center justify-center gap-1.5 rounded-lg border border-border bg-card px-5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          >
+          <Button variant="outline" render={<a href="#features" />}>
             Explore features
-            <ChevronRight className="h-4 w-4" />
-          </a>
+            <ChevronRight />
+          </Button>
         </div>
 
         <p className="mt-4 text-xs text-muted-foreground">

@@ -1,55 +1,7 @@
+import { Button } from "@/components/ui/button";
+import { PLANS } from "@/constants/pricingPlans";
 import { Check } from "lucide-react";
 import { Link } from "react-router-dom";
-
-const PLANS = [
-  {
-    name: "Free",
-    description: "For individuals getting started with organized work.",
-    price: "$0",
-    period: "forever",
-    features: [
-      "1 workspace",
-      "Up to 5 projects",
-      "Unlimited tasks",
-      "Task comments",
-      "Basic notifications",
-    ],
-    cta: "Get started",
-    featured: false,
-  },
-  {
-    name: "Pro",
-    description: "For individuals and small teams managing real projects.",
-    price: "$9",
-    period: "per user / month",
-    features: [
-      "Unlimited workspaces",
-      "Unlimited projects",
-      "Unlimited tasks",
-      "Task comments",
-      "Activity tracking",
-      "Advanced notifications",
-    ],
-    cta: "Start free trial",
-    featured: true,
-  },
-  {
-    name: "Team",
-    description: "For teams that need more control and collaboration.",
-    price: "$16",
-    period: "per user / month",
-    features: [
-      "Everything in Pro",
-      "Unlimited team members",
-      "Workspace management",
-      "Project collaboration",
-      "Advanced activity tracking",
-      "Priority support",
-    ],
-    cta: "Get started",
-    featured: false,
-  },
-];
 
 const Pricing = () => {
   return (
@@ -68,8 +20,7 @@ const Pricing = () => {
           </h2>
 
           <p className="mx-auto mt-5 max-w-xl text-sm leading-6 text-muted-foreground sm:text-base">
-            Start free and upgrade when your team needs more space to
-            collaborate and get work done.
+            Start free today. Paid plans are coming soon as your team grows.
           </p>
         </div>
 
@@ -124,63 +75,70 @@ const Pricing = () => {
                 </div>
               </div>
 
-              <Link
-                to="/auth/register"
-                className={[
-                  "mt-8 flex h-11 items-center justify-center rounded-lg text-sm font-medium transition-opacity",
-                  plan.featured
-                    ? "bg-primary-foreground text-primary hover:opacity-90"
-                    : "bg-primary text-primary-foreground hover:opacity-85",
-                ].join(" ")}
-              >
-                {plan.cta}
-              </Link>
+              {plan.comingSoon ? (
+                <Button
+                  disabled
+                  className={[
+                    "mt-8 w-full",
+                    plan.featured
+                      ? "bg-primary-foreground/15 text-primary-foreground/60"
+                      : "",
+                  ].join(" ")}
+                >
+                  {plan.cta}
+                </Button>
+              ) : (
+                <Button
+                  className="mt-8 w-full hover:opacity-85"
+                  render={<Link to="/auth/register" />}
+                >
+                  {plan.cta}
+                </Button>
+              )}
 
-              <div
-                className={[
-                  "my-7 h-px",
-                  plan.featured ? "bg-primary-foreground/10" : "bg-border",
-                ].join(" ")}
-              />
-
-              <p
-                className={[
-                  "text-xs font-medium",
-                  plan.featured
-                    ? "text-primary-foreground/50"
-                    : "text-muted-foreground",
-                ].join(" ")}
-              >
-                What's included
-              </p>
-
-              <ul className="mt-4 space-y-3">
-                {plan.features.map((feature) => (
-                  <li
-                    key={feature}
-                    className="flex items-start gap-2.5 text-sm"
+              {plan.comingSoon ? (
+                <div
+                  className={[
+                    "mt-7 border-t pt-7",
+                    plan.featured
+                      ? "border-primary-foreground/10"
+                      : "border-border",
+                  ].join(" ")}
+                >
+                  <p
+                    className={[
+                      "text-sm leading-6",
+                      plan.featured
+                        ? "text-primary-foreground/60"
+                        : "text-muted-foreground",
+                    ].join(" ")}
                   >
-                    <Check
-                      className={[
-                        "mt-0.5 h-4 w-4 shrink-0",
-                        plan.featured
-                          ? "text-primary-foreground/70"
-                          : "text-muted-foreground",
-                      ].join(" ")}
-                    />
+                    Paid plan coming soon. Additional capabilities will be
+                    introduced in future updates.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <div className="my-7 h-px bg-border" />
 
-                    <span
-                      className={
-                        plan.featured
-                          ? "text-primary-foreground/70"
-                          : "text-muted-foreground"
-                      }
-                    >
-                      {feature}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+                  <p className="text-xs font-medium text-muted-foreground">
+                    What's included
+                  </p>
+
+                  <ul className="mt-4 space-y-3">
+                    {plan.features.map((feature) => (
+                      <li
+                        key={feature}
+                        className="flex items-start gap-2.5 text-sm"
+                      >
+                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+
+                        <span className="text-muted-foreground">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
             </div>
           ))}
         </div>

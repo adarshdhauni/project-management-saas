@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
@@ -18,13 +19,13 @@ const CTA = () => {
           your team focused.
         </p>
 
-        <Link
-          to="/auth/register"
-          className="mt-8 inline-flex h-11 items-center gap-2 rounded-lg bg-primary-foreground px-5 text-sm font-medium text-primary transition-opacity hover:opacity-90"
+        <Button
+          className="group mt-8 bg-primary-foreground text-primary hover:bg-primary-foreground/90"
+          render={<Link to="/auth/register" />}
         >
           Get started for free
-          <ArrowRight className="h-4 w-4" />
-        </Link>
+          <ArrowRight className="transition-transform group-hover:translate-x-0.5" />
+        </Button>
       </div>
     </section>
   );

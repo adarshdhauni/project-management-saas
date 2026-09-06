@@ -119,7 +119,6 @@ const ForgotPassword = () => {
 
         <div className="space-y-4 pt-4">
           <Button
-            size="lg"
             type="submit"
             disabled={isSending}
             className="w-full cursor-pointer"
@@ -136,7 +135,6 @@ const ForgotPassword = () => {
 
           <Button
             variant="secondary"
-            size="lg"
             type="button"
             onClick={() => navigate("/auth/login")}
             className="w-full cursor-pointer"

@@ -12,24 +12,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-
-export const NAV_LINKS = [
-  {
-    label: "Features",
-    id: "features",
-    href: "#features",
-  },
-  {
-    label: "Workflow",
-    id: "workflow",
-    href: "#workflow",
-  },
-  {
-    label: "Pricing",
-    id: "pricing",
-    href: "#pricing",
-  },
-];
+import { NAV_LINKS } from "@/constants/publicNavigation";
 
 const PublicNavbar = () => {
   const [open, setOpen] = useState(false);
@@ -85,13 +68,11 @@ const PublicNavbar = () => {
         <div className="hidden items-center gap-2.5 md:flex">
           <ThemeToggle />
 
-          <Button size="lg" variant="ghost" render={<Link to="/auth/login" />}>
+          <Button variant="ghost" render={<Link to="/auth/login" />}>
             Log in
           </Button>
 
-          <Button size="lg" render={<Link to="/auth/register" />}>
-            Get started
-          </Button>
+          <Button render={<Link to="/auth/register" />}>Get started</Button>
         </div>
 
         <div className="flex items-center gap-1 md:hidden">
@@ -184,7 +165,6 @@ const PublicNavbar = () => {
 
                   <div className="grid gap-2">
                     <Button
-                      size="lg"
                       variant="outline"
                       onClick={closeSheet}
                       render={<Link to="/auth/login" />}
@@ -194,7 +174,6 @@ const PublicNavbar = () => {
                     </Button>
 
                     <Button
-                      size="lg"
                       render={<Link to="/auth/register" />}
                       onClick={closeSheet}
                       className="w-full"

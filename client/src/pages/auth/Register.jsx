@@ -309,7 +309,6 @@ const Register = () => {
 
         <div className="space-y-4 pt-4">
           <Button
-            size="lg"
             type="submit"
             disabled={isRegistering}
             className="w-full cursor-pointer"
@@ -326,7 +325,6 @@ const Register = () => {
 
           <Button
             variant="secondary"
-            size="lg"
             type="button"
             onClick={() => navigate("/")}
             className="w-full cursor-pointer"

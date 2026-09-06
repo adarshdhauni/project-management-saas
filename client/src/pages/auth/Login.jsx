@@ -169,7 +169,6 @@ const Login = () => {
 
         <div className="space-y-4 pt-4">
           <Button
-            size="lg"
             type="submit"
             disabled={isSigningIn}
             className="w-full cursor-pointer"
@@ -186,7 +185,6 @@ const Login = () => {
 
           <Button
             variant="secondary"
-            size="lg"
             type="button"
             onClick={() => navigate("/")}
             className="w-full cursor-pointer"

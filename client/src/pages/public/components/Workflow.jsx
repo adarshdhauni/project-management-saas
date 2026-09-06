@@ -1,3 +1,5 @@
+import { Button } from "@/components/ui/button";
+import { WORKFLOW_DATA } from "@/constants/workflowData";
 import { ArrowRight, Check } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
@@ -26,23 +28,19 @@ const Workflow = () => {
               manageable tasks, and keep momentum visible.
             </p>
 
-            <Link
-              to="/auth/register"
-              className="group mt-8 inline-flex items-center gap-2 text-sm font-medium text-foreground"
+            <Button
+              size="lg"
+              variant="link"
+              className="group mt-8 h-auto px-0"
+              render={<Link to="/auth/register" />}
             >
               Start building today
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </Link>
+              <ArrowRight className="transition-transform group-hover:translate-x-1" />
+            </Button>
           </div>
 
           <div className="space-y-3">
-            {[
-              "Create your workspace",
-              "Invite your team",
-              "Create projects",
-              "Break projects into tasks",
-              "Track progress to completion",
-            ].map((item, index) => (
+            {WORKFLOW_DATA.map((item, index) => (
               <div
                 key={item}
                 className="flex items-center gap-4 rounded-xl border border-border bg-card p-4"

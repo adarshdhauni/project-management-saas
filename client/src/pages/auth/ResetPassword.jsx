@@ -224,7 +224,6 @@ const ResetPassword = () => {
 
         <div className="space-y-4 pt-4">
           <Button
-            size="lg"
             type="submit"
             disabled={isResetting}
             className="w-full cursor-pointer"
@@ -241,7 +240,6 @@ const ResetPassword = () => {
 
           <Button
             variant="secondary"
-            size="lg"
             type="button"
             onClick={() => navigate("/auth/login", { replace: true })}
             className="w-full cursor-pointer"
