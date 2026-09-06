@@ -19,7 +19,7 @@ const envSchema = z.object({
   ACCESS_TOKEN_EXPIRES_IN: z.string(),
   REFRESH_TOKEN_EXPIRES_IN: z.string(),
 
-  CLIENT_URL: z.string().url(),
+  CLIENT_URL: z.url(),
 });
 
 const env = envSchema.parse(process.env);
