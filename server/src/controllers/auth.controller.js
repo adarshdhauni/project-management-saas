@@ -89,7 +89,17 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 });
 
 const logoutUser = asyncHandler(async (req, res) => {
-  await authService.logout(req.user._id);
+  const { refreshToken } = req.cookies;
+
+  if (refreshToken) {
+    try {
+      const decoded = jwt.verify(refreshToken, env.JWT_REFRESH_SECRET);
+
+      await authService.logout(decoded.sub);
+    } catch {
+      // Ignore invalid or expired refresh token.
+    }
+  }
 
   return res
     .status(200)
