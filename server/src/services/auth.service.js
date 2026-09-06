@@ -55,6 +55,7 @@ const login = async (userData) => {
 };
 
 const refreshAccessToken = async (incomingRefreshToken) => {
+  console.log(incomingRefreshToken)
   if (!incomingRefreshToken) {
     throw new ApiError(401, "Invalid refresh token.");
   }

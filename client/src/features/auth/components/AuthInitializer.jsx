@@ -8,7 +8,15 @@ import GlobalLoader from "@/components/feedback/loading/GlobalLoader";
 const AuthInitializer = ({ children }) => {
   const dispatch = useDispatch();
 
-  const { data, isLoading, isError } = useGetMeQuery();
+  const { data, error, isLoading, isError, isSuccess } = useGetMeQuery();
+
+  console.log({
+    data,
+    error,
+    isLoading,
+    isError,
+    isSuccess,
+  });
 
   useEffect(() => {
     if (data?.data?.user) {
