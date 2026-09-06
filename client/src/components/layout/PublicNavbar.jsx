@@ -13,18 +13,36 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { NAV_LINKS } from "@/constants/publicNavigation";
+import { useSelector } from "react-redux";
 
 const PublicNavbar = () => {
   const [open, setOpen] = useState(false);
 
   const closeSheet = () => setOpen(false);
 
+  const { isAuthenticated, isInitialized } = useSelector((state) => state.auth);
+
+  const isLoggedIn = isInitialized && isAuthenticated;
+
   const activeSection = useActiveSection();
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/85 text-foreground backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-8">
-        <a href="#top" className="flex items-center gap-2.5">
+        <a
+          href="#top"
+          onClick={(e) => {
+            e.preventDefault();
+
+            window.scrollTo({
+              top: 0,
+              behavior: "smooth",
+            });
+
+            window.history.replaceState(null, "", "/");
+          }}
+          className="flex items-center gap-2.5"
+        >
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <span className="text-sm font-semibold">T</span>
           </div>
@@ -68,17 +86,28 @@ const PublicNavbar = () => {
         <div className="hidden items-center gap-2.5 md:flex">
           <ThemeToggle />
 
-          <Button
-            nativeButton={false}
-            variant="ghost"
-            render={<Link to="/auth/login" />}
-          >
-            Log in
-          </Button>
+          {isLoggedIn ? (
+            <Button nativeButton={false} render={<Link to="/dashboard" />}>
+              Dashboard
+            </Button>
+          ) : (
+            <>
+              <Button
+                nativeButton={false}
+                variant="ghost"
+                render={<Link to="/auth/login" />}
+              >
+                Log in
+              </Button>
 
-          <Button nativeButton={false} render={<Link to="/auth/register" />}>
-            Get started
-          </Button>
+              <Button
+                nativeButton={false}
+                render={<Link to="/auth/register" />}
+              >
+                Get started
+              </Button>
+            </>
+          )}
         </div>
 
         <div className="flex items-center gap-1 md:hidden">
@@ -166,28 +195,43 @@ const PublicNavbar = () => {
 
                 <div className="mt-auto border-t border-border px-6 py-6">
                   <p className="mb-3 text-xs font-medium text-muted-foreground">
-                    Get started with TaskFlow
+                    {isLoggedIn
+                      ? "Your workspace"
+                      : "Get started with TaskFlow"}
                   </p>
 
                   <div className="grid gap-2">
-                    <Button
-                      nativeButton={false}
-                      variant="outline"
-                      onClick={closeSheet}
-                      render={<Link to="/auth/login" />}
-                      className="w-full"
-                    >
-                      Log in
-                    </Button>
+                    {isLoggedIn ? (
+                      <Button
+                        nativeButton={false}
+                        render={<Link to="/dashboard" />}
+                        onClick={closeSheet}
+                        className="w-full"
+                      >
+                        Dashboard
+                      </Button>
+                    ) : (
+                      <>
+                        <Button
+                          nativeButton={false}
+                          variant="outline"
+                          onClick={closeSheet}
+                          render={<Link to="/auth/login" />}
+                          className="w-full"
+                        >
+                          Log in
+                        </Button>
 
-                    <Button
-                      nativeButton={false}
-                      render={<Link to="/auth/register" />}
-                      onClick={closeSheet}
-                      className="w-full"
-                    >
-                      Get started
-                    </Button>
+                        <Button
+                          nativeButton={false}
+                          render={<Link to="/auth/register" />}
+                          onClick={closeSheet}
+                          className="w-full"
+                        >
+                          Get started
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

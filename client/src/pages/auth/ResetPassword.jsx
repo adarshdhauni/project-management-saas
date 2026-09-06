@@ -11,7 +11,6 @@ import PasswordRequirements from "@/features/auth/components/PasswordRequirement
 import PasswordStrength from "@/features/auth/components/PasswordStrength";
 import { getPasswordValidation } from "@/validations/passwordValidation";
 import focusField from "@/utils/focusField";
-import PageTransition from "@/components/shared/PageTransition";
 
 const ResetPassword = () => {
   const { token } = useParams();
@@ -131,7 +130,7 @@ const ResetPassword = () => {
   };
 
   return (
-    <PageTransition className="space-y-12">
+    <div className="space-y-12">
       <div className="space-y-3 text-center">
         <h1 className="text-2xl font-light tracking-wide sm:text-3xl">
           Reset Password
@@ -248,7 +247,7 @@ const ResetPassword = () => {
           </Button>
         </div>
       </form>
-    </PageTransition>
+    </div>
   );
 };
 

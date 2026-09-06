@@ -8,7 +8,6 @@ import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/Input";
 import { Spinner } from "@/components/ui/spinner";
 import focusField from "@/utils/focusField";
-import PageTransition from "@/components/shared/PageTransition";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "@/features/auth/authSlice";
 
@@ -92,7 +91,7 @@ const Login = () => {
   };
 
   return (
-    <PageTransition className="space-y-12">
+    <div className="space-y-12">
       <div className="space-y-3 text-center">
         <h1 className="text-2xl font-light tracking-wide sm:text-3xl">
           Sign In
@@ -209,7 +208,7 @@ const Login = () => {
           Sign up
         </Button>
       </p>
-    </PageTransition>
+    </div>
   );
 };
 

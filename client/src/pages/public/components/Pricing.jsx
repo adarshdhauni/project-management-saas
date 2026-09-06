@@ -1,9 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { PLANS } from "@/constants/pricingPlans";
 import { Check } from "lucide-react";
+import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
 const Pricing = () => {
+  const { isAuthenticated, isInitialized } = useSelector((state) => state.auth);
+
+  const isLoggedIn = isInitialized && isAuthenticated;
+
   return (
     <section
       id="pricing"
@@ -91,9 +96,11 @@ const Pricing = () => {
                 <Button
                   nativeButton={false}
                   className="mt-8 w-full hover:opacity-85"
-                  render={<Link to="/auth/register" />}
+                  render={
+                    <Link to={isLoggedIn ? "/dashboard" : "/auth/register"} />
+                  }
                 >
-                  {plan.cta}
+                  {isLoggedIn ? "Go to dashboard" : plan.cta}
                 </Button>
               )}
 

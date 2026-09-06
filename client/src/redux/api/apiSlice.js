@@ -34,6 +34,7 @@ export const apiSlice = createApi({
   tagTypes: [
     "User",
     "Workspace",
+    "WorkspaceMember",
     "Project",
     "Task",
     "Comment",

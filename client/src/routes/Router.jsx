@@ -10,6 +10,8 @@ const Home = lazy(() => import("@/pages/public/Home"));
 
 import ScrollToTop from "./ScrollToTop";
 import ProtectedRoute from "./ProtectedRoute";
+import AuthenticatedNavbar from "@/components/layout/AuthenticatedNavbar";
+import PageTransition from "@/components/shared/PageTransition";
 
 const AppLayout = () => {
   return (
@@ -22,16 +24,22 @@ const AppLayout = () => {
 
 const AuthLayout = () => (
   <div className="flex min-h-screen items-center justify-center bg-background px-5 py-8 text-foreground sm:px-6 sm:py-12">
-    <div className="w-full max-w-125">
+    <PageTransition className="w-full max-w-125">
       <Outlet />
-    </div>
+    </PageTransition>
   </div>
 );
 
 const RootLayout = () => {
   return (
-    <div className="min-h-screen">
-      <Outlet />
+    <div className="min-h-screen bg-background text-foreground">
+      <AuthenticatedNavbar />
+
+      <main>
+        <PageTransition>
+          <Outlet />
+        </PageTransition>
+      </main>
     </div>
   );
 };

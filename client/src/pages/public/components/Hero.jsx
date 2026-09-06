@@ -2,8 +2,13 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, ChevronRight } from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const Hero = () => {
+  const { isAuthenticated, isInitialized } = useSelector((state) => state.auth);
+
+  const isLoggedIn = isInitialized && isAuthenticated;
+
   return (
     <section className="relative overflow-hidden">
       <div className="pointer-events-none absolute left-1/2 top-0 h-150 w-200 -translate-x-1/2 rounded-full bg-primary/4 blur-3xl" />
@@ -25,18 +30,21 @@ const Hero = () => {
           Plan projects, organize tasks, collaborate with your team, and keep
           every detail in one focused workspace.
         </p>
-
         <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Button
             nativeButton={false}
             className="group"
-            render={<Link to="/auth/register" />}
+            render={<Link to={isLoggedIn ? "/dashboard" : "/auth/register"} />}
           >
-            Start for free
+            {isLoggedIn ? "Go to dashboard" : "Start for free"}
             <ArrowRight className="transition-transform group-hover:translate-x-0.5" />
           </Button>
 
-          <Button nativeButton={false} variant="outline" render={<a href="#features" />}>
+          <Button
+            nativeButton={false}
+            variant="outline"
+            render={<a href="#features" />}
+          >
             Explore features
             <ChevronRight />
           </Button>

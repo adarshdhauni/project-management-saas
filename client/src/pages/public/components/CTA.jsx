@@ -1,9 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import React from "react";
+import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
 const CTA = () => {
+  const { isAuthenticated, isInitialized } = useSelector((state) => state.auth);
+
+  const isLoggedIn = isInitialized && isAuthenticated;
+
   return (
     <section
       id="cta"
@@ -22,9 +27,9 @@ const CTA = () => {
         <Button
           nativeButton={false}
           className="group mt-8 bg-primary-foreground text-primary hover:bg-primary-foreground/90"
-          render={<Link to="/auth/register" />}
+          render={<Link to={isLoggedIn ? "/dashboard" : "/auth/register"} />}
         >
-          Get started for free
+          {isLoggedIn ? "Go to dashboard" : "Get started for free"}
           <ArrowRight className="transition-transform group-hover:translate-x-0.5" />
         </Button>
       </div>
