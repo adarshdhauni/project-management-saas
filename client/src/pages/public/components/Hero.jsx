@@ -28,6 +28,7 @@ const Hero = () => {
 
         <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Button
+            nativeButton={false}
             className="group"
             render={<Link to="/auth/register" />}
           >
@@ -35,7 +36,7 @@ const Hero = () => {
             <ArrowRight className="transition-transform group-hover:translate-x-0.5" />
           </Button>
 
-          <Button variant="outline" render={<a href="#features" />}>
+          <Button nativeButton={false} variant="outline" render={<a href="#features" />}>
             Explore features
             <ChevronRight />
           </Button>

@@ -29,6 +29,7 @@ const Workflow = () => {
             </p>
 
             <Button
+              nativeButton={false}
               size="lg"
               variant="link"
               className="group mt-8 h-auto px-0"

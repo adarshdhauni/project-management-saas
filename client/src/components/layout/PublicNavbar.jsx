@@ -68,11 +68,17 @@ const PublicNavbar = () => {
         <div className="hidden items-center gap-2.5 md:flex">
           <ThemeToggle />
 
-          <Button variant="ghost" render={<Link to="/auth/login" />}>
+          <Button
+            nativeButton={false}
+            variant="ghost"
+            render={<Link to="/auth/login" />}
+          >
             Log in
           </Button>
 
-          <Button render={<Link to="/auth/register" />}>Get started</Button>
+          <Button nativeButton={false} render={<Link to="/auth/register" />}>
+            Get started
+          </Button>
         </div>
 
         <div className="flex items-center gap-1 md:hidden">
@@ -165,6 +171,7 @@ const PublicNavbar = () => {
 
                   <div className="grid gap-2">
                     <Button
+                      nativeButton={false}
                       variant="outline"
                       onClick={closeSheet}
                       render={<Link to="/auth/login" />}
@@ -174,6 +181,7 @@ const PublicNavbar = () => {
                     </Button>
 
                     <Button
+                      nativeButton={false}
                       render={<Link to="/auth/register" />}
                       onClick={closeSheet}
                       className="w-full"

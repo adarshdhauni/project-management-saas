@@ -20,6 +20,7 @@ const CTA = () => {
         </p>
 
         <Button
+          nativeButton={false}
           className="group mt-8 bg-primary-foreground text-primary hover:bg-primary-foreground/90"
           render={<Link to="/auth/register" />}
         >

@@ -9,11 +9,14 @@ import { Input } from "@/components/ui/Input";
 import { Spinner } from "@/components/ui/spinner";
 import focusField from "@/utils/focusField";
 import PageTransition from "@/components/shared/PageTransition";
+import { useDispatch } from "react-redux";
+import { setCredentials } from "@/features/auth/authSlice";
 
 const Login = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch()
 
-  const [credentials, setCredentials] = useState({
+  const [userData, setUserData] = useState({
     email: "",
     password: "",
   });
@@ -23,13 +26,13 @@ const Login = () => {
   const [loginUser, { isLoading: isSigningIn }] = useLoginUserMutation();
 
   const handleChange = (e) => {
-    setCredentials((prev) => ({ ...prev, [e.target.id]: e.target.value }));
+    setUserData((prev) => ({ ...prev, [e.target.id]: e.target.value }));
   };
 
-  const isEmailValid = /\S+@\S+\.\S+/.test(credentials.email);
+  const isEmailValid = /\S+@\S+\.\S+/.test(userData.email);
 
   const validateForm = () => {
-    const { email, password } = credentials;
+    const { email, password } = userData;
 
     if (!email.trim()) {
       focusField("email");
@@ -64,14 +67,16 @@ const Login = () => {
     }
 
     try {
-      await loginUser(credentials).unwrap();
+      const res = await loginUser(userData).unwrap();
+
+      dispatch(setCredentials(res.data.user));
 
       toast.add({
         type: "success",
         title: "Logged in successfully 🎉",
       });
 
-      setCredentials({
+      setUserData({
         email: "",
         password: "",
       });
@@ -99,7 +104,7 @@ const Login = () => {
       <form onSubmit={handleLogin} className="space-y-10">
         <Field
           data-disabled={isSigningIn}
-          data-invalid={!isEmailValid && credentials.email.trim() !== ""}
+          data-invalid={!isEmailValid && userData.email.trim() !== ""}
         >
           <FieldLabel htmlFor="email">
             Email <span className="text-destructive">*</span>
@@ -110,14 +115,14 @@ const Login = () => {
             type="email"
             placeholder="Enter your email"
             autoComplete="email"
-            value={credentials.email}
+            value={userData.email}
             onChange={handleChange}
             disabled={isSigningIn}
-            aria-invalid={!isEmailValid && credentials.email.trim() !== ""}
+            aria-invalid={!isEmailValid && userData.email.trim() !== ""}
             required
           />
 
-          {credentials.email.trim() !== "" && !isEmailValid && (
+          {userData.email.trim() !== "" && !isEmailValid && (
             <p className="text-xs text-destructive">Invalid email</p>
           )}
 
@@ -137,7 +142,7 @@ const Login = () => {
                 id="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter your password"
-                value={credentials.password}
+                value={userData.password}
                 onChange={handleChange}
                 disabled={isSigningIn}
                 required

@@ -12,9 +12,12 @@ import PasswordStrength from "@/features/auth/components/PasswordStrength";
 import { getPasswordValidation } from "@/validations/passwordValidation";
 import focusField from "@/utils/focusField";
 import PageTransition from "@/components/shared/PageTransition";
+import { useDispatch } from "react-redux";
+import { setCredentials } from "@/features/auth/authSlice";
 
 const Register = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [userData, setUserData] = useState({
     name: "",
@@ -135,11 +138,13 @@ const Register = () => {
     }
 
     try {
-      await registerUser({
+      const res = await registerUser({
         name: userData.name,
         email: userData.email,
         password: userData.password,
       }).unwrap();
+
+      dispatch(setCredentials(res.data.user));
 
       toast.add({
         type: "success",

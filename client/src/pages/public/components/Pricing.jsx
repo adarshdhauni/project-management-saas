@@ -89,6 +89,7 @@ const Pricing = () => {
                 </Button>
               ) : (
                 <Button
+                  nativeButton={false}
                   className="mt-8 w-full hover:opacity-85"
                   render={<Link to="/auth/register" />}
                 >
