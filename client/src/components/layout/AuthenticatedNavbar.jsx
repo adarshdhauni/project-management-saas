@@ -41,6 +41,7 @@ const AuthenticatedNavbar = () => {
     useGetWorkspacesQuery();
 
   const workspaces = data?.data?.workspaces ?? [];
+  console.log(data)
 
   return (
     <header className="h-16 border-b border-border bg-background">

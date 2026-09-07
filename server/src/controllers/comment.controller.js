@@ -11,7 +11,7 @@ const createComment = asyncHandler(async (req, res) => {
 
   return res
     .status(201)
-    .json(new ApiResponse(201, comment, "Comment created successfully."));
+    .json(new ApiResponse(comment, "Comment created successfully."));
 });
 
 const getComments = asyncHandler(async (req, res) => {
@@ -23,7 +23,7 @@ const getComments = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, result, "Comments retrieved successfully."));
+    .json(new ApiResponse(result, "Comments retrieved successfully."));
 });
 
 const getCommentById = asyncHandler(async (req, res) => {
@@ -34,7 +34,7 @@ const getCommentById = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, comment, "Comment retrieved successfully."));
+    .json(new ApiResponse(comment, "Comment retrieved successfully."));
 });
 
 const updateComment = asyncHandler(async (req, res) => {
@@ -46,7 +46,7 @@ const updateComment = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, comment, "Comment updated successfully."));
+    .json(new ApiResponse(comment, "Comment updated successfully."));
 });
 
 const deleteComment = asyncHandler(async (req, res) => {
@@ -54,7 +54,7 @@ const deleteComment = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, null, "Comment deleted successfully."));
+    .json(new ApiResponse(null, "Comment deleted successfully."));
 });
 
 const commentController = {
@@ -62,7 +62,7 @@ const commentController = {
   getComments,
   getCommentById,
   updateComment,
-  deleteComment
+  deleteComment,
 };
 
 export default commentController;

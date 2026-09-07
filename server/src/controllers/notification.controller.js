@@ -10,7 +10,7 @@ const getNotifications = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, result, "Notifications fetched successfully."));
+    .json(new ApiResponse(result, "Notifications fetched successfully."));
 });
 
 const getNotificationById = asyncHandler(async (req, res) => {
@@ -21,9 +21,7 @@ const getNotificationById = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(
-      new ApiResponse(200, notification, "Notification fetched successfully."),
-    );
+    .json(new ApiResponse(notification, "Notification fetched successfully."));
 });
 
 const markNotificationAsRead = asyncHandler(async (req, res) => {
@@ -34,7 +32,7 @@ const markNotificationAsRead = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, notification, "Notification marked as read."));
+    .json(new ApiResponse(notification, "Notification marked as read."));
 });
 
 const markAllNotificationsAsRead = asyncHandler(async (req, res) => {
@@ -44,7 +42,7 @@ const markAllNotificationsAsRead = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, result, "All notifications marked as read."));
+    .json(new ApiResponse(result, "All notifications marked as read."));
 });
 
 const deleteNotification = asyncHandler(async (req, res) => {
@@ -55,7 +53,7 @@ const deleteNotification = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, null, "Notification deleted successfully."));
+    .json(new ApiResponse(null, "Notification deleted successfully."));
 });
 
 const notificationController = {

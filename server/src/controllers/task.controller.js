@@ -11,7 +11,7 @@ const createTask = asyncHandler(async (req, res) => {
 
   return res
     .status(201)
-    .json(new ApiResponse(201, task, "Task created successfully."));
+    .json(new ApiResponse(task, "Task created successfully."));
 });
 
 const getTasks = asyncHandler(async (req, res) => {
@@ -23,7 +23,7 @@ const getTasks = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, result, "Tasks retrieved successfully."));
+    .json(new ApiResponse(result, "Tasks retrieved successfully."));
 });
 
 const getTaskById = asyncHandler(async (req, res) => {
@@ -31,7 +31,7 @@ const getTaskById = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, task, "Task retrieved successfully."));
+    .json(new ApiResponse(task, "Task retrieved successfully."));
 });
 
 const updateTask = asyncHandler(async (req, res) => {
@@ -43,7 +43,7 @@ const updateTask = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, updatedTask, "Task updated successfully."));
+    .json(new ApiResponse(updatedTask, "Task updated successfully."));
 });
 
 const deleteTask = asyncHandler(async (req, res) => {
@@ -51,7 +51,7 @@ const deleteTask = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, null, "Task deleted successfully."));
+    .json(new ApiResponse(null, "Task deleted successfully."));
 });
 
 const moveTask = asyncHandler(async (req, res) => {
@@ -63,7 +63,7 @@ const moveTask = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, task, "Task position updated successfully."));
+    .json(new ApiResponse(task, "Task position updated successfully."));
 });
 
 const taskController = {
@@ -72,7 +72,7 @@ const taskController = {
   getTaskById,
   updateTask,
   deleteTask,
-  moveTask
+  moveTask,
 };
 
 export default taskController;

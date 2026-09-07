@@ -9,7 +9,7 @@ const createWorkspace = asyncHandler(async (req, res) => {
 
   return res
     .status(201)
-    .json(new ApiResponse(201, workspace, "Workspace created successfully."));
+    .json(new ApiResponse("Workspace created successfully.", workspace));
 });
 
 const getUserWorkspaces = asyncHandler(async (req, res) => {
@@ -19,7 +19,7 @@ const getUserWorkspaces = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, workspaces, "Workspaces fetched successfully."));
+    .json(new ApiResponse("Workspaces fetched successfully.", workspaces));
 });
 
 const getWorkspaceById = asyncHandler(async (req, res) => {
@@ -33,7 +33,7 @@ const getWorkspaceById = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, workspace, "Workspace fetched successfully."));
+    .json(new ApiResponse(workspace, "Workspace fetched successfully."));
 });
 
 const updateWorkspace = asyncHandler(async (req, res) => {
@@ -48,9 +48,7 @@ const updateWorkspace = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(
-      new ApiResponse(200, updatedWorkspace, "Workspace updated successfully."),
-    );
+    .json(new ApiResponse(updatedWorkspace, "Workspace updated successfully."));
 });
 
 const deleteWorkspace = asyncHandler(async (req, res) => {
@@ -61,7 +59,7 @@ const deleteWorkspace = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, null, "Workspace deleted successfully."));
+    .json(new ApiResponse(null, "Workspace deleted successfully."));
 });
 
 const inviteMember = asyncHandler(async (req, res) => {
@@ -76,7 +74,7 @@ const inviteMember = asyncHandler(async (req, res) => {
 
   return res
     .status(201)
-    .json(new ApiResponse(201, invitation, "Invitation sent successfully."));
+    .json(new ApiResponse(invitation, "Invitation sent successfully."));
 });
 
 const acceptInvitation = asyncHandler(async (req, res) => {
@@ -88,11 +86,7 @@ const acceptInvitation = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(
-      new ApiResponse(
-        200,
-        workspaceMember,
-        "Invitation accepted successfully.",
-      ),
+      new ApiResponse(workspaceMember, "Invitation accepted successfully."),
     );
 });
 
@@ -104,7 +98,7 @@ const rejectInvitation = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, null, "Invitation rejected successfully."));
+    .json(new ApiResponse(null, "Invitation rejected successfully."));
 });
 
 const getMyPendingInvitations = asyncHandler(async (req, res) => {
@@ -115,11 +109,7 @@ const getMyPendingInvitations = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(
-      new ApiResponse(
-        200,
-        invitations,
-        "Pending invitations fetched successfully.",
-      ),
+      new ApiResponse(invitations, "Pending invitations fetched successfully."),
     );
 });
 
@@ -131,9 +121,7 @@ const getWorkspaceMembers = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(
-      new ApiResponse(200, members, "Workspace members fetched successfully."),
-    );
+    .json(new ApiResponse(members, "Workspace members fetched successfully."));
 });
 
 const updateMemberRole = asyncHandler(async (req, res) => {
@@ -146,9 +134,7 @@ const updateMemberRole = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(
-      new ApiResponse(200, updatedMember, "Member role updated successfully."),
-    );
+    .json(new ApiResponse(updatedMember, "Member role updated successfully."));
 });
 
 const removeMember = asyncHandler(async (req, res) => {
@@ -160,7 +146,7 @@ const removeMember = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, null, "Member removed successfully."));
+    .json(new ApiResponse(null, "Member removed successfully."));
 });
 
 const leaveWorkspace = asyncHandler(async (req, res) => {
@@ -168,7 +154,7 @@ const leaveWorkspace = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, null, "Left workspace successfully."));
+    .json(new ApiResponse(null, "Left workspace successfully."));
 });
 
 const workspaceController = {

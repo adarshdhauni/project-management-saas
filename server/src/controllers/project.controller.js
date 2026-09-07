@@ -11,7 +11,7 @@ const createProject = asyncHandler(async (req, res) => {
 
   return res
     .status(201)
-    .json(new ApiResponse(201, project, "Project created successfully."));
+    .json(new ApiResponse(project, "Project created successfully."));
 });
 
 const getWorkspaceProjects = asyncHandler(async (req, res) => {
@@ -22,7 +22,7 @@ const getWorkspaceProjects = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, projects, "Projects retrieved successfully."));
+    .json(new ApiResponse(projects, "Projects retrieved successfully."));
 });
 
 const getProjectById = asyncHandler(async (req, res) => {
@@ -33,7 +33,7 @@ const getProjectById = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, project, "Project retrieved successfully."));
+    .json(new ApiResponse(project, "Project retrieved successfully."));
 });
 
 const updateProject = asyncHandler(async (req, res) => {
@@ -45,9 +45,7 @@ const updateProject = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(
-      new ApiResponse(200, updatedProject, "Project updated successfully."),
-    );
+    .json(new ApiResponse(updatedProject, "Project updated successfully."));
 });
 
 const deleteProject = asyncHandler(async (req, res) => {
@@ -55,7 +53,7 @@ const deleteProject = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, null, "Project deleted successfully."));
+    .json(new ApiResponse(null, "Project deleted successfully."));
 });
 
 const projectController = {
@@ -63,7 +61,7 @@ const projectController = {
   getWorkspaceProjects,
   getProjectById,
   updateProject,
-  deleteProject
+  deleteProject,
 };
 
 export default projectController;
