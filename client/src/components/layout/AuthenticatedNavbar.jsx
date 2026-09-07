@@ -22,9 +22,13 @@ import { useGetWorkspacesQuery } from "@/features/workspace/workspaceApi";
 import { Skeleton } from "../ui/skeleton";
 import { useSelector } from "react-redux";
 import { Spinner } from "../ui/spinner";
+import { useState } from "react";
+import CreateWorkspaceDialog from "@/features/workspace/components/CreateWorkspaceDialog";
 
 const AuthenticatedNavbar = () => {
   const user = useSelector((state) => state.auth.user);
+
+  const [isCreateWorkspaceOpen, setIsCreateWorkspaceOpen] = useState(false);
 
   const initials = user?.name
     ?.split(" ")
@@ -53,10 +57,7 @@ const AuthenticatedNavbar = () => {
           </Link>
 
           {isLoading ? (
-            <div className="flex items-center gap-2 rounded-lg px-2.5 py-2">
-              <Skeleton className="h-6 w-6 rounded-md" />
-              <Skeleton className="hidden h-4 w-28 rounded sm:block" />
-            </div>
+            <Skeleton className="h-10 w-44 rounded-lg" />
           ) : isError ? (
             <button
               type="button"
@@ -79,6 +80,7 @@ const AuthenticatedNavbar = () => {
           ) : workspaces.length === 0 ? (
             <button
               type="button"
+              onClick={() => setIsCreateWorkspaceOpen(true)}
               className="flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
               <div className="flex h-6 w-6 items-center justify-center rounded-md bg-muted">
@@ -93,6 +95,7 @@ const AuthenticatedNavbar = () => {
                 render={
                   <button
                     type="button"
+                    onClick={() => setIsCreateWorkspaceOpen(true)}
                     className="flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                   />
                 }
@@ -191,6 +194,11 @@ const AuthenticatedNavbar = () => {
           </DropdownMenu>
         </div>
       </div>
+
+      <CreateWorkspaceDialog
+        open={isCreateWorkspaceOpen}
+        onOpenChange={setIsCreateWorkspaceOpen}
+      />
     </header>
   );
 };

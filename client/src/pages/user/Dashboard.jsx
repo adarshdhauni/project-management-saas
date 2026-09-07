@@ -5,9 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import ErrorState from "@/components/feedback/error/ErrorState";
 import { useGetWorkspacesQuery } from "@/features/workspace/workspaceApi";
+import { useState } from "react";
+import CreateWorkspaceDialog from "@/features/workspace/components/CreateWorkspaceDialog";
 
 const Dashboard = () => {
   const user = useSelector((state) => state.auth.user);
+
+  const [isCreateWorkspaceOpen, setIsCreateWorkspaceOpen] = useState(false);
 
   const { data, isLoading, isFetching, isError, refetch } =
     useGetWorkspacesQuery();
@@ -78,7 +82,11 @@ const Dashboard = () => {
               in one place.
             </p>
 
-            <Button type="button" className="mt-6 cursor-pointer">
+            <Button
+              type="button"
+              onClick={() => setIsCreateWorkspaceOpen(true)}
+              className="mt-6 cursor-pointer"
+            >
               <Plus />
               Create workspace
             </Button>
@@ -87,6 +95,11 @@ const Dashboard = () => {
       ) : (
         <section className="mt-8">{/* Actual dashboard */}</section>
       )}
+
+      <CreateWorkspaceDialog
+        open={isCreateWorkspaceOpen}
+        onOpenChange={setIsCreateWorkspaceOpen}
+      />
     </div>
   );
 };
