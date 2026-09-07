@@ -1,4 +1,4 @@
-import { createBrowserRouter, Outlet } from "react-router-dom";
+import { createBrowserRouter } from "react-router-dom";
 import React, { lazy } from "react";
 
 const Register = lazy(() => import("@/pages/auth/Register"));
@@ -8,41 +8,11 @@ const ResetPassword = lazy(() => import("@/pages/auth/ResetPassword"));
 const Dashboard = lazy(() => import("@/pages/user/Dashboard"));
 const Home = lazy(() => import("@/pages/public/Home"));
 
-import ScrollToTop from "./ScrollToTop";
 import ProtectedRoute from "./ProtectedRoute";
-import AuthenticatedNavbar from "@/components/layout/AuthenticatedNavbar";
-import PageTransition from "@/components/shared/PageTransition";
 
-const AppLayout = () => {
-  return (
-    <>
-      <ScrollToTop />
-      <Outlet />
-    </>
-  );
-};
-
-const AuthLayout = () => (
-  <div className="flex min-h-screen items-center justify-center bg-background px-5 py-8 text-foreground sm:px-6 sm:py-12">
-    <PageTransition className="w-full max-w-125">
-      <Outlet />
-    </PageTransition>
-  </div>
-);
-
-const RootLayout = () => {
-  return (
-    <div className="min-h-screen bg-background text-foreground">
-      <AuthenticatedNavbar />
-
-      <main>
-        <PageTransition>
-          <Outlet />
-        </PageTransition>
-      </main>
-    </div>
-  );
-};
+import { AppLayout } from "@/layouts/AppLayout";
+import { AuthLayout } from "@/layouts/AuthLayout";
+import { RootLayout } from "@/layouts/RootLayout";
 
 const router = createBrowserRouter([
   {
