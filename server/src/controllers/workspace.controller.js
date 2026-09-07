@@ -9,7 +9,7 @@ const createWorkspace = asyncHandler(async (req, res) => {
 
   return res
     .status(201)
-    .json(new ApiResponse("Workspace created successfully.", workspace));
+    .json(new ApiResponse(workspace, "Workspace created successfully."));
 });
 
 const getUserWorkspaces = asyncHandler(async (req, res) => {
@@ -19,7 +19,7 @@ const getUserWorkspaces = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse("Workspaces fetched successfully.", workspaces));
+    .json(new ApiResponse(workspaces, "Workspaces fetched successfully."));
 });
 
 const getWorkspaceById = asyncHandler(async (req, res) => {
