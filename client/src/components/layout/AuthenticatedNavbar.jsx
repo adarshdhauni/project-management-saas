@@ -23,6 +23,7 @@ import {
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useGetWorkspacesQuery } from "@/features/workspace/workspaceApi";
+import { useGetNotificationsQuery } from "@/features/notification/notificationApi";
 
 import ThemeToggle from "../common/ThemeToggle";
 import { Skeleton } from "../ui/skeleton";
@@ -32,6 +33,7 @@ import CreateWorkspaceDialog from "@/features/workspace/components/CreateWorkspa
 import { useLogoutMutation } from "@/features/auth/authApi";
 import { clearCredentials } from "@/features/auth/authSlice";
 import { toast } from "../ui/toast";
+import NotificationMenu from "./NotificationMenu";
 
 const AuthenticatedNavbar = () => {
   const user = useSelector((state) => state.auth.user);
@@ -249,16 +251,7 @@ const AuthenticatedNavbar = () => {
 
           <ThemeToggle />
 
-          <button
-            type="button"
-            aria-label="Notifications"
-            className="relative flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          >
-            <Bell className="h-4 w-4" />
-
-            <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-primary" />
-          </button>
-
+          <NotificationMenu />
           <div className="mx-1 h-6 w-px bg-border sm:mx-2" />
 
           <DropdownMenu>

@@ -10,9 +10,9 @@ const Home = lazy(() => import("@/pages/public/Home"));
 
 import ProtectedRoute from "./ProtectedRoute";
 
-import { AppLayout } from "@/layouts/AppLayout";
-import { AuthLayout } from "@/layouts/AuthLayout";
-import { RootLayout } from "@/layouts/RootLayout";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { AuthLayout } from "@/components/layout/AuthLayout";
+import { RootLayout } from "@/components/layout/RootLayout";
 
 const router = createBrowserRouter([
   {
