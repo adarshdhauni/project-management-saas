@@ -3,9 +3,14 @@ import { apiSlice } from "@/redux/api/apiSlice";
 const notificationApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getNotifications: builder.query({
-      query: () => ({
+      query: ({ page = 1, limit = 20, read } = {}) => ({
         url: "/api/v1/notifications",
         method: "GET",
+        params: {
+          page,
+          limit,
+          ...(read !== undefined && { read }),
+        },
       }),
       providesTags: ["Notification"],
     }),

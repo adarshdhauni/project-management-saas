@@ -23,17 +23,25 @@ const findAllByRecipient = async (recipientId, filters = {}, options = {}) => {
 
   const skip = (page - 1) * limit;
 
-  const [notifications, total] = await Promise.all([
+  const unreadQuery = {
+    recipient: recipientId,
+    read: false,
+  };
+
+  const [notifications, total, unreadCount] = await Promise.all([
     Notification.find(query, null, options)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit),
 
     Notification.countDocuments(query),
+
+    Notification.countDocuments(unreadQuery),
   ]);
 
   return {
     notifications,
+    unreadCount,
     pagination: {
       page,
       limit,

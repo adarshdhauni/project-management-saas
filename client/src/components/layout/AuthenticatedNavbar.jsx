@@ -1,5 +1,4 @@
 import {
-  Bell,
   ChevronDown,
   Search,
   Settings,
@@ -23,7 +22,6 @@ import {
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useGetWorkspacesQuery } from "@/features/workspace/workspaceApi";
-import { useGetNotificationsQuery } from "@/features/notification/notificationApi";
 
 import ThemeToggle from "../common/ThemeToggle";
 import { Skeleton } from "../ui/skeleton";
@@ -284,12 +282,12 @@ const AuthenticatedNavbar = () => {
 
               <DropdownMenuSeparator />
 
-              <DropdownMenuItem className="cursor-pointer gap-2 rounded-lg">
+              <DropdownMenuItem className="cursor-pointer gap-2 rounded-lg px-2.5 py-2">
                 <User className="h-4 w-4" />
                 Profile
               </DropdownMenuItem>
 
-              <DropdownMenuItem className="cursor-pointer gap-2 rounded-lg">
+              <DropdownMenuItem className="cursor-pointer gap-2 rounded-lg px-2.5 py-2">
                 <Settings className="h-4 w-4" />
                 Settings
               </DropdownMenuItem>
@@ -299,7 +297,7 @@ const AuthenticatedNavbar = () => {
               <DropdownMenuItem
                 onClick={handleLogout}
                 disabled={isLoggingOut}
-                className="cursor-pointer gap-2 rounded-lg text-destructive focus:text-destructive"
+                className="cursor-pointer gap-2 rounded-lg px-2.5 py-2 text-destructive focus:text-destructive"
               >
                 <LogOut className="h-4 w-4" />
                 {isLoggingOut ? "Logging out..." : "Log out"}
