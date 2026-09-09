@@ -1,14 +1,16 @@
 import { Building2, Plus, ArrowRight } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import ErrorState from "@/components/feedback/error/ErrorState";
 import { useGetWorkspacesQuery } from "@/features/workspace/workspaceApi";
 import { useSelector } from "react-redux";
+import { useState } from "react";
+import CreateWorkspaceDialog from "@/features/workspace/components/CreateWorkspaceDialog";
 
 const Dashboard = () => {
-  const navigate = useNavigate();
+  const [isCreateWorkspaceOpen, setIsCreateWorkspaceOpen] = useState(false);
 
   const { user } = useSelector((state) => state.auth);
 
@@ -31,15 +33,9 @@ const Dashboard = () => {
     );
   };
 
-  const handleCreateWorkspace = () => {
-    // Wire this to the same CreateWorkspaceDialog
-    // used by the navbar.
-  };
-
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-background">
       <div className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-6 lg:px-8">
-        {/* Header */}
         <header>
           <p className="text-sm text-muted-foreground">Dashboard</p>
 
@@ -50,10 +46,8 @@ const Dashboard = () => {
           </div>
         </header>
 
-        {/* Loading */}
         {isLoading && <DashboardSkeleton />}
 
-        {/* Error */}
         {!isLoading && isError && (
           <section className="mt-8">
             <ErrorState
@@ -65,7 +59,6 @@ const Dashboard = () => {
           </section>
         )}
 
-        {/* Empty */}
         {!isLoading && !isError && workspaces.length === 0 && (
           <section className="mt-8">
             <div className="flex min-h-100 flex-col items-center justify-center rounded-xl border border-border bg-card px-6 text-center">
@@ -84,7 +77,7 @@ const Dashboard = () => {
 
               <Button
                 type="button"
-                onClick={handleCreateWorkspace}
+                onClick={() => setIsCreateWorkspaceOpen(true)}
                 className="mt-6 cursor-pointer"
               >
                 <Plus data-icon="inline-start" />
@@ -94,7 +87,6 @@ const Dashboard = () => {
           </section>
         )}
 
-        {/* Workspaces */}
         {!isLoading && !isError && workspaces.length > 0 && (
           <section className="mt-10">
             <div className="mb-5 flex items-center justify-between">
@@ -111,7 +103,7 @@ const Dashboard = () => {
               <Button
                 type="button"
                 variant="outline"
-                onClick={handleCreateWorkspace}
+                onClick={() => setIsCreateWorkspaceOpen(true)}
                 className="cursor-pointer"
               >
                 <Plus data-icon="inline-start" />
@@ -124,13 +116,11 @@ const Dashboard = () => {
                 const initials = getWorkspaceInitials(workspace.name);
 
                 return (
-                  <button
+                  <Link
                     key={workspace._id}
-                    type="button"
-                    onClick={() => navigate(`/workspaces/${workspace._id}`)}
+                    to={`/dashboard/workspaces/${workspace._id}`}
                     className="group flex min-h-55 cursor-pointer flex-col rounded-xl border border-border bg-card p-5 text-left transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
-                    {/* Workspace identity */}
                     <div className="flex items-start justify-between">
                       <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-muted text-sm font-semibold text-foreground/70">
                         {initials}
@@ -139,7 +129,6 @@ const Dashboard = () => {
                       <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-100" />
                     </div>
 
-                    {/* Workspace name */}
                     <div className="mt-5">
                       <h3 className="truncate text-base font-semibold tracking-tight">
                         {workspace.name}
@@ -150,7 +139,6 @@ const Dashboard = () => {
                       </p>
                     </div>
 
-                    {/* Workspace metadata */}
                     <div className="mt-auto pt-6">
                       <p className="text-xs text-muted-foreground">
                         Open workspace
@@ -161,14 +149,13 @@ const Dashboard = () => {
                         <ArrowRight className="ml-1.5 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
                       </span>
                     </div>
-                  </button>
+                  </Link>
                 );
               })}
 
-              {/* Create workspace card */}
               <button
                 type="button"
-                onClick={handleCreateWorkspace}
+                onClick={() => setIsCreateWorkspaceOpen(true)}
                 className="group flex min-h-55 cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-border bg-background px-5 text-center transition-colors hover:border-foreground/20 hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-muted transition-colors group-hover:bg-muted/80">
@@ -185,6 +172,10 @@ const Dashboard = () => {
           </section>
         )}
       </div>
+      <CreateWorkspaceDialog
+        open={isCreateWorkspaceOpen}
+        onOpenChange={setIsCreateWorkspaceOpen}
+      />
     </div>
   );
 };
@@ -192,28 +183,46 @@ const Dashboard = () => {
 const DashboardSkeleton = () => {
   return (
     <section className="mt-10">
-      <div className="mb-5">
-        <Skeleton className="h-5 w-32 rounded-md" />
-        <Skeleton className="mt-2 h-4 w-52 rounded-md" />
+      <div className="mb-5 flex items-center justify-between">
+        <div className="space-y-2">
+          <Skeleton className="h-5 w-32 rounded-md" />
+          <Skeleton className="h-4 w-48 rounded-md" />
+        </div>
+
+        <Skeleton className="h-9 w-10 rounded-md sm:h-9 sm:w-40" />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {Array.from({ length: 6 }).map((_, index) => (
+        {[1, 2, 3].map((item) => (
           <div
-            key={index}
-            className="min-h-55 rounded-xl border border-border bg-card p-5"
+            key={item}
+            className="flex min-h-55 flex-col rounded-xl border border-border bg-card p-5"
           >
-            <Skeleton className="h-11 w-11 rounded-xl" />
+            <div className="flex items-start justify-between">
+              <Skeleton className="h-11 w-11 rounded-xl" />
+              <Skeleton className="h-4 w-4 rounded-md" />
+            </div>
 
-            <Skeleton className="mt-5 h-5 w-32 rounded-md" />
-            <Skeleton className="mt-2 h-4 w-20 rounded-md" />
+            <div className="mt-5 space-y-2">
+              <Skeleton className="h-4 w-32 rounded-md" />
+              <Skeleton className="h-3.5 w-20 rounded-md" />
+            </div>
 
-            <div className="mt-12">
+            <div className="mt-auto space-y-2 pt-6">
               <Skeleton className="h-3 w-24 rounded-md" />
-              <Skeleton className="mt-2 h-4 w-32 rounded-md" />
+              <Skeleton className="h-4 w-28 rounded-md" />
             </div>
           </div>
         ))}
+
+        <div className="flex min-h-55 flex-col items-center justify-center rounded-xl border border-dashed border-border bg-background px-5">
+          <Skeleton className="h-11 w-11 rounded-xl" />
+
+          <Skeleton className="mt-4 h-4 w-28 rounded-md" />
+
+          <Skeleton className="mt-2 h-3 w-48 rounded-md" />
+          <Skeleton className="mt-1 h-3 w-40 rounded-md" />
+        </div>
       </div>
     </section>
   );
