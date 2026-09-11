@@ -8,6 +8,8 @@ const ResetPassword = lazy(() => import("@/pages/auth/ResetPassword"));
 const Home = lazy(() => import("@/pages/public/Home"));
 const Dashboard = lazy(() => import("@/pages/user/Dashboard"));
 const Notification = lazy(() => import("@/pages/user/Notification"));
+const Profile = lazy(() => import("@/pages/user/Profile"));
+const Settings = lazy(() => import("@/pages/user/Settings"));
 
 import ProtectedRoute from "./ProtectedRoute";
 
@@ -61,6 +63,14 @@ const router = createBrowserRouter([
                   {
                     path: "notifications",
                     element: <Notification />,
+                  },
+                  {
+                    path: "profile",
+                    element: <Profile />,
+                  },
+                  {
+                    path: "settings",
+                    element: <Settings />,
                   },
                 ],
               },

@@ -282,12 +282,18 @@ const AuthenticatedNavbar = () => {
 
               <DropdownMenuSeparator />
 
-              <DropdownMenuItem className="cursor-pointer gap-2 rounded-lg px-2.5 py-2">
+              <DropdownMenuItem
+                onClick={() => navigate("/dashboard/profile")}
+                className="cursor-pointer gap-2 rounded-lg px-2.5 py-2"
+              >
                 <User className="h-4 w-4" />
                 Profile
               </DropdownMenuItem>
 
-              <DropdownMenuItem className="cursor-pointer gap-2 rounded-lg px-2.5 py-2">
+              <DropdownMenuItem
+                onClick={() => navigate("/dashboard/settings")}
+                className="cursor-pointer gap-2 rounded-lg px-2.5 py-2"
+              >
                 <Settings className="h-4 w-4" />
                 Settings
               </DropdownMenuItem>
