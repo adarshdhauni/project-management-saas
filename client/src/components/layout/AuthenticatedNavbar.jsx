@@ -53,7 +53,7 @@ const AuthenticatedNavbar = () => {
     /^\/dashboard\/workspaces\/([^/]+)/,
   )?.[1];
 
-  const isWorkspaceRoute = Boolean(workspaceId);
+  const isDashboardHome = location.pathname === "/dashboard";
 
   const currentWorkspace = workspaces.find(
     (workspace) => workspace._id === workspaceId,
@@ -108,7 +108,7 @@ const AuthenticatedNavbar = () => {
           </Link>
 
           <div className="mx-0.5 hidden h-6 w-px bg-border sm:block" />
-          {isWorkspaceRoute && (
+          {!isDashboardHome && (
             <Link
               to="/dashboard"
               aria-label="Dashboard"

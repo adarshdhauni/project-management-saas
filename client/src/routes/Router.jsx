@@ -5,8 +5,9 @@ const Register = lazy(() => import("@/pages/auth/Register"));
 const Login = lazy(() => import("@/pages/auth/Login"));
 const ForgotPassword = lazy(() => import("@/pages/auth/ForgotPassword"));
 const ResetPassword = lazy(() => import("@/pages/auth/ResetPassword"));
-const Dashboard = lazy(() => import("@/pages/user/Dashboard"));
 const Home = lazy(() => import("@/pages/public/Home"));
+const Dashboard = lazy(() => import("@/pages/user/Dashboard"));
+const Notification = lazy(() => import("@/pages/user/Notification"));
 
 import ProtectedRoute from "./ProtectedRoute";
 
@@ -52,10 +53,16 @@ const router = createBrowserRouter([
             children: [
               {
                 path: "/dashboard",
-                element: <Dashboard />,
-              },
-              {
-                path: "/notifications",
+                children: [
+                  {
+                    index: true,
+                    element: <Dashboard />,
+                  },
+                  {
+                    path: "notifications",
+                    element: <Notification />,
+                  },
+                ],
               },
             ],
           },

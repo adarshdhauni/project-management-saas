@@ -1,4 +1,4 @@
-import { Bell, Check, UserPlus } from "lucide-react";
+import { Bell, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -9,7 +9,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import ErrorState from "@/components/feedback/error/ErrorState";
@@ -24,9 +23,8 @@ import {
   useDeclineInvitationMutation,
 } from "@/features/workspace/workspaceApi";
 
-import { getNotificationContent } from "@/utils/notification";
-import { formatRelativeTime } from "@/utils/date";
 import { toast } from "../ui/toast";
+import NotificationItem from "@/features/notification/components/NotificationItem";
 
 const NotificationMenu = () => {
   const navigate = useNavigate();
@@ -51,6 +49,8 @@ const NotificationMenu = () => {
   const notifications = data?.data?.notifications ?? [];
 
   const unreadCount = data?.data?.unreadCount ?? 0;
+
+  const isNotificationsPage = location.pathname === "/dashboard/notifications";
 
   const handleMarkAllAsRead = async () => {
     try {
@@ -266,107 +266,24 @@ const NotificationMenu = () => {
           </div>
         ) : (
           <div className="space-y-1">
-            {notifications.map((notification) => {
-              const { title, description } =
-                getNotificationContent(notification);
-
-              const isInvitation = notification.type === "workspace.invited";
-
-              return (
-                <DropdownMenuItem
+            <div className="space-y-1">
+              {notifications.map((notification) => (
+                <NotificationItem
                   key={notification._id}
-                  onClick={() => handleNotificationClick(notification)}
-                  className={`cursor-pointer items-start gap-3 rounded-lg px-2.5 py-2.5 ${
-                    !notification.read ? "bg-muted/50" : ""
-                  }`}
-                >
-                  <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted">
-                    {isInvitation ? (
-                      <UserPlus className="h-4 w-4 text-muted-foreground" />
-                    ) : (
-                      <Bell className="h-4 w-4 text-muted-foreground" />
-                    )}
-                  </div>
-
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-start gap-2">
-                      <p
-                        className={`min-w-0 flex-1 text-sm ${
-                          notification.read ? "font-medium" : "font-semibold"
-                        }`}
-                      >
-                        {title}
-                      </p>
-
-                      <div className="flex shrink-0 items-center gap-1.5">
-                        <span className="text-[10px] text-muted-foreground">
-                          {formatRelativeTime(notification.createdAt)}
-                        </span>
-
-                        {!notification.read && (
-                          <span
-                            aria-label="Unread"
-                            className="h-1.5 w-1.5 rounded-full bg-primary"
-                          />
-                        )}
-                      </div>
-                    </div>
-
-                    {description && (
-                      <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                        {description}
-                      </p>
-                    )}
-
-                    {isInvitation && (
-                      <div
-                        className="mt-2 flex gap-2"
-                        onClick={(event) => event.stopPropagation()}
-                      >
-                        <Button
-                          type="button"
-                          size="sm"
-                          disabled={isAccepting || isDeclining}
-                          onClick={() => handleAcceptInvitation(notification)}
-                          className="h-7 px-2.5 text-xs"
-                        >
-                          {isAccepting ? (
-                            <>
-                              <Spinner data-icon="inline-start" />
-                              Accepting...
-                            </>
-                          ) : (
-                            "Accept"
-                          )}
-                        </Button>
-
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          disabled={isAccepting || isDeclining}
-                          onClick={() => handleDeclineInvitation(notification)}
-                          className="h-7 px-2.5 text-xs"
-                        >
-                          {isDeclining ? (
-                            <>
-                              <Spinner data-icon="inline-start" />
-                              Declining...
-                            </>
-                          ) : (
-                            "Decline"
-                          )}
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                </DropdownMenuItem>
-              );
-            })}
+                  notification={notification}
+                  onClick={handleNotificationClick}
+                  onAccept={handleAcceptInvitation}
+                  onDecline={handleDeclineInvitation}
+                  isAccepting={isAccepting}
+                  isDeclining={isDeclining}
+                  variant="compact"
+                />
+              ))}
+            </div>
           </div>
         )}
 
-        {!isLoading && !isError && (
+        {!isLoading && !isError && !isNotificationsPage && (
           <>
             <DropdownMenuSeparator className="my-1.5" />
 
