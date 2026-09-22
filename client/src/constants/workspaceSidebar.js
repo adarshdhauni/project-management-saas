@@ -1,4 +1,5 @@
 import {
+  Activity,
   CheckSquare,
   FolderKanban,
   LayoutDashboard,
@@ -22,6 +23,11 @@ export const navItems = [
     label: "Tasks",
     icon: CheckSquare,
     getTo: (workspaceId) => `/dashboard/workspaces/${workspaceId}/tasks`,
+  },
+  {
+    label: "Activity",
+    icon: Activity,
+    getTo: (workspaceId) => `/dashboard/workspaces/${workspaceId}/activity`,
   },
   {
     label: "Members",
