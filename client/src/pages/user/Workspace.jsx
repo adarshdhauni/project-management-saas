@@ -1,27 +1,25 @@
 import {
   Activity,
   ArrowRight,
-  CheckCircle2,
   Clock3,
   FolderKanban,
-  ListTodo,
   MoreHorizontal,
   Plus,
   Users,
+  CheckSquare,
 } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-import {
-  useGetWorkspaceByIdQuery,
-  useGetWorkspaceOverviewQuery,
-} from "@/features/workspace/workspaceApi";
+import { useGetWorkspaceOverviewQuery } from "@/features/workspace/workspaceApi";
 import ErrorState from "@/components/feedback/error/ErrorState";
 import getWorkspaceInitials from "@/utils/workspaceInitials";
 import WorkspaceSkeleton from "@/components/feedback/loading/WorkspaceSkeleton";
 import WorkspaceNotFound from "@/components/feedback/empty/WorkspaceNotFound";
+import { getActivityContent } from "@/utils/activity";
+import { formatRelativeTime } from "@/utils/date";
 
 const getProjectProgress = (project) => {
   if (!project.tasks) return 0;
@@ -48,12 +46,42 @@ const Workspace = () => {
   const { data, isLoading, isFetching, isError, error, refetch } =
     useGetWorkspaceOverviewQuery(workspaceId);
 
-  const workspace = data?.workspace;
-  const stats = data?.data?.stats;
+  const workspace = data?.data?.workspace;
+  const overviewStats = data?.data?.stats || [];
+
+  const stats = [
+    {
+      label: "Projects",
+      value: overviewStats?.projects ?? 0,
+      icon: FolderKanban,
+    },
+    {
+      label: "Tasks",
+      value: overviewStats?.tasks ?? 0,
+      icon: CheckSquare,
+    },
+    {
+      label: "Members",
+      value: overviewStats?.members ?? 0,
+      icon: Users,
+    },
+  ];
+
   const recentProjects = data?.data?.recentProjects ?? [];
   const recentActivity = data?.data?.recentActivity ?? [];
 
-  console.log(error)
+  const activities = recentActivity.map((activity) => {
+    const content = getActivityContent(activity);
+
+    return {
+      id: activity._id,
+      user: activity.user?.name ?? "Someone",
+      action: content.action,
+      target: content.target,
+      time: formatRelativeTime(activity.createdAt),
+      icon: content.icon,
+    };
+  });
 
   if (isLoading) {
     return <WorkspaceSkeleton />;
@@ -248,7 +276,7 @@ const Workspace = () => {
 
             <CardContent className="px-5 py-1 sm:px-6">
               <div className="divide-y divide-border">
-                {recentActivity?.map((activity) => {
+                {activities?.map((activity) => {
                   const Icon = activity.icon;
 
                   return (

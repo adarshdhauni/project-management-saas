@@ -58,6 +58,7 @@ const findRecentByWorkspace = (workspaceId, limit = 5, options = {}) => {
     null,
     options,
   )
+    .populate("user", "name")
     .sort({ createdAt: -1 })
     .limit(limit)
     .lean();
