@@ -76,18 +76,22 @@ const CreateWorkspaceDialog = ({ open, onOpenChange }) => {
     };
 
     try {
-      await createWorkspace(workspaceData).unwrap();
+      const response = await createWorkspace(workspaceData).unwrap();
 
       toast.add({
         type: "success",
         title: "Workspace created successfully 🎉",
       });
 
+      const newWorkspaceId = response.data._id;
+
       onOpenChange(false);
+
+      navigate(`/dashboard/workspaces/${newWorkspaceId}`);
     } catch (error) {
       toast.add({
         type: "error",
-        title: err?.data?.message || "Something went wrong",
+        title: error?.data?.message || "Something went wrong",
         priority: "high",
       });
     }

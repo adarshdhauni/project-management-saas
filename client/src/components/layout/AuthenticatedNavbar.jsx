@@ -32,6 +32,7 @@ import { useLogoutMutation } from "@/features/auth/authApi";
 import { clearCredentials } from "@/features/auth/authSlice";
 import { toast } from "../ui/toast";
 import NotificationMenu from "./NotificationMenu";
+import getWorkspaceInitials from "@/utils/workspaceInitials";
 
 const AuthenticatedNavbar = () => {
   const user = useSelector((state) => state.auth.user);
@@ -66,13 +67,6 @@ const AuthenticatedNavbar = () => {
     .slice(0, 2)
     .toUpperCase();
 
-  const workspaceInitials = currentWorkspace?.name
-    ?.split(/\s+/)
-    .map((word) => word[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-
   const handleWorkspaceSelect = (id) => {
     navigate(`/dashboard/workspaces/${id}`);
   };
@@ -87,7 +81,7 @@ const AuthenticatedNavbar = () => {
     } catch (error) {
       toast.add({
         type: "error",
-        title: err?.data?.message || "Failed to log out. Please try again.",
+        title: error?.data?.message || "Failed to log out. Please try again.",
         priority: "high",
       });
     }
@@ -169,7 +163,7 @@ const AuthenticatedNavbar = () => {
               >
                 <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-muted text-foreground/70">
                   {currentWorkspace ? (
-                    workspaceInitials
+                   getWorkspaceInitials(currentWorkspace.name)
                   ) : (
                     <Building2 className="h-3.5 w-3.5" />
                   )}

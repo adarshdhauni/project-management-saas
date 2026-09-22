@@ -59,6 +59,15 @@ const deleteAllByWorkspace = (workspaceId, options = {}) => {
   );
 };
 
+const countByWorkspace = (workspaceId, options = {}) => {
+  return WorkspaceMember.countDocuments(
+    {
+      workspace: workspaceId,
+    },
+    options,
+  );
+};
+
 const workspaceMemberRepository = {
   create,
   findById,
@@ -68,6 +77,7 @@ const workspaceMemberRepository = {
   updateById,
   deleteById,
   deleteAllByWorkspace,
+  countByWorkspace
 };
 
 export default workspaceMemberRepository;

@@ -8,6 +8,7 @@ import { useGetWorkspacesQuery } from "@/features/workspace/workspaceApi";
 import { useSelector } from "react-redux";
 import { useState } from "react";
 import CreateWorkspaceDialog from "@/features/workspace/components/CreateWorkspaceDialog";
+import getWorkspaceInitials from "@/utils/workspaceInitials";
 
 const Dashboard = () => {
   const [isCreateWorkspaceOpen, setIsCreateWorkspaceOpen] = useState(false);
@@ -20,18 +21,6 @@ const Dashboard = () => {
   const workspaces = data?.data ?? [];
 
   const firstName = user?.name?.trim().split(/\s+/)[0] ?? "there";
-
-  const getWorkspaceInitials = (name) => {
-    return (
-      name
-        ?.trim()
-        .split(/\s+/)
-        .map((word) => word[0])
-        .join("")
-        .slice(0, 2)
-        .toUpperCase() ?? ""
-    );
-  };
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-background">

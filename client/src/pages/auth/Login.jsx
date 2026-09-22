@@ -81,10 +81,10 @@ const Login = () => {
       });
 
       navigate("/dashboard", { replace: true });
-    } catch (err) {
+    } catch (error) {
       toast.add({
         type: "error",
-        title: err?.data?.message || "Login failed",
+        title: error.data?.message || "Login failed",
         priority: "high",
       });
     }

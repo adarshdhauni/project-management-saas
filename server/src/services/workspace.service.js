@@ -8,6 +8,9 @@ import mongoose from "mongoose";
 import userRepository from "../repositories/user.repository.js";
 import activityService from "./activity.service.js";
 import notificationService from "./notification.services.js";
+import projectRepository from "../repositories/project.repository.js";
+import taskRepository from "../repositories/task.repository.js";
+import activityRepository from "../repositories/activity.repository.js";
 
 const createWorkspace = async (userId, workspaceData) => {
   const slug = slugify(workspaceData.name, {
@@ -782,6 +785,43 @@ const leaveWorkspace = async (userId, workspaceId) => {
   }
 };
 
+export const getWorkspaceOverview = async (workspaceId, userId) => {
+  const workspace = await workspaceRepository.findById(workspaceId);
+
+  if (!workspace) {
+    throw new ApiError(404, "Workspace not found.");
+  }
+
+  const isMember = await workspaceMemberRepository.findByWorkspaceAndUser(
+    workspaceId,
+    userId,
+  );
+
+  if (!isMember) {
+    throw new ApiError(403, "You do not have access to this workspace.");
+  }
+
+  const [projectCount, taskCount, memberCount, recentProjects, recentActivity] =
+    await Promise.all([
+      projectRepository.countByWorkspace(workspaceId),
+      taskRepository.countByWorkspace(workspaceId),
+      workspaceMemberRepository.countByWorkspace(workspaceId),
+      projectRepository.findRecentByWorkspace(workspaceId, 5),
+      activityRepository.findRecentByWorkspace(workspaceId, 5),
+    ]);
+
+  return {
+    workspace,
+    stats: {
+      projects: projectCount,
+      tasks: taskCount,
+      members: memberCount,
+    },
+    recentProjects,
+    recentActivity,
+  };
+};
+
 const workspaceService = {
   createWorkspace,
   getUserWorkspaces,
@@ -796,6 +836,7 @@ const workspaceService = {
   updateMemberRole,
   removeMember,
   leaveWorkspace,
+  getWorkspaceOverview
 };
 
 export default workspaceService;

@@ -125,6 +125,15 @@ const deleteById = (taskId, options = {}) => {
   return Task.findByIdAndDelete(taskId, options);
 };
 
+const countByWorkspace = (workspaceId, options = {}) => {
+  return Task.countDocuments(
+    {
+      workspace: workspaceId,
+    },
+    options,
+  );
+};
+
 const taskRepository = {
   create,
   findById,
@@ -133,6 +142,7 @@ const taskRepository = {
   findLastByProject,
   updateById,
   deleteById,
+  countByWorkspace
 };
 
 export default taskRepository;

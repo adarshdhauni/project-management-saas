@@ -120,10 +120,10 @@ const ResetPassword = () => {
       });
 
       navigate("/auth/login", { replace: true });
-    } catch (err) {
+    } catch (error) {
       toast.add({
         type: "error",
-        title: err?.data?.message || "Password reset failed",
+        title: error?.data?.message || "Password reset failed",
         priority: "high",
       });
     }

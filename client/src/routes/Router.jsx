@@ -10,12 +10,15 @@ const Dashboard = lazy(() => import("@/pages/user/Dashboard"));
 const Notification = lazy(() => import("@/pages/user/Notification"));
 const Profile = lazy(() => import("@/pages/user/Profile"));
 const Settings = lazy(() => import("@/pages/user/Settings"));
+const Workspace = lazy(() => import("@/pages/user/Workspace"));
+const Projects = lazy(() => import("@/pages/user/Projects"));
 
 import ProtectedRoute from "./ProtectedRoute";
 
 import { AppLayout } from "@/components/layout/AppLayout";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { RootLayout } from "@/components/layout/RootLayout";
+import { WorkspaceLayout } from "@/components/layout/WorkspaceLayout";
 
 const router = createBrowserRouter([
   {
@@ -25,6 +28,7 @@ const router = createBrowserRouter([
         path: "/",
         element: <Home />,
       },
+
       {
         path: "/auth",
         element: <AuthLayout />,
@@ -47,6 +51,7 @@ const router = createBrowserRouter([
           },
         ],
       },
+
       {
         element: <ProtectedRoute />,
         children: [
@@ -71,6 +76,33 @@ const router = createBrowserRouter([
                   {
                     path: "settings",
                     element: <Settings />,
+                  },
+
+                  {
+                    path: "workspaces/:workspaceId",
+                    element: <WorkspaceLayout />,
+                    children: [
+                      {
+                        index: true,
+                        element: <Workspace />,
+                      },
+                      {
+                        path: "projects",
+                        element: <Projects />,
+                      },
+                      // {
+                      //   path: "tasks",
+                      //   element: <Tasks />,
+                      // },
+                      // {
+                      //   path: "members",
+                      //   element: <Members />,
+                      // },
+                      // {
+                      //   path: "settings",
+                      //   element: <WorkspaceSettings />,
+                      // },
+                    ],
                   },
                 ],
               },

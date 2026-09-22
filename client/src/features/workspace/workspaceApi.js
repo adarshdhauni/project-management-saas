@@ -54,6 +54,20 @@ const workspaceApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["Workspace", "Notification"],
     }),
+
+    getWorkspaceOverview: builder.query({
+      query: (id) => ({
+        url: `/api/v1/workspaces/${id}/overview`,
+        method: "GET",
+      }),
+      providesTags: [
+        "Workspace",
+        "Project",
+        "Task",
+        "WorkspaceMember",
+        "Activity",
+      ],
+    }),
   }),
 });
 
@@ -65,4 +79,5 @@ export const {
   useDeleteWorkspaceMutation,
   useAcceptInvitationMutation,
   useDeclineInvitationMutation,
+  useGetWorkspaceOverviewQuery,
 } = workspaceApi;

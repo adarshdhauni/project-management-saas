@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Bell, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -24,13 +23,18 @@ import {
 
 import NotificationItem from "@/features/notification/components/NotificationItem";
 import { toast } from "@/components/ui/toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 const Notifications = () => {
   const navigate = useNavigate();
 
-  const [filter, setFilter] = useState("all");
-  const [page, setPage] = useState(1);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const filterParam = searchParams.get("filter");
+  const pageParam = Number(searchParams.get("page"));
+
+  const filter = filterParam === "unread" ? "unread" : "all";
+  const page = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
 
   const read = filter === "unread" ? false : undefined;
 
@@ -169,11 +173,8 @@ const Notifications = () => {
   };
 
   const handleFilterChange = (value) => {
-    setFilter(value);
-    setPage(1);
+    setSearchParams(value === "all" ? {} : { filter: value });
   };
-
-  console.log(pagination);
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
@@ -327,11 +328,15 @@ const Notifications = () => {
                     <PaginationItem>
                       <PaginationPrevious
                         href="#"
+
                         onClick={(event) => {
                           event.preventDefault();
 
                           if (page > 1 && !isFetching) {
-                            setPage((current) => current - 1);
+                            setSearchParams((params) => {
+                              params.set("page", String(page - 1));
+                              return params;
+                            });
                           }
                         }}
                         className={
@@ -354,7 +359,10 @@ const Notifications = () => {
                             event.preventDefault();
 
                             if (page !== pageNumber && !isFetching) {
-                              setPage(pageNumber);
+                              setSearchParams((params) => {
+                                params.set("page", String(pageNumber));
+                                return params;
+                              });
                             }
                           }}
                           className="cursor-pointer"
@@ -367,11 +375,15 @@ const Notifications = () => {
                     <PaginationItem>
                       <PaginationNext
                         href="#"
+
                         onClick={(event) => {
                           event.preventDefault();
 
                           if (page < pagination.totalPages && !isFetching) {
-                            setPage((current) => current + 1);
+                            setSearchParams((params) => {
+                              params.set("page", String(page + 1));
+                              return params;
+                            });
                           }
                         }}
                         className={

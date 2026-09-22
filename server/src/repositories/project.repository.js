@@ -54,6 +54,28 @@ const findByWorkspaceAndId = (workspaceId, projectId, options = {}) => {
   );
 };
 
+const countByWorkspace = (workspaceId, options = {}) => {
+  return Project.countDocuments(
+    {
+      workspace: workspaceId,
+    },
+    options,
+  );
+};
+
+const findRecentByWorkspace = (workspaceId, limit = 5, options = {}) => {
+  return Project.find(
+    {
+      workspace: workspaceId,
+    },
+    null,
+    options,
+  )
+    .sort({ updatedAt: -1 })
+    .limit(limit)
+    .lean();
+};
+
 const projectRepository = {
   create,
   findById,
@@ -61,7 +83,9 @@ const projectRepository = {
   updateById,
   deleteById,
   findByWorkspaceAndName,
-  findByWorkspaceAndId
+  findByWorkspaceAndId,
+  countByWorkspace,
+  findRecentByWorkspace,
 };
 
 export default projectRepository;

@@ -50,10 +50,24 @@ const findByEntity = async (entityType, entityId, options = {}) => {
   });
 };
 
+const findRecentByWorkspace = (workspaceId, limit = 5, options = {}) => {
+  return Activity.find(
+    {
+      workspace: workspaceId,
+    },
+    null,
+    options,
+  )
+    .sort({ createdAt: -1 })
+    .limit(limit)
+    .lean();
+};
+
 const activityRepository = {
   create,
   findAllByWorkspace,
   findByEntity,
+  findRecentByWorkspace,
 };
 
 export default activityRepository;

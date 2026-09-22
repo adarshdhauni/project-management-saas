@@ -52,7 +52,7 @@ const PublicNavbar = () => {
           </span>
         </a>
 
-        <nav className="hidden md:flex">
+        <nav className="hidden sm:flex">
           <ul className="flex items-center gap-8">
             {NAV_LINKS.map((link) => {
               const isActive = activeSection === link.id;
@@ -83,7 +83,7 @@ const PublicNavbar = () => {
           </ul>
         </nav>
 
-        <div className="hidden items-center gap-2.5 md:flex">
+        <div className="hidden items-center gap-2.5 sm:flex">
           <ThemeToggle />
 
           {isLoggedIn ? (
@@ -110,7 +110,7 @@ const PublicNavbar = () => {
           )}
         </div>
 
-        <div className="flex items-center gap-1 md:hidden">
+        <div className="flex items-center gap-1 sm:hidden">
           <ThemeToggle />
 
           <Sheet open={open} onOpenChange={setOpen}>

@@ -158,10 +158,10 @@ const Register = () => {
       });
 
       navigate("/dashboard", { replace: true });
-    } catch (err) {
+    } catch (error) {
       toast.add({
         type: "error",
-        title: err?.data?.message || "Signup failed",
+        title: error?.data?.message || "Signup failed",
         priority: "high",
       });
     }

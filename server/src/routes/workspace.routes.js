@@ -119,6 +119,15 @@ router.delete(
   workspaceController.leaveWorkspace,
 );
 
+router.get(
+  "/:workspaceId/overview",
+  protect,
+  validate({
+    params: workspaceIdSchema,
+  }),
+  workspaceController.getWorkspaceOverview,
+);
+
 router.post(
   "/:workspaceId/projects",
   protect,

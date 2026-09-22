@@ -30,20 +30,6 @@ const notificationApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["Notification"],
     }),
-    getNotificationById: builder.query({
-      query: (id) => ({
-        url: `/api/v1/notifications/${id}`,
-        method: "GET",
-      }),
-      providesTags: ["Notification"],
-    }),
-    deleteNotification: builder.mutation({
-      query: (id) => ({
-        url: `/api/v1/notifications/${id}`,
-        method: "DELETE",
-      }),
-      invalidatesTags: ["Notification"],
-    }),
   }),
 });
 
@@ -51,6 +37,4 @@ export const {
   useGetNotificationsQuery,
   useMarkNotificationAsReadMutation,
   useMarkAllNotificationsAsReadMutation,
-  useGetNotificationByIdQuery,
-  useDeleteNotificationMutation,
 } = notificationApi;
