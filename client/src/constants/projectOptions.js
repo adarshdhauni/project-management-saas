@@ -40,3 +40,17 @@ export const projectColors = [
   { value: "pink", label: "Pink", className: "bg-pink-500" },
   { value: "cyan", label: "Cyan", className: "bg-cyan-500" },
 ];
+
+export const getProjectIcon = (icon) => {
+  return (
+    projectIcons.find((projectIcon) => projectIcon.value === icon)?.icon ??
+    FolderKanban
+  );
+};
+
+export const getProjectColorClass = (color) => {
+  return (
+    projectColors.find((projectColor) => projectColor.value === color)
+      ?.className ?? "bg-muted"
+  );
+};

@@ -163,7 +163,7 @@ const AuthenticatedNavbar = () => {
               >
                 <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-muted text-foreground/70">
                   {currentWorkspace ? (
-                   getWorkspaceInitials(currentWorkspace.name)
+                    getWorkspaceInitials(currentWorkspace.name)
                   ) : (
                     <Building2 className="h-3.5 w-3.5" />
                   )}

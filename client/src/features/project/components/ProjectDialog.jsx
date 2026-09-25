@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Pencil } from "lucide-react";
 
 import {
   Dialog,
@@ -21,47 +21,72 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectSeparator,
 } from "@/components/ui/select";
 
 import { projectColors, projectIcons } from "@/constants/projectOptions";
 
-import { useCreateWorkspaceMutation } from "@/features/workspace/workspaceApi";
 import focusField from "@/utils/focusField";
+import {
+  useCreateProjectMutation,
+  useUpdateProjectMutation,
+} from "../projectApi";
 
-const CreateWorkspaceDialog = ({ open, onOpenChange }) => {
+const ProjectDialog = ({ open, onOpenChange, workspaceId, project = null }) => {
+  const isEditMode = Boolean(project);
+
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [color, setColor] = useState("");
   const [icon, setIcon] = useState("");
 
-  const [createWorkspace, { isLoading }] = useCreateWorkspaceMutation();
+  const [createProject, { isLoading: isCreating }] = useCreateProjectMutation();
+
+  const [updateProject, { isLoading: isUpdating }] = useUpdateProjectMutation();
+
+  const isLoading = isCreating || isUpdating;
 
   useEffect(() => {
     if (!open) {
       setName("");
       setDescription("");
+      setColor("");
+      setIcon("");
+      return;
     }
-  }, [open]);
+
+    if (project) {
+      setName(project.name ?? "");
+      setDescription(project.description ?? "");
+      setColor(project.color ?? "");
+      setIcon(project.icon ?? "");
+    } else {
+      setName("");
+      setDescription("");
+      setColor("");
+      setIcon("");
+    }
+  }, [open, project]);
 
   const validateForm = () => {
     if (!name.trim()) {
-      focusField("workspace-name");
-      return "Enter your workspace name";
+      focusField("project-name");
+      return "Enter your project name";
     }
 
     if (name.length < 3) {
-      focusField("workspace-name");
-      return "Workspace name must be at least 3 characters";
+      focusField("project-name");
+      return "Project name must be at least 3 characters";
     }
 
     if (name.length > 100) {
-      focusField("workspace-name");
-      return "Workspace name cannot exceed 100 characters";
+      focusField("project-name");
+      return "Project name cannot exceed 100 characters";
     }
 
     if (description.length > 500) {
-      focusField("workspace-description");
-      return "Description cannot exceed 500 characters";
+      focusField("project-description");
+      return "Project cannot exceed 500 characters";
     }
 
     return null;
@@ -81,25 +106,41 @@ const CreateWorkspaceDialog = ({ open, onOpenChange }) => {
       return;
     }
 
-    const workspaceData = {
-      name: name,
-      description: description,
+    const projectData = {
+      name: name.trim(),
+      description: description.trim() || undefined,
+      color:
+        color === "none" ? (isEditMode ? null : undefined) : color || undefined,
+      icon:
+        icon === "none" ? (isEditMode ? null : undefined) : icon || undefined,
     };
 
     try {
-      const response = await createWorkspace(workspaceData).unwrap();
+      if (isEditMode) {
+        await updateProject({
+          id: project._id,
+          data: projectData,
+        }).unwrap();
 
-      toast.add({
-        type: "success",
-        title: "Workspace created successfully 🎉",
-      });
+        toast.add({
+          type: "success",
+          title: "Project updated successfully",
+        });
+      } else {
+        await createProject({
+          id: workspaceId,
+          data: projectData,
+        }).unwrap();
 
-      const newWorkspaceId = response.data._id;
+        toast.add({
+          type: "success",
+          title: "Project created successfully",
+        });
+      }
 
       onOpenChange(false);
-
-      navigate(`/dashboard/workspaces/${newWorkspaceId}`);
     } catch (error) {
+      console.log(error)
       toast.add({
         type: "error",
         title: error?.data?.message || "Something went wrong",
@@ -116,10 +157,14 @@ const CreateWorkspaceDialog = ({ open, onOpenChange }) => {
       <DialogContent className="sm:max-w-md">
         <form onSubmit={handleSubmit} className="space-y-6">
           <DialogHeader>
-            <DialogTitle>Create project</DialogTitle>
+            <DialogTitle>
+              {isEditMode ? "Edit project" : "Create project"}
+            </DialogTitle>
 
             <DialogDescription>
-              Create a project to organize tasks and work within this workspace.
+              {isEditMode
+                ? "Update your project details."
+                : "Create a project to organize tasks and work within this workspace."}
             </DialogDescription>
           </DialogHeader>
 
@@ -183,9 +228,9 @@ const CreateWorkspaceDialog = ({ open, onOpenChange }) => {
 
             <Field data-disabled={isLoading}>
               <FieldLabel>
-                Color <span className="text-muted-foreground">(optional)</span>
+                Color
+                <span className="text-muted-foreground">(optional)</span>{" "}
               </FieldLabel>
-
               <Select
                 value={color}
                 onValueChange={setColor}
@@ -198,7 +243,9 @@ const CreateWorkspaceDialog = ({ open, onOpenChange }) => {
                         (item) => item.value === color,
                       );
 
-                      if (!selectedColor) return "Select a color";
+                      if (!selectedColor) {
+                        return color === "none" ? "No color" : "Select a color";
+                      }
 
                       return (
                         <div className="flex items-center gap-2">
@@ -213,6 +260,12 @@ const CreateWorkspaceDialog = ({ open, onOpenChange }) => {
                 </SelectTrigger>
 
                 <SelectContent>
+                  <SelectItem value="none" className="cursor-pointer">
+                    No color
+                  </SelectItem>
+
+                  <SelectSeparator />
+
                   {projectColors.map((projectColor) => (
                     <SelectItem
                       key={projectColor.value}
@@ -229,9 +282,9 @@ const CreateWorkspaceDialog = ({ open, onOpenChange }) => {
                   ))}
                 </SelectContent>
               </Select>
-
               <FieldDescription>
-                Choose a color to identify your project.
+                {" "}
+                Choose a color to identify your project.{" "}
               </FieldDescription>
             </Field>
 
@@ -248,6 +301,7 @@ const CreateWorkspaceDialog = ({ open, onOpenChange }) => {
                         (item) => item.value === icon,
                       );
 
+                      if (icon === "none") return "No icon";
                       if (!selectedIcon) return "Select an icon";
 
                       const Icon = selectedIcon.icon;
@@ -263,6 +317,12 @@ const CreateWorkspaceDialog = ({ open, onOpenChange }) => {
                 </SelectTrigger>
 
                 <SelectContent>
+                  <SelectItem value="none" className="cursor-pointer">
+                    No icon
+                  </SelectItem>
+
+                  <SelectSeparator />
+
                   {projectIcons.map((projectIcon) => {
                     const Icon = projectIcon.icon;
 
@@ -307,12 +367,17 @@ const CreateWorkspaceDialog = ({ open, onOpenChange }) => {
               {isLoading ? (
                 <>
                   <Spinner data-icon="inline-start" />
-                  Creating...
+                  {isEditMode ? "Saving..." : "Creating..."}
                 </>
               ) : (
                 <>
-                  <Plus data-icon="inline-start" />
-                  Create project
+                  {isEditMode ? (
+                    <Pencil data-icon="inline-start" />
+                  ) : (
+                    <Plus data-icon="inline-start" />
+                  )}
+
+                  {isEditMode ? "Save changes" : "Create project"}
                 </>
               )}
             </Button>
@@ -323,4 +388,4 @@ const CreateWorkspaceDialog = ({ open, onOpenChange }) => {
   );
 };
 
-export default CreateWorkspaceDialog;
+export default ProjectDialog;

@@ -7,6 +7,8 @@ import {
   Plus,
   Users,
   CheckSquare,
+  Pencil,
+  Trash2,
 } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 
@@ -21,31 +23,24 @@ import WorkspaceNotFound from "@/components/feedback/empty/WorkspaceNotFound";
 import { getActivityContent } from "@/utils/activity";
 import { formatRelativeTime } from "@/utils/date";
 import { useState } from "react";
-import CreateWorkspaceDialog from "@/features/project/components/CreateProjectDialog";
-
-const getProjectProgress = (project) => {
-  if (!project.tasks) return 0;
-
-  return Math.round((project.completedTasks / project.tasks) * 100);
-};
-
-const getProjectStatusStyles = (status) => {
-  switch (status) {
-    case "Completed":
-      return "bg-muted text-foreground";
-
-    case "Planning":
-      return "bg-muted text-muted-foreground";
-
-    default:
-      return "bg-primary/10 text-primary";
-  }
-};
+import ProjectDialog from "@/features/project/components/ProjectDialog";
+import {
+  getProjectIcon,
+  getProjectColorClass,
+} from "@/constants/projectOptions";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 
 const Workspace = () => {
   const { workspaceId } = useParams();
 
-  const [isCreateProjectOpen, setisCreateProjectOpen] = useState(false)
+  const [isProjectDialogOpen, setIsProjectDialogOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
 
   const { data, isLoading, isFetching, isError, error, refetch } =
     useGetWorkspaceOverviewQuery(workspaceId);
@@ -93,6 +88,15 @@ const Workspace = () => {
     };
   });
 
+  const handleEditProject = (project) => {
+    setSelectedProject(project);
+    setIsProjectDialogOpen(true);
+  };
+
+  const handleCreateProject = () => {
+    setSelectedProject(null);
+    setIsProjectDialogOpen(true);
+  };
   if (isLoading) {
     return <WorkspaceSkeleton />;
   }
@@ -141,7 +145,7 @@ const Workspace = () => {
         </div>
 
         <Button
-          onClick={() => setisCreateProjectOpen(true)}
+          onClick={() => handleCreateProject()}
           type="button"
           className="w-full cursor-pointer sm:w-auto"
         >
@@ -225,60 +229,80 @@ const Workspace = () => {
               ) : (
                 <div className="divide-y divide-border">
                   {recentProjects.map((project) => {
-                    const progress = getProjectProgress(project);
+                    const Icon = getProjectIcon(project.icon);
 
                     return (
-                      <Link
+                      <div
                         key={project._id}
-                        to={`/dashboard/workspaces/${workspaceId}/projects/${project._id}`}
-                        className="group block px-5 py-4 transition-colors hover:bg-muted/40 sm:px-6"
+                        className="group px-5 py-4 transition-colors hover:bg-muted/40 sm:px-6"
                       >
                         <div className="flex items-start justify-between gap-4">
-                          <div className="min-w-0">
-                            <div className="flex flex-wrap items-center gap-2">
+                          <Link
+                            to={`/dashboard/workspaces/${workspaceId}/projects/${project._id}`}
+                            className="flex min-w-0 flex-1 items-start gap-3"
+                          >
+                            <div
+                              className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${getProjectColorClass(
+                                project.color,
+                              )}`}
+                            >
+                              <Icon className="size-4" />
+                            </div>
+
+                            <div className="min-w-0">
                               <h3 className="truncate text-sm font-medium">
                                 {project.name}
                               </h3>
 
-                              <span
-                                className={`rounded-md px-2 py-0.5 text-[11px] font-medium ${getProjectStatusStyles(
-                                  project.status,
-                                )}`}
-                              >
-                                {project.status}
-                              </span>
+                              <p className="mt-1 truncate text-xs text-muted-foreground">
+                                {project.description || "No description"}
+                              </p>
                             </div>
+                          </Link>
 
-                            <p className="mt-1 truncate text-xs text-muted-foreground">
-                              {project.description || "No description"}
-                            </p>
-                          </div>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger
+                              render={
+                                <button
+                                  type="button"
+                                  aria-label={`Actions for ${project.name}`}
+                                  className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                                />
+                              }
+                            >
+                              <MoreHorizontal className="size-4" />
+                            </DropdownMenuTrigger>
 
-                          <MoreHorizontal className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
-                        </div>
+                            <DropdownMenuContent
+                              align="end"
+                              className="w-40 rounded-xl p-1.5"
+                            >
+                              <DropdownMenuItem
+                                onClick={() => handleEditProject(project)}
+                                className="cursor-pointer gap-2 rounded-lg px-2.5 py-2"
+                              >
+                                <Pencil className="h-4 w-4" />
+                                <span>Edit project</span>
+                              </DropdownMenuItem>
 
-                        <div className="mt-4">
-                          <div className="flex items-center justify-between gap-3 text-[11px] text-muted-foreground">
-                            <span>
-                              {project.completedTasks} of {project.tasks} tasks
-                            </span>
+                              <DropdownMenuSeparator className="my-1.5" />
 
-                            <span>{progress}%</span>
-                          </div>
-
-                          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
-                            <div
-                              className="h-full rounded-full bg-primary transition-all"
-                              style={{ width: `${progress}%` }}
-                            />
-                          </div>
+                              <DropdownMenuItem
+                                onClick={() => handleDeleteProject(project)}
+                                className="cursor-pointer gap-2 rounded-lg px-2.5 py-2 text-destructive focus:text-destructive"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                                <span>Delete project</span>
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
 
                         <div className="mt-3 flex items-center gap-1.5 text-[11px] text-muted-foreground">
                           <Clock3 className="h-3.5 w-3.5" />
-                          Updated {project.updatedAt}
+                          Updated {formatRelativeTime(project.updatedAt)}
                         </div>
-                      </Link>
+                      </div>
                     );
                   })}
                 </div>
@@ -370,9 +394,11 @@ const Workspace = () => {
           </Card>
         </section>
       </div>
-      <CreateWorkspaceDialog
-        open={isCreateProjectOpen}
-        onOpenChange={setisCreateProjectOpen}
+      <ProjectDialog
+        open={isProjectDialogOpen}
+        onOpenChange={setIsProjectDialogOpen}
+        workspaceId={workspaceId}
+        project={selectedProject}
       />
     </div>
   );
