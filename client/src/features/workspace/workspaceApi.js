@@ -68,6 +68,17 @@ const workspaceApi = apiSlice.injectEndpoints({
         "Activity",
       ],
     }),
+
+    getActivities: builder.query({
+      query: ({ workspaceId, page = 1, limit = 20 }) => ({
+        url: `/api/v1/workspaces/${workspaceId}/activities`,
+        params: {
+          page,
+          limit,
+        },
+      }),
+      providesTags: ["Activity"],
+    }),
   }),
 });
 
@@ -80,4 +91,5 @@ export const {
   useAcceptInvitationMutation,
   useDeclineInvitationMutation,
   useGetWorkspaceOverviewQuery,
+  useGetActivitiesQuery,
 } = workspaceApi;

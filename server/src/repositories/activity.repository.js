@@ -17,9 +17,11 @@ const findAllByWorkspace = async (workspaceId, filters = {}, options = {}) => {
 
   const [activities, total] = await Promise.all([
     Activity.find(query, null, options)
+      .populate("user", "name")
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(limit),
+      .limit(limit)
+      .lean(),
 
     Activity.countDocuments(query),
   ]);
