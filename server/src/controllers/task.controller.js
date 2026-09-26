@@ -18,7 +18,7 @@ const getTasks = asyncHandler(async (req, res) => {
   const result = await taskService.getTasks(
     req.user._id,
     req.params.projectId,
-    req.query,
+    req.validatedQuery,
   );
 
   return res

@@ -12,7 +12,7 @@ const validate = (schemas = {}) => {
       }
 
       if (query) {
-        query.parse(req.query);
+        req.validatedQuery = query.parse(req.query);
       }
 
       next();

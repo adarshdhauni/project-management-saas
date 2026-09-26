@@ -5,7 +5,7 @@ import ApiResponse from "../utils/ApiResponse.js";
 const getNotifications = asyncHandler(async (req, res) => {
   const result = await notificationService.getNotifications(
     req.user._id,
-    req.query,
+    req.validatedQuery,
   );
 
   return res

@@ -18,7 +18,7 @@ const getComments = asyncHandler(async (req, res) => {
   const result = await commentService.getComments(
     req.user._id,
     req.params.taskId,
-    req.query,
+    req.validatedQuery,
   );
 
   return res

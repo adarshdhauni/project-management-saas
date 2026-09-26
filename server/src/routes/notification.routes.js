@@ -1,7 +1,6 @@
 import { Router } from "express";
 
 import notificationController from "../controllers/notification.controller.js";
-
 import { protect } from "../middlewares/protect.js";
 import validate from "../middlewares/validate.js";
 
@@ -14,7 +13,9 @@ router.use(protect);
 
 router.get(
   "/",
-  validate(getNotificationsSchema, "query"),
+  validate({
+    query: getNotificationsSchema,
+  }),
   notificationController.getNotifications,
 );
 
@@ -22,19 +23,25 @@ router.patch("/read-all", notificationController.markAllNotificationsAsRead);
 
 router.get(
   "/:notificationId",
-  validate(notificationIdSchema, "params"),
+  validate({
+    params: notificationIdSchema,
+  }),
   notificationController.getNotificationById,
 );
 
 router.patch(
   "/:notificationId/read",
-  validate(notificationIdSchema, "params"),
+  validate({
+    params: notificationIdSchema,
+  }),
   notificationController.markNotificationAsRead,
 );
 
 router.delete(
   "/:notificationId",
-  validate(notificationIdSchema, "params"),
+  validate({
+    params: notificationIdSchema,
+  }),
   notificationController.deleteNotification,
 );
 

@@ -6,7 +6,7 @@ const getActivities = asyncHandler(async (req, res) => {
   const result = await activityService.getActivities(
     req.user._id,
     req.params.workspaceId,
-    req.query,
+    req.validatedQuery,
   );
 
   return res
