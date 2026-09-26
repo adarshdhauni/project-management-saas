@@ -3,6 +3,7 @@ import projectRepository from "../repositories/project.repository.js";
 import workspaceMemberRepository from "../repositories/workspace-member.repository.js";
 import ApiError from "../utils/ApiError.js";
 import activityService from "./activity.service.js";
+import userRepository from "../repositories/user.repository.js";
 
 const createTask = async (userId, projectId, taskData) => {
   const project = await projectRepository.findById(projectId);
@@ -60,6 +61,8 @@ const createTask = async (userId, projectId, taskData) => {
         entityId: task._id,
         metadata: {
           title: task.title,
+          projectId: project._id,
+          taskId: task._id,
         },
       },
       { session },
@@ -180,6 +183,8 @@ const updateTask = async (userId, taskId, taskData) => {
   const changes = {};
 
   for (const [key, value] of Object.entries(taskData)) {
+    if (value === undefined) continue;
+
     if (task[key]?.toString() !== value?.toString()) {
       changes[key] = {
         from: task[key],
@@ -210,6 +215,8 @@ const updateTask = async (userId, taskId, taskData) => {
           entityType: "Task",
           entityId: task._id,
           metadata: {
+            projectId: project._id,
+            taskId: task._id,
             from: changes.status.from,
             to: changes.status.to,
           },
@@ -219,6 +226,14 @@ const updateTask = async (userId, taskId, taskData) => {
     }
 
     if (changes.assignee) {
+      const previousAssignee = changes.assignee.from
+        ? await userRepository.findUserById(changes.assignee.from)
+        : null;
+
+      const newAssignee = changes.assignee.to
+        ? await userRepository.findUserById(changes.assignee.to)
+        : null;
+
       await activityService.createActivity(
         {
           workspaceId: project.workspace,
@@ -227,8 +242,10 @@ const updateTask = async (userId, taskId, taskData) => {
           entityType: "Task",
           entityId: task._id,
           metadata: {
-            from: changes.assignee.from,
-            to: changes.assignee.to,
+            projectId: project._id,
+            taskId: task._id,
+            from: previousAssignee?.name ?? null,
+            to: newAssignee?.name ?? null,
           },
         },
         { session },
@@ -245,6 +262,7 @@ const updateTask = async (userId, taskId, taskData) => {
             entityId: task._id,
             metadata: {
               taskTitle: task.title,
+              projectId: project._id,
             },
           },
           { session },
@@ -266,6 +284,8 @@ const updateTask = async (userId, taskId, taskData) => {
           entityType: "Task",
           entityId: task._id,
           metadata: {
+            projectId: project._id,
+            taskId: task._id,
             changes: otherChanges,
           },
         },
@@ -323,6 +343,8 @@ const deleteTask = async (userId, taskId) => {
         entityId: task._id,
         metadata: {
           title: task.title,
+          projectId: project._id,
+          taskId: task._id,
         },
       },
       { session },
@@ -427,6 +449,8 @@ const moveTask = async (userId, taskId, beforeTaskId = null) => {
         entityType: "Task",
         entityId: task._id,
         metadata: {
+          projectId: project._id,
+          taskId: task._id,
           fromPosition: task.position,
           toPosition: newPosition,
           beforeTaskId,

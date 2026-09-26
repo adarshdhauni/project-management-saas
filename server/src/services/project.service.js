@@ -60,6 +60,7 @@ const createProject = async (userId, workspaceId, projectData) => {
         entityId: project._id,
         metadata: {
           name: project.name,
+          projectId: project._id,
         },
       },
       { session },
@@ -164,6 +165,10 @@ const updateProject = async (userId, projectId, projectData) => {
   const changes = {};
 
   for (const [key, value] of Object.entries(projectData)) {
+    if (value === undefined) {
+      continue;
+    }
+
     if (project[key]?.toString() !== value?.toString()) {
       changes[key] = {
         from: project[key],
@@ -195,6 +200,7 @@ const updateProject = async (userId, projectId, projectData) => {
         entityType: "Project",
         entityId: project._id,
         metadata: {
+          projectId: project._id,
           changes,
         },
       },
@@ -259,6 +265,7 @@ const deleteProject = async (userId, projectId) => {
         entityId: project._id,
         metadata: {
           name: project.name,
+          projectId: project._id,
         },
       },
       { session },

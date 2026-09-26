@@ -239,24 +239,31 @@ const Workspace = () => {
                         <div className="flex items-start justify-between gap-4">
                           <Link
                             to={`/dashboard/workspaces/${workspaceId}/projects/${project._id}`}
-                            className="flex min-w-0 flex-1 items-start gap-3"
+                            className="min-w-0 flex-1"
                           >
-                            <div
-                              className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${getProjectColorClass(
-                                project.color,
-                              )}`}
-                            >
-                              <Icon className="size-4" />
+                            <div className="flex min-w-0 items-start gap-3">
+                              <div
+                                className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${getProjectColorClass(
+                                  project.color,
+                                )}`}
+                              >
+                                <Icon className="size-4" />
+                              </div>
+
+                              <div className="min-w-0">
+                                <h3 className="truncate text-sm font-medium">
+                                  {project.name}
+                                </h3>
+
+                                <p className="mt-1 truncate text-xs text-muted-foreground">
+                                  {project.description || "No description"}
+                                </p>
+                              </div>
                             </div>
 
-                            <div className="min-w-0">
-                              <h3 className="truncate text-sm font-medium">
-                                {project.name}
-                              </h3>
-
-                              <p className="mt-1 truncate text-xs text-muted-foreground">
-                                {project.description || "No description"}
-                              </p>
+                            <div className="mt-3 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                              <Clock3 className="h-3.5 w-3.5" />
+                              Updated {formatRelativeTime(project.updatedAt)}
                             </div>
                           </Link>
 
@@ -296,11 +303,6 @@ const Workspace = () => {
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
-                        </div>
-
-                        <div className="mt-3 flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                          <Clock3 className="h-3.5 w-3.5" />
-                          Updated {formatRelativeTime(project.updatedAt)}
                         </div>
                       </div>
                     );
@@ -359,11 +361,8 @@ const Workspace = () => {
                   {activities.map((activity) => {
                     const Icon = activity.icon;
 
-                    return (
-                      <div
-                        key={activity.id}
-                        className="flex gap-3 py-4 first:pt-4 last:pb-4"
-                      >
+                    const content = (
+                      <div className="flex gap-3 py-4 first:pt-4 last:pb-4">
                         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted">
                           <Icon className="h-3.5 w-3.5 text-muted-foreground" />
                         </div>
@@ -386,6 +385,18 @@ const Workspace = () => {
                           </p>
                         </div>
                       </div>
+                    );
+
+                    return activity.to ? (
+                      <Link
+                        key={activity.id}
+                        to={activity.to}
+                        className="block transition-colors hover:bg-muted/40 focus-visible:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+                      >
+                        {content}
+                      </Link>
+                    ) : (
+                      <div key={activity.id}>{content}</div>
                     );
                   })}
                 </div>

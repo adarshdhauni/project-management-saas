@@ -7,7 +7,10 @@ const create = async (notificationData, options = {}) => {
 };
 
 const findById = (notificationId, options = {}) => {
-  return Notification.findById(notificationId, null, options);
+  return Notification.findById(notificationId, null, options).populate(
+    "actor",
+    "name",
+  );
 };
 
 const findAllByRecipient = async (recipientId, filters = {}, options = {}) => {
@@ -30,6 +33,7 @@ const findAllByRecipient = async (recipientId, filters = {}, options = {}) => {
 
   const [notifications, total, unreadCount] = await Promise.all([
     Notification.find(query, null, options)
+      .populate("actor", "name")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit),

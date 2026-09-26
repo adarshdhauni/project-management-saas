@@ -49,6 +49,9 @@ const createComment = async (userId, taskId, content) => {
         entityType: "Comment",
         entityId: comment._id,
         metadata: {
+          projectId: project._id,
+          taskId: task._id,
+          taskTitle: task.title,
           preview: content.slice(0, 100),
         },
       },
@@ -185,8 +188,11 @@ const updateComment = async (userId, commentId, updatedContent) => {
         entityType: "Comment",
         entityId: comment._id,
         metadata: {
-          from: comment.content,
-          to: updatedContent,
+          projectId: project._id,
+          taskId: task._id,
+          taskTitle: task.title,
+          from: comment.content.slice(0, 100),
+          to: updatedContent.slice(0, 100),
         },
       },
       { session },
@@ -259,6 +265,9 @@ const deleteComment = async (userId, commentId) => {
         entityType: "Comment",
         entityId: comment._id,
         metadata: {
+          projectId: project._id,
+          taskId: task._id,
+          taskTitle: task.title,
           preview: comment.content.slice(0, 100),
         },
       },

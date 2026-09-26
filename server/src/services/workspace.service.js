@@ -58,6 +58,7 @@ const createWorkspace = async (userId, workspaceData) => {
         entityId: workspace._id,
         metadata: {
           name: workspace.name,
+          workspaceId: workspace._id,
         },
       },
       { session },
@@ -144,6 +145,10 @@ const updateWorkspace = async (userId, workspaceId, updateData) => {
   const changes = {};
 
   for (const [key, value] of Object.entries(updateData)) {
+    if (value === undefined) {
+      continue;
+    }
+
     if (workspace[key]?.toString() !== value?.toString()) {
       changes[key] = {
         from: workspace[key],
@@ -175,6 +180,7 @@ const updateWorkspace = async (userId, workspaceId, updateData) => {
         entityType: "Workspace",
         entityId: workspace._id,
         metadata: {
+          workspaceId: workspace._id,
           changes,
         },
       },
@@ -234,6 +240,7 @@ const deleteWorkspace = async (userId, workspaceId) => {
         entityId: workspace._id,
         metadata: {
           name: workspace.name,
+          workspaceId: workspace._id,
         },
       },
       { session },
@@ -332,6 +339,7 @@ const inviteMember = async (userId, workspaceId, inviteData) => {
         metadata: {
           email,
           role,
+          workspaceId: workspace._id,
         },
       },
       { session },
@@ -401,6 +409,7 @@ const acceptInvitation = async (userId, invitationId) => {
   }
 
   const session = await mongoose.startSession();
+
   try {
     session.startTransaction();
 
@@ -430,6 +439,8 @@ const acceptInvitation = async (userId, invitationId) => {
         entityType: "WorkspaceMember",
         entityId: workspaceMember._id,
         metadata: {
+          workspaceId: invitation.workspace,
+          memberName: user.name,
           role: workspaceMember.role,
         },
       },
@@ -498,6 +509,7 @@ const rejectInvitation = async (userId, invitationId) => {
         entityType: "Workspace",
         entityId: invitation.workspace,
         metadata: {
+          workspaceId: invitation.workspace,
           email: invitation.email,
           role: invitation.role,
         },
@@ -591,6 +603,12 @@ const updateMemberRole = async (userId, workspaceId, memberId, role) => {
 
   const previousRole = targetMember.role;
 
+  const member = await userRepository.findUserById(targetMember.user);
+
+  if (!member) {
+    throw new ApiError(404, "User not found.");
+  }
+
   const session = await mongoose.startSession();
 
   try {
@@ -612,9 +630,10 @@ const updateMemberRole = async (userId, workspaceId, memberId, role) => {
         entityType: "WorkspaceMember",
         entityId: targetMember._id,
         metadata: {
-          userId: targetMember.user,
-          from: previousRole,
-          to: role,
+          workspaceId: workspace._id,
+          memberName: member.name,
+          previousRole,
+          newRole: role,
         },
       },
       { session },
@@ -684,6 +703,12 @@ const removeMember = async (userId, workspaceId, memberId) => {
     throw new ApiError(409, "Workspace owner cannot remove themselves.");
   }
 
+  const member = await userRepository.findUserById(targetMember.user);
+
+  if (!member) {
+    throw new ApiError(404, "User not found.");
+  }
+
   const session = await mongoose.startSession();
 
   try {
@@ -699,7 +724,8 @@ const removeMember = async (userId, workspaceId, memberId) => {
         entityType: "WorkspaceMember",
         entityId: targetMember._id,
         metadata: {
-          userId: targetMember.user,
+          workspaceId,
+          memberName: member.name,
           role: targetMember.role,
         },
       },
@@ -754,6 +780,12 @@ const leaveWorkspace = async (userId, workspaceId) => {
     );
   }
 
+  const user = await userRepository.findUserById(userId);
+
+  if (!user) {
+    throw new ApiError(404, "User not found.");
+  }
+
   const session = await mongoose.startSession();
 
   try {
@@ -769,6 +801,8 @@ const leaveWorkspace = async (userId, workspaceId) => {
         entityType: "WorkspaceMember",
         entityId: membership._id,
         metadata: {
+          workspaceId,
+          memberName: user.name,
           role: membership.role,
         },
       },
@@ -836,7 +870,7 @@ const workspaceService = {
   updateMemberRole,
   removeMember,
   leaveWorkspace,
-  getWorkspaceOverview
+  getWorkspaceOverview,
 };
 
 export default workspaceService;
