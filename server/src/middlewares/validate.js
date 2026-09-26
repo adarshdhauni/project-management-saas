@@ -12,7 +12,7 @@ const validate = (schemas = {}) => {
       }
 
       if (query) {
-        req.query = query.parse(req.query);
+        query.parse(req.query);
       }
 
       next();
@@ -22,4 +22,4 @@ const validate = (schemas = {}) => {
   };
 };
 
-export default validate
+export default validate;
