@@ -16,7 +16,6 @@ const NotificationItem = ({
   const { title, description } = getNotificationContent(notification);
 
   const isInvitation = notification.type === "workspace.invited";
-
   const isCompact = variant === "compact";
 
   return (

@@ -50,6 +50,7 @@ export const getNotificationPath = (notification) => {
   switch (notification.type) {
     case "workspace.invited":
       return null;
+
     case "task.assigned":
       return notification.metadata?.projectId
         ? `/dashboard/workspaces/${notification.workspace}/projects/${notification.metadata.projectId}/tasks/${notification.entityId}`

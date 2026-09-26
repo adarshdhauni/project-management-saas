@@ -1,5 +1,5 @@
 import { Bell, Check } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import {
   DropdownMenu,
@@ -18,6 +18,7 @@ import {
   useMarkAllNotificationsAsReadMutation,
   useMarkNotificationAsReadMutation,
 } from "@/features/notification/notificationApi";
+
 import {
   useAcceptInvitationMutation,
   useDeclineInvitationMutation,
@@ -25,9 +26,11 @@ import {
 
 import { toast } from "../ui/toast";
 import NotificationItem from "@/features/notification/components/NotificationItem";
+import { getNotificationPath } from "@/utils/notification";
 
 const NotificationMenu = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const { data, isLoading, isError, isFetching, refetch } =
     useGetNotificationsQuery({
@@ -47,7 +50,6 @@ const NotificationMenu = () => {
     useDeclineInvitationMutation();
 
   const notifications = data?.data?.notifications ?? [];
-
   const unreadCount = data?.data?.unreadCount ?? 0;
 
   const isNotificationsPage = location.pathname === "/dashboard/notifications";
@@ -70,26 +72,10 @@ const NotificationMenu = () => {
         await markNotificationAsRead(notification._id).unwrap();
       }
 
-      switch (notification.type) {
-        case "task.assigned":
-          navigate(
-            `/dashboard/workspaces/${notification.workspace}/tasks/${notification.entityId}`,
-          );
-          break;
+      const path = getNotificationPath(notification);
 
-        case "workspace.invited":
-          break;
-
-        case "member.role_changed":
-          navigate(`/dashboard/workspaces/${notification.workspace}/members`);
-          break;
-
-        case "member.removed":
-          navigate("/dashboard");
-          break;
-
-        default:
-          break;
+      if (path) {
+        navigate(path);
       }
     } catch (error) {
       toast.add({
@@ -237,7 +223,6 @@ const NotificationMenu = () => {
                 <div className="min-w-0 flex-1 space-y-2">
                   <div className="flex items-center justify-between gap-2">
                     <Skeleton className="h-3.5 w-4/5 rounded-md" />
-
                     <Skeleton className="h-3 w-9 shrink-0 rounded-md" />
                   </div>
 
@@ -266,20 +251,18 @@ const NotificationMenu = () => {
           </div>
         ) : (
           <div className="space-y-1">
-            <div className="space-y-1">
-              {notifications.map((notification) => (
-                <NotificationItem
-                  key={notification._id}
-                  notification={notification}
-                  onClick={handleNotificationClick}
-                  onAccept={handleAcceptInvitation}
-                  onDecline={handleDeclineInvitation}
-                  isAccepting={isAccepting}
-                  isDeclining={isDeclining}
-                  variant="compact"
-                />
-              ))}
-            </div>
+            {notifications.map((notification) => (
+              <NotificationItem
+                key={notification._id}
+                notification={notification}
+                onClick={handleNotificationClick}
+                onAccept={handleAcceptInvitation}
+                onDecline={handleDeclineInvitation}
+                isAccepting={isAccepting}
+                isDeclining={isDeclining}
+                variant="compact"
+              />
+            ))}
           </div>
         )}
 

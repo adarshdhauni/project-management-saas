@@ -83,6 +83,7 @@ const Workspace = () => {
       user: activity.user?.name ?? "Someone",
       action: content.action,
       target: content.target,
+      to: content.to,
       time: formatRelativeTime(activity.createdAt),
       icon: content.icon,
     };

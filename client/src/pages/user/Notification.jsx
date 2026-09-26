@@ -24,6 +24,7 @@ import {
 import NotificationItem from "@/features/notification/components/NotificationItem";
 import { toast } from "@/components/ui/toast";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { getNotificationPath } from "@/utils/notification";
 
 const Notifications = () => {
   const navigate = useNavigate();
@@ -78,26 +79,10 @@ const Notifications = () => {
         await markNotificationAsRead(notification._id).unwrap();
       }
 
-      switch (notification.type) {
-        case "task.assigned":
-          navigate(
-            `/dashboard/workspaces/${notification.workspace}/tasks/${notification.entityId}`,
-          );
-          break;
+      const path = getNotificationPath(notification);
 
-        case "workspace.invited":
-          break;
-
-        case "member.role_changed":
-          navigate(`/dashboard/workspaces/${notification.workspace}/members`);
-          break;
-
-        case "member.removed":
-          navigate("/dashboard");
-          break;
-
-        default:
-          break;
+      if (path) {
+        navigate(path);
       }
     } catch (error) {
       toast.add({
