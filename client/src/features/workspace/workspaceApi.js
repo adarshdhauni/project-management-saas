@@ -8,7 +8,7 @@ const workspaceApi = apiSlice.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      invalidatesTags: ["Workspace"],
+      invalidatesTags: ["Workspace", "Activity"],
     }),
     getWorkspaces: builder.query({
       query: () => ({
@@ -30,21 +30,21 @@ const workspaceApi = apiSlice.injectEndpoints({
         method: "PATCH",
         body: data,
       }),
-      invalidatesTags: ["Workspace"],
+      invalidatesTags: ["Workspace", "Activity"],
     }),
     deleteWorkspace: builder.mutation({
       query: (id) => ({
         url: `/api/v1/workspaces/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Workspace"],
+      invalidatesTags: ["Workspace", "Activity"],
     }),
     acceptInvitation: builder.mutation({
       query: (invitationId) => ({
         url: `/api/v1/workspaces/invitations/${invitationId}/accept`,
         method: "POST",
       }),
-      invalidatesTags: ["Workspace", "Notification"],
+      invalidatesTags: ["Workspace", "Notification", "Activity"],
     }),
 
     declineInvitation: builder.mutation({
@@ -52,7 +52,7 @@ const workspaceApi = apiSlice.injectEndpoints({
         url: `/api/v1/workspaces/invitations/${invitationId}/decline`,
         method: "POST",
       }),
-      invalidatesTags: ["Workspace", "Notification"],
+      invalidatesTags: ["Workspace", "Notification", "Activity"],
     }),
 
     getWorkspaceOverview: builder.query({

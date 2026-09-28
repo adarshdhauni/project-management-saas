@@ -35,12 +35,14 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import DeleteDialog from "@/features/project/components/DeleteDialog";
 
 const Workspace = () => {
   const { workspaceId } = useParams();
 
   const [isProjectDialogOpen, setIsProjectDialogOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const { data, isLoading, isFetching, isError, error, refetch } =
     useGetWorkspaceOverviewQuery(workspaceId);
@@ -98,6 +100,12 @@ const Workspace = () => {
     setSelectedProject(null);
     setIsProjectDialogOpen(true);
   };
+
+  const handleDeleteProject = (project) => {
+    setSelectedProject(project);
+    setIsDeleteDialogOpen(true);
+  };
+
   if (isLoading) {
     return <WorkspaceSkeleton />;
   }
@@ -411,6 +419,12 @@ const Workspace = () => {
         onOpenChange={setIsProjectDialogOpen}
         workspaceId={workspaceId}
         project={selectedProject}
+      />
+
+      <DeleteDialog
+        isDeleteDialogOpen={isDeleteDialogOpen}
+        setIsDeleteDialogOpen={setIsDeleteDialogOpen}
+        selectedProject={selectedProject}
       />
     </div>
   );

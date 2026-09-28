@@ -313,13 +313,17 @@ const Notifications = () => {
                     <PaginationItem>
                       <PaginationPrevious
                         href="#"
-
                         onClick={(event) => {
                           event.preventDefault();
 
                           if (page > 1 && !isFetching) {
                             setSearchParams((params) => {
-                              params.set("page", String(page - 1));
+                              if (page - 1 === 1) {
+                                params.delete("page");
+                              } else {
+                                params.set("page", String(page - 1));
+                              }
+
                               return params;
                             });
                           }
@@ -345,12 +349,21 @@ const Notifications = () => {
 
                             if (page !== pageNumber && !isFetching) {
                               setSearchParams((params) => {
-                                params.set("page", String(pageNumber));
+                                if (pageNumber === 1) {
+                                  params.delete("page");
+                                } else {
+                                  params.set("page", String(pageNumber));
+                                }
+
                                 return params;
                               });
                             }
                           }}
-                          className="cursor-pointer"
+                          className={
+                            isFetching
+                              ? "pointer-events-none cursor-default opacity-60"
+                              : "cursor-pointer"
+                          }
                         >
                           {pageNumber}
                         </PaginationLink>
@@ -360,7 +373,6 @@ const Notifications = () => {
                     <PaginationItem>
                       <PaginationNext
                         href="#"
-
                         onClick={(event) => {
                           event.preventDefault();
 
