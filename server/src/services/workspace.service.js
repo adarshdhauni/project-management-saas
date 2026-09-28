@@ -540,7 +540,7 @@ const getMyPendingInvitations = async (userId) => {
   return pendingInvitations;
 };
 
-const getWorkspaceMembers = async (userId, workspaceId) => {
+const getWorkspaceMembers = async (userId, workspaceId, filter = {}) => {
   const workspace = await workspaceRepository.findById(workspaceId);
 
   if (!workspace) {
@@ -556,8 +556,10 @@ const getWorkspaceMembers = async (userId, workspaceId) => {
     throw new ApiError(403, "You do not have access to this workspace.");
   }
 
-  const workspaceMembers =
-    await workspaceMemberRepository.findAllByWorkspace(workspaceId);
+  const workspaceMembers = await workspaceMemberRepository.findAllByWorkspace(
+    workspaceId,
+    filter,
+  );
 
   return workspaceMembers;
 };

@@ -79,6 +79,17 @@ const workspaceApi = apiSlice.injectEndpoints({
       }),
       providesTags: ["Activity"],
     }),
+
+    getWorkspaceMembers: builder.query({
+      query: ({ workspaceId, page = 1, limit = 20 }) => ({
+        url: `/api/v1/workspaces/${workspaceId}/activities`,
+        params: {
+          page,
+          limit,
+        },
+      }),
+      providesTags: ["Activity"],
+    }),
   }),
 });
 

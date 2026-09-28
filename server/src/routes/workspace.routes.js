@@ -14,6 +14,7 @@ import createProjectSchema from "../validators/project/create-project.schema.js"
 import projectController from "../controllers/project.controller.js";
 import getActivitiesSchema from "../validators/activity/get-activity.schema.js";
 import activityController from "../controllers/activity.controller.js";
+import getMembersSchema from "../validators/workspace/get-member.schema.js";
 
 const router = express.Router();
 
@@ -85,6 +86,9 @@ router.get(
   protect,
   validate({
     params: workspaceIdSchema,
+  }),
+  validate({
+    query: getMembersSchema,
   }),
   workspaceController.getWorkspaceMembers,
 );

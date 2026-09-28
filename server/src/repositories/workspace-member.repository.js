@@ -24,12 +24,86 @@ const findByWorkspaceAndUser = (workspaceId, userId, options = {}) => {
   );
 };
 
-const findAllByWorkspace = (workspaceId, options = {}) => {
-  return WorkspaceMember.find(
-    { workspace: workspaceId },
-    null,
-    options,
-  ).populate("user", "name email");
+const findAllByWorkspace = async (workspaceId, filters = {}, options = {}) => {
+  const { page = 1, limit = 20, search = "" } = filters;
+
+  const skip = (page - 1) * limit;
+
+  const pipeline = [
+    {
+      $match: {
+        workspace: new mongoose.Types.ObjectId(workspaceId),
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "user",
+        foreignField: "_id",
+        as: "user",
+      },
+    },
+
+    {
+      $unwind: "$user",
+    },
+    {
+      $project: {
+        workspace: 1,
+        role: 1,
+        createdAt: 1,
+        updatedAt: 1,
+        user: {
+          _id: "$user._id",
+          name: "$user.name",
+          email: "$user.email",
+          avatar: "$user.avatar",
+        },
+      },
+    },
+  ];
+
+  if (search.trim()) {
+    const searchRegex = new RegExp(search.trim(), "i");
+
+    pipeline.push({
+      $match: {
+        $or: [{ "user.name": searchRegex }, { "user.email": searchRegex }],
+      },
+    });
+  }
+
+  pipeline.push(
+    {
+      $sort: {
+        createdAt: 1,
+      },
+    },
+    {
+      $facet: {
+        members: [{ $skip: skip }, { $limit: limit }],
+        total: [{ $count: "count" }],
+      },
+    },
+  );
+
+  const [result] = await WorkspaceMember.aggregate(pipeline).option(options);
+
+  const members = result?.members ?? [];
+  const total = result?.total?.[0]?.count ?? 0;
+  const totalPages = Math.ceil(total / limit);
+
+  return {
+    members,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPreviousPage: page > 1,
+    },
+  };
 };
 
 const findAllByUser = (userId, options = {}) => {
@@ -77,7 +151,7 @@ const workspaceMemberRepository = {
   updateById,
   deleteById,
   deleteAllByWorkspace,
-  countByWorkspace
+  countByWorkspace,
 };
 
 export default workspaceMemberRepository;

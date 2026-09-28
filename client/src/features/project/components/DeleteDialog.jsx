@@ -20,22 +20,13 @@ const DeleteDialog = ({
   setIsDeleteDialogOpen,
   selectedProject,
 }) => {
-  const [deleteProject, { isLoading: isDeleting, error }] = useDeleteProjectMutation(
-    selectedProject?._id,
-  );
-
-  console.log(error)
-
-  console.log(selectedProject?._id)
+  const [deleteProject, { isLoading: isDeleting }] = useDeleteProjectMutation();
 
   const handleDeleteProject = async () => {
     if (!selectedProject?._id) return;
 
     try {
-      await deleteProject({
-        workspaceId: selectedProject.workspace,
-        projectId: selectedProject._id,
-      }).unwrap();
+      await deleteProject(selectedProject._id).unwrap();
 
       toast.add({
         type: "success",

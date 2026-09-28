@@ -117,6 +117,7 @@ const getWorkspaceMembers = asyncHandler(async (req, res) => {
   const members = await workspaceService.getWorkspaceMembers(
     req.user._id,
     req.params.workspaceId,
+    req.validatedQuery
   );
 
   return res
