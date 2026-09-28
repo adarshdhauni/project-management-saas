@@ -165,4 +165,5 @@ router.get(
   activityController.getActivities,
 );
 
+
 export default router;
