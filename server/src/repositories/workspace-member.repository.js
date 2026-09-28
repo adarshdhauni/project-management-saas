@@ -87,7 +87,7 @@ const findAllByWorkspace = async (workspaceId, filters = {}, options = {}) => {
     },
   );
 
-  const [result] = await WorkspaceMember.aggregate(pipeline).option(options);
+  const [result] = await WorkspaceMember.aggregate(pipeline);
 
   const members = result?.members ?? [];
   const total = result?.total?.[0]?.count ?? 0;
