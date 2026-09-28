@@ -22,13 +22,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import ErrorState from "@/components/error-state";
+import ErrorState from "@/components/feedback/error/ErrorState";
 
-import { useGetWorkspaceMembersQuery } from "../workspaceApi";
+import { useGetWorkspaceMembersQuery } from "@/features/workspace/workspaceApi";
 import { formatRelativeTime } from "@/utils/date";
 
 const MembersPage = () => {
   const { workspaceId } = useParams();
+
+  const [isRetrying, setIsRetrying] = useState(false);
 
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -61,13 +63,15 @@ const MembersPage = () => {
     return () => clearTimeout(timeout);
   }, [search, setSearchParams]);
 
-  const { data, isLoading, isError, isFetching, refetch } =
+  const { data, isLoading, isError, error, isFetching, refetch } =
     useGetWorkspaceMembersQuery({
       workspaceId,
       page,
       limit,
       search: searchParam,
     });
+
+  console.log(error);
 
   const members = data?.data?.members ?? [];
   const pagination = data?.data?.pagination;
@@ -117,6 +121,17 @@ const MembersPage = () => {
       params.set("page", String(page + 1));
       return params;
     });
+  };
+
+  const handleRetry = async () => {
+    setIsRetrying(true);
+
+    try {
+      await refetch().unwrap();
+    } catch {
+    } finally {
+      setIsRetrying(false);
+    }
   };
 
   return (
@@ -175,15 +190,15 @@ const MembersPage = () => {
               </div>
             ))}
           </div>
-        ) : isError ? (
+        ) : isError || isRetrying ? (
           <ErrorState
             title="Couldn't load members"
             description="We couldn't load the workspace members. Please try again."
-            onRetry={refetch}
-            isRetrying={isFetching}
+            onRetry={handleRetry}
+            isRetrying={isRetrying}
             className="py-16"
           />
-        ) : members.length === 0 ? (
+        ) : members.length === 0 && !isFetching ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
               <Users className="h-5 w-5 text-muted-foreground" />
