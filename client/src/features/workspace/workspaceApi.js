@@ -81,14 +81,15 @@ const workspaceApi = apiSlice.injectEndpoints({
     }),
 
     getWorkspaceMembers: builder.query({
-      query: ({ workspaceId, page = 1, limit = 20 }) => ({
-        url: `/api/v1/workspaces/${workspaceId}/activities`,
+      query: ({ workspaceId, page = 1, limit = 20, search = "" }) => ({
+        url: `/api/v1/workspaces/${workspaceId}/members`,
         params: {
           page,
           limit,
+          search,
         },
       }),
-      providesTags: ["Activity"],
+      providesTags: ["WorkspaceMember"],
     }),
   }),
 });
@@ -103,4 +104,5 @@ export const {
   useDeclineInvitationMutation,
   useGetWorkspaceOverviewQuery,
   useGetActivitiesQuery,
+  useGetWorkspaceMembersQuery,
 } = workspaceApi;

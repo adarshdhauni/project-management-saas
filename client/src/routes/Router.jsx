@@ -13,6 +13,7 @@ const Settings = lazy(() => import("@/pages/user/Settings"));
 const Workspace = lazy(() => import("@/pages/user/Workspace"));
 const Projects = lazy(() => import("@/pages/user/Projects"));
 const Activity = lazy(() => import("@/pages/user/Activity"));
+const MembersPage = lazy(() => import("@/pages/user/MembersPage"));
 
 import ProtectedRoute from "./ProtectedRoute";
 
@@ -94,6 +95,10 @@ const router = createBrowserRouter([
                       {
                         path: "activity",
                         element: <Activity />,
+                      },
+                      {
+                        path: "members",
+                        element: <MembersPage />,
                       },
                       // {
                       //   path: "tasks",
