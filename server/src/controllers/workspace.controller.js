@@ -114,10 +114,11 @@ const getMyPendingInvitations = asyncHandler(async (req, res) => {
 });
 
 const getWorkspaceMembers = asyncHandler(async (req, res) => {
+  console.log("recieved");
   const members = await workspaceService.getWorkspaceMembers(
     req.user._id,
     req.params.workspaceId,
-    req.validatedQuery
+    req.validatedQuery,
   );
 
   return res
@@ -159,7 +160,10 @@ const leaveWorkspace = asyncHandler(async (req, res) => {
 });
 
 const getWorkspaceOverview = asyncHandler(async (req, res) => {
-  const data = await workspaceService.getWorkspaceOverview(req.params.workspaceId, req.user._id);
+  const data = await workspaceService.getWorkspaceOverview(
+    req.params.workspaceId,
+    req.user._id,
+  );
 
   res
     .status(200)
@@ -180,7 +184,7 @@ const workspaceController = {
   updateMemberRole,
   removeMember,
   leaveWorkspace,
-  getWorkspaceOverview
+  getWorkspaceOverview,
 };
 
 export default workspaceController;

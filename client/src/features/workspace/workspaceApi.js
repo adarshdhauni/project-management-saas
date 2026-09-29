@@ -72,6 +72,7 @@ const workspaceApi = apiSlice.injectEndpoints({
     getActivities: builder.query({
       query: ({ workspaceId, page = 1, limit = 20 }) => ({
         url: `/api/v1/workspaces/${workspaceId}/activities`,
+        method: "GET",
         params: {
           page,
           limit,
@@ -83,6 +84,7 @@ const workspaceApi = apiSlice.injectEndpoints({
     getWorkspaceMembers: builder.query({
       query: ({ workspaceId, page = 1, limit = 20, search = "" }) => ({
         url: `/api/v1/workspaces/${workspaceId}/members`,
+        method: "GET",
         params: {
           page,
           limit,
