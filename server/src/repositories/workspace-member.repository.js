@@ -1,4 +1,5 @@
 import WorkspaceMember from "../models/workspace-member.model.js";
+import mongoose from "mongoose"
 
 const create = async (memberData, options = {}) => {
   const [member] = await WorkspaceMember.create([memberData], options);

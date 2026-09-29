@@ -114,7 +114,6 @@ const getMyPendingInvitations = asyncHandler(async (req, res) => {
 });
 
 const getWorkspaceMembers = asyncHandler(async (req, res) => {
-  console.log("recieved");
   const members = await workspaceService.getWorkspaceMembers(
     req.user._id,
     req.params.workspaceId,
