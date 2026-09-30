@@ -49,7 +49,7 @@ const workspaceApi = apiSlice.injectEndpoints({
 
     declineInvitation: builder.mutation({
       query: (invitationId) => ({
-        url: `/api/v1/workspaces/invitations/${invitationId}/decline`,
+        url: `/api/v1/workspaces/invitations/${invitationId}/reject`,
         method: "POST",
       }),
       invalidatesTags: ["Workspace", "Notification", "Activity"],
@@ -93,6 +93,32 @@ const workspaceApi = apiSlice.injectEndpoints({
       }),
       providesTags: ["WorkspaceMember"],
     }),
+
+    inviteWorkspaceMember: builder.mutation({
+      query: ({ workspaceId, data }) => ({
+        url: `/api/v1/workspaces/${workspaceId}/invite`,
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["WorkspaceMember"],
+    }),
+
+    updateMemberRole: builder.mutation({
+      query: ({ workspaceId, memberId, data }) => ({
+        url: `/api/v1/workspaces/${workspaceId}/members/${memberId}`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: ["WorkspaceMember"],
+    }),
+
+    removeWorkspaceMember: builder.mutation({
+      query: ({ workspaceId, memberId }) => ({
+        url: `/api/v1/workspaces/${workspaceId}/members/${memberId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["WorkspaceMember"],
+    }),
   }),
 });
 
@@ -107,4 +133,7 @@ export const {
   useGetWorkspaceOverviewQuery,
   useGetActivitiesQuery,
   useGetWorkspaceMembersQuery,
+  useInviteWorkspaceMemberMutation,
+  useUpdateMemberRoleMutation,
+  useRemoveWorkspaceMemberMutation,
 } = workspaceApi;

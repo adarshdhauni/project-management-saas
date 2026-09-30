@@ -7,7 +7,7 @@ const inviteMemberSchema = z
       .trim()
       .toLowerCase(),
 
-    role: z.enum(["admin", "member"]).optional(),
+    role: z.enum(["admin", "member"]).default("member"),
   })
   .strict();
 

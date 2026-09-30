@@ -547,12 +547,12 @@ const getWorkspaceMembers = async (userId, workspaceId, filter = {}) => {
     throw new ApiError(404, "Workspace not found.");
   }
 
-  const isMember = await workspaceMemberRepository.findByWorkspaceAndUser(
+  const currentMember = await workspaceMemberRepository.findByWorkspaceAndUser(
     workspaceId,
     userId,
   );
 
-  if (!isMember) {
+  if (!currentMember) {
     throw new ApiError(403, "You do not have access to this workspace.");
   }
 
@@ -561,7 +561,10 @@ const getWorkspaceMembers = async (userId, workspaceId, filter = {}) => {
     filter,
   );
 
-  return workspaceMembers;
+  return {
+    ...workspaceMembers,
+    currentUserRole: currentMember.role,
+  };
 };
 
 const updateMemberRole = async (userId, workspaceId, memberId, role) => {
@@ -683,8 +686,14 @@ const removeMember = async (userId, workspaceId, memberId) => {
     throw new ApiError(403, "You do not have access to this workspace.");
   }
 
-  if (requesterMembership.role !== "owner") {
-    throw new ApiError(403, "Only the workspace owner can remove a member.");
+  if (
+    requesterMembership.role !== "owner" &&
+    requesterMembership.role !== "admin"
+  ) {
+    throw new ApiError(
+      403,
+      "Only workspace owners and admins can remove members.",
+    );
   }
 
   const targetMember = await workspaceMemberRepository.findById(memberId);
@@ -701,8 +710,12 @@ const removeMember = async (userId, workspaceId, memberId) => {
     throw new ApiError(409, "Owner cannot be removed.");
   }
 
+  if (requesterMembership.role === "admin" && targetMember.role === "admin") {
+    throw new ApiError(403, "Admins cannot remove other admins.");
+  }
+
   if (targetMember.user.equals(userId)) {
-    throw new ApiError(409, "Workspace owner cannot remove themselves.");
+    throw new ApiError(409, "You cannot remove yourself from the workspace.");
   }
 
   const member = await userRepository.findUserById(targetMember.user);
