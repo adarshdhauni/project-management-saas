@@ -21,7 +21,8 @@ const validate = (schemas = {}) => {
 
       next();
     } catch (error) {
-      console.log("VALIDATION ERROR:", error.issues);
+      console.log("VALIDATION ERROR:", error);
+      console.log("ISSUES:", error.issues);
       next(error);
     }
   };
