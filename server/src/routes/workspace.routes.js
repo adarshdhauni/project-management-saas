@@ -18,8 +18,6 @@ import getMembersSchema from "../validators/workspace/get-member.schema.js";
 
 const router = express.Router();
 
-console.log(updateMemberRoleSchema.safeParse({ role: "admin" }));
-
 router.post(
   "/",
   protect,

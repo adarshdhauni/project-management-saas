@@ -1,12 +1,15 @@
 const validate = (schemas = {}) => {
   return (req, res, next) => {
+    console.log("🔥 NEW VALIDATE MIDDLEWARE");
+
     try {
       const { body, params, query } = schemas;
 
       if (body) {
-        console.log("BACKEND BODY:", req.body);
-        console.log("BACKEND ROLE:", req.body?.role);
-        console.log("ROLE TYPE:", typeof req.body?.role);
+        console.log("🔥 BODY VALIDATION");
+        console.log("BODY:", req.body);
+        console.log("ROLE:", req.body?.role);
+        console.log("TYPE:", typeof req.body?.role);
 
         req.body = body.parse(req.body);
       }
@@ -21,8 +24,7 @@ const validate = (schemas = {}) => {
 
       next();
     } catch (error) {
-      console.log("VALIDATION ERROR:", error);
-      console.log("ISSUES:", error.issues);
+      console.log("🔥 VALIDATION ERROR", error);
       next(error);
     }
   };
