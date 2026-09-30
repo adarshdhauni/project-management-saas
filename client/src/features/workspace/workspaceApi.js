@@ -104,10 +104,10 @@ const workspaceApi = apiSlice.injectEndpoints({
     }),
 
     updateMemberRole: builder.mutation({
-      query: ({ workspaceId, memberId, data }) => ({
+      query: ({ workspaceId, memberId, role }) => ({
         url: `/api/v1/workspaces/${workspaceId}/members/${memberId}`,
         method: "PATCH",
-        body: data,
+        body: { role },
       }),
       invalidatesTags: ["WorkspaceMember"],
     }),

@@ -4,6 +4,10 @@ const validate = (schemas = {}) => {
       const { body, params, query } = schemas;
 
       if (body) {
+        console.log("BACKEND BODY:", req.body);
+        console.log("BACKEND ROLE:", req.body?.role);
+        console.log("ROLE TYPE:", typeof req.body?.role);
+
         req.body = body.parse(req.body);
       }
 
@@ -17,6 +21,7 @@ const validate = (schemas = {}) => {
 
       next();
     } catch (error) {
+      console.log("VALIDATION ERROR:", error.issues);
       next(error);
     }
   };

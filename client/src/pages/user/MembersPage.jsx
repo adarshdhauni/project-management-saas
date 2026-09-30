@@ -35,12 +35,16 @@ import ErrorState from "@/components/feedback/error/ErrorState";
 import { useGetWorkspaceMembersQuery } from "@/features/workspace/workspaceApi";
 import { formatRelativeTime } from "@/utils/date";
 import InviteMemberDialog from "@/features/workspace/components/InviteMemberDialog";
+import UpdateMemberRoleDialog from "@/features/workspace/components/UpdateMemberRoleDialog";
 
 const MembersPage = () => {
   const { workspaceId } = useParams();
 
   const [isRetrying, setIsRetrying] = useState(false);
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
+  const [isUpdateMemberRoleDialogOpen, setIsUpdateMemberRoleDialogOpen] =
+    useState(false);
+  const [selectedMember, setSelectedMember] = useState(null);
 
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -240,9 +244,11 @@ const MembersPage = () => {
                   currentUserRole === "owner" && member.role !== "owner";
 
                 const canRemoveMember =
-                  (currentUserRole === "owner" ||
-                    currentUserRole === "admin") &&
-                  member.role !== "owner";
+                  currentUserRole === "owner"
+                    ? member.role !== "owner"
+                    : currentUserRole === "admin"
+                      ? member.role === "member"
+                      : false;
 
                 const canManageMember = canChangeRole || canRemoveMember;
 
@@ -308,7 +314,13 @@ const MembersPage = () => {
                           align="end"
                           className="w-44 rounded-xl p-1.5"
                         >
-                          <DropdownMenuItem className="cursor-pointer gap-2 rounded-lg px-2.5 py-2">
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setSelectedMember(member);
+                              setIsUpdateMemberRoleDialogOpen(true);
+                            }}
+                            className="cursor-pointer gap-2 rounded-lg px-2.5 py-2"
+                          >
                             <Pencil className="h-4 w-4" />
                             <span>Change role</span>
                           </DropdownMenuItem>
@@ -397,6 +409,13 @@ const MembersPage = () => {
         open={isInviteDialogOpen}
         onOpenChange={setIsInviteDialogOpen}
         workspaceId={workspaceId}
+      />
+
+      <UpdateMemberRoleDialog
+        open={isUpdateMemberRoleDialogOpen}
+        onOpenChange={setIsUpdateMemberRoleDialogOpen}
+        workspaceId={workspaceId}
+        member={selectedMember}
       />
     </div>
   );
