@@ -22,7 +22,9 @@ const Login = () => {
 
   const [showPassword, setShowPassword] = useState(false);
 
-  const [loginUser, { isLoading: isSigningIn }] = useLoginUserMutation();
+  const [loginUser, { isLoading: isSigningIn, error }] = useLoginUserMutation();
+
+  console.log(error)
 
   const handleChange = (e) => {
     setUserData((prev) => ({ ...prev, [e.target.id]: e.target.value }));
