@@ -97,7 +97,7 @@ const Activity = () => {
   };
 
   return (
-    <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Activity</h1>
 

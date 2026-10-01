@@ -36,6 +36,7 @@ import { useGetWorkspaceMembersQuery } from "@/features/workspace/workspaceApi";
 import { formatRelativeTime } from "@/utils/date";
 import InviteMemberDialog from "@/features/workspace/components/InviteMemberDialog";
 import UpdateMemberRoleDialog from "@/features/workspace/components/UpdateMemberRoleDialog";
+import RemoveMemberDialog from "@/features/workspace/components/RemoveMemberDialog";
 
 const MembersPage = () => {
   const { workspaceId } = useParams();
@@ -44,6 +45,8 @@ const MembersPage = () => {
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
   const [isUpdateMemberRoleDialogOpen, setIsUpdateMemberRoleDialogOpen] =
     useState(false);
+  const [isRemoveDialogOpen, setIsRemoveDialogOpen] = useState(false);
+
   const [selectedMember, setSelectedMember] = useState(null);
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -328,6 +331,10 @@ const MembersPage = () => {
                           <DropdownMenuSeparator className="my-1.5" />
 
                           <DropdownMenuItem
+                            onClick={() => {
+                              setSelectedMember(member);
+                              setIsRemoveDialogOpen(true);
+                            }}
                             variant="destructive"
                             className="cursor-pointer gap-2 rounded-lg px-2.5 py-2 whitespace-nowrap"
                           >
@@ -416,6 +423,13 @@ const MembersPage = () => {
         onOpenChange={setIsUpdateMemberRoleDialogOpen}
         workspaceId={workspaceId}
         member={selectedMember}
+      />
+
+      <RemoveMemberDialog
+        isRemoveDialogOpen={isRemoveDialogOpen}
+        setIsRemoveDialogOpen={setIsRemoveDialogOpen}
+        selectedMember={selectedMember}
+        workspaceId={workspaceId}
       />
     </div>
   );

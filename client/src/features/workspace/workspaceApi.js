@@ -119,6 +119,14 @@ const workspaceApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["WorkspaceMember"],
     }),
+
+    getMyWorkspaceMembership: builder.query({
+      query: (workspaceId) => ({
+        url: `/api/v1/workspaces/${workspaceId}/membership`,
+        method: "GET",
+      }),
+      providesTags: ["WorkspaceMember"],
+    }),
   }),
 });
 
@@ -136,4 +144,5 @@ export const {
   useInviteWorkspaceMemberMutation,
   useUpdateMemberRoleMutation,
   useRemoveWorkspaceMemberMutation,
+  useGetMyWorkspaceMembershipQuery,
 } = workspaceApi;

@@ -871,6 +871,29 @@ export const getWorkspaceOverview = async (workspaceId, userId) => {
   };
 };
 
+const getMyWorkspaceMembership = async (userId, workspaceId) => {
+  const workspace = await workspaceRepository.findById(workspaceId);
+
+  if (!workspace) {
+    throw new ApiError(404, "Workspace not found.");
+  }
+
+  const membership = await workspaceMemberRepository.findByWorkspaceAndUser(
+    workspaceId,
+    userId,
+  );
+
+  if (!membership) {
+    throw new ApiError(403, "You do not have access to this workspace.");
+  }
+
+  return {
+    _id: membership._id,
+    workspace: membership.workspace,
+    role: membership.role,
+  };
+};
+
 const workspaceService = {
   createWorkspace,
   getUserWorkspaces,
@@ -886,6 +909,7 @@ const workspaceService = {
   removeMember,
   leaveWorkspace,
   getWorkspaceOverview,
+  getMyWorkspaceMembership,
 };
 
 export default workspaceService;

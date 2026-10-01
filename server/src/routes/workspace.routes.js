@@ -132,6 +132,13 @@ router.get(
   workspaceController.getWorkspaceOverview,
 );
 
+router.get(
+  "/:workspaceId/membership",
+  protect,
+  validate({ params: workspaceIdSchema }),
+  workspaceController.getMyWorkspaceMembership,
+);
+
 router.post(
   "/:workspaceId/projects",
   protect,

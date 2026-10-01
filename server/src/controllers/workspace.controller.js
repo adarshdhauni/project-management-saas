@@ -169,6 +169,19 @@ const getWorkspaceOverview = asyncHandler(async (req, res) => {
     .json(new ApiResponse(data, "Workspace overview fetched successfully"));
 });
 
+const getMyWorkspaceMembership = asyncHandler(async (req, res) => {
+  const membership = await workspaceService.getMyWorkspaceMembership(
+    req.user._id,
+    req.params.workspaceId,
+  );
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(membership, "Workspace membership fetched successfully."),
+    );
+});
+
 const workspaceController = {
   createWorkspace,
   getUserWorkspaces,
@@ -184,6 +197,7 @@ const workspaceController = {
   removeMember,
   leaveWorkspace,
   getWorkspaceOverview,
+  getMyWorkspaceMembership
 };
 
 export default workspaceController;
