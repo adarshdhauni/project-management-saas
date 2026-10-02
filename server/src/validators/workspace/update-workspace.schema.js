@@ -15,7 +15,7 @@ const updateWorkspaceSchema = z
       .max(500, "Description cannot exceed 500 characters.")
       .optional(),
 
-    logo: z.string().trim().url().optional(),
+    logo: z.url().trim().optional(),
   })
   .strict()
   .refine(

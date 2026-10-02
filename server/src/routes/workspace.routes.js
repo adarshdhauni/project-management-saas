@@ -15,6 +15,7 @@ import projectController from "../controllers/project.controller.js";
 import getActivitiesSchema from "../validators/activity/get-activity.schema.js";
 import activityController from "../controllers/activity.controller.js";
 import getMembersSchema from "../validators/workspace/get-member.schema.js";
+import transferOwnershipSchema from "../validators/workspace/transfer-ownership.schema.js";
 
 const router = express.Router();
 
@@ -137,6 +138,16 @@ router.get(
   protect,
   validate({ params: workspaceIdSchema }),
   workspaceController.getMyWorkspaceMembership,
+);
+
+router.patch(
+  "/:workspaceId/transfer-ownership",
+  protect,
+  validate({
+    params: workspaceIdSchema,
+    body: transferOwnershipSchema,
+  }),
+  workspaceController.transferWorkspaceOwnership,
 );
 
 router.post(

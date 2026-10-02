@@ -19,6 +19,7 @@ const activitySchema = new mongoose.Schema(
         "workspace.created",
         "workspace.updated",
         "workspace.deleted",
+        "workspace.ownership_transferred",
 
         "project.created",
         "project.updated",

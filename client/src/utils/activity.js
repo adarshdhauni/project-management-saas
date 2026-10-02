@@ -42,6 +42,18 @@ export const getActivityContent = (activity) => {
       };
     }
 
+    case "workspace.ownership_transferred":
+      return {
+        action: "transferred workspace ownership",
+        target: `from "${metadata.previousOwnerName ?? "Unknown"}" to "${
+          metadata.newOwnerName ?? "Unknown"
+        }"`,
+        to: metadata.workspaceId
+          ? `/dashboard/workspaces/${metadata.workspaceId}`
+          : null,
+        icon: Users,
+      };
+
     case "workspace.deleted":
       return {
         action: "deleted the workspace",

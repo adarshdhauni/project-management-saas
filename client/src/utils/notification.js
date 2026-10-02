@@ -18,15 +18,23 @@ export const getNotificationContent = (notification) => {
         } assigned you "${notification.metadata?.taskTitle ?? "a task"}".`,
       };
 
-    case "member.role_changed":
+    case "member.role_changed": {
+      const previousRole = notification.metadata?.previousRole;
+      const newRole = notification.metadata?.newRole;
+      const isOwnershipTransfer =
+        previousRole === "owner" && newRole === "admin";
+
       return {
-        title: "Your workspace role was changed",
-        description: `${
-          notification.actor?.name ?? "Someone"
-        } changed your role from ${
-          notification.metadata?.previousRole ?? "unknown"
-        } to ${notification.metadata?.newRole ?? "unknown"}.`,
+        title: isOwnershipTransfer
+          ? "Your workspace ownership was transferred"
+          : "Your workspace role was changed",
+        description: isOwnershipTransfer
+          ? `${notification.actor?.name ?? "Someone"} transferred workspace ownership to another member. You are now an admin.`
+          : `${notification.actor?.name ?? "Someone"} changed your role from ${
+              previousRole ?? "unknown"
+            } to ${newRole ?? "unknown"}.`,
       };
+    }
 
     case "member.removed":
       return {

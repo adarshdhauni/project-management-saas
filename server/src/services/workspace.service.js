@@ -894,6 +894,118 @@ const getMyWorkspaceMembership = async (userId, workspaceId) => {
   };
 };
 
+const transferWorkspaceOwnership = async (userId, workspaceId, memberId) => {
+  const workspace = await workspaceRepository.findById(workspaceId);
+
+  if (!workspace) {
+    throw new ApiError(404, "Workspace not found.");
+  }
+
+  const requesterMembership =
+    await workspaceMemberRepository.findByWorkspaceAndUser(workspaceId, userId);
+
+  if (!requesterMembership) {
+    throw new ApiError(403, "You do not have access to this workspace.");
+  }
+
+  if (requesterMembership.role !== "owner") {
+    throw new ApiError(403, "Only the workspace owner can transfer ownership.");
+  }
+
+  const targetMember = await workspaceMemberRepository.findById(memberId);
+
+  if (!targetMember) {
+    throw new ApiError(404, "Member not found.");
+  }
+
+  if (!targetMember.workspace.equals(workspaceId)) {
+    throw new ApiError(400, "Member does not belong to this workspace.");
+  }
+
+  if (targetMember._id.equals(requesterMembership._id)) {
+    throw new ApiError(409, "You already own this workspace.");
+  }
+
+  if (targetMember.role === "owner") {
+    throw new ApiError(
+      409,
+      "The selected member is already the workspace owner.",
+    );
+  }
+
+  const newOwner = await userRepository.findUserById(targetMember.user);
+
+  if (!newOwner) {
+    throw new ApiError(404, "User not found.");
+  }
+
+  const previousOwner = await userRepository.findUserById(
+    requesterMembership.user,
+  );
+
+  if (!previousOwner) {
+    throw new ApiError(404, "Current owner not found.");
+  }
+
+  const session = await mongoose.startSession();
+
+  try {
+    session.startTransaction();
+
+    await workspaceMemberRepository.updateById(
+      requesterMembership._id,
+      { role: "admin" },
+      { session },
+    );
+
+    await workspaceMemberRepository.updateById(
+      targetMember._id,
+      { role: "owner" },
+      { session },
+    );
+
+    await activityService.createActivity(
+      {
+        workspaceId,
+        userId,
+        action: "workspace.ownership_transferred",
+        entityType: "Workspace",
+        entityId: workspace._id,
+        metadata: {
+          workspaceId: workspace._id,
+          previousOwnerName: previousOwner.name,
+          newOwnerName: newOwner.name,
+        },
+      },
+      { session },
+    );
+
+    await notificationService.createNotification(
+      {
+        recipient: requesterMembership.user,
+        actor: userId,
+        workspace: workspaceId,
+        type: "member.role_changed",
+        entityType: "WorkspaceMember",
+        entityId: requesterMembership._id,
+        metadata: {
+          previousRole: "owner",
+          newRole: "admin",
+          workspaceName: workspace.name,
+        },
+      },
+      { session },
+    );
+
+    await session.commitTransaction();
+  } catch (error) {
+    await session.abortTransaction();
+    throw error;
+  } finally {
+    await session.endSession();
+  }
+};
+
 const workspaceService = {
   createWorkspace,
   getUserWorkspaces,
@@ -910,6 +1022,7 @@ const workspaceService = {
   leaveWorkspace,
   getWorkspaceOverview,
   getMyWorkspaceMembership,
+  transferWorkspaceOwnership,
 };
 
 export default workspaceService;

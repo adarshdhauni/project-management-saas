@@ -127,6 +127,23 @@ const workspaceApi = apiSlice.injectEndpoints({
       }),
       providesTags: ["WorkspaceMember"],
     }),
+
+    leaveWorkspace: builder.mutation({
+      query: (workspaceId) => ({
+        url: `/api/v1/workspaces/${workspaceId}/leave`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Workspace", "WorkspaceMember"],
+    }),
+
+    transferOwnership: builder.mutation({
+      query: ({ workspaceId, data }) => ({
+        url: `/api/v1/workspaces/${workspaceId}/transfer-ownership`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: ["Workspace", "WorkspaceMember"],
+    }),
   }),
 });
 
@@ -145,4 +162,6 @@ export const {
   useUpdateMemberRoleMutation,
   useRemoveWorkspaceMemberMutation,
   useGetMyWorkspaceMembershipQuery,
+  useLeaveWorkspaceMutation,
+  useTransferOwnershipMutation,
 } = workspaceApi;

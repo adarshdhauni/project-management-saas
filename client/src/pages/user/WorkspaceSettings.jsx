@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Save, Trash2 } from "lucide-react";
+import { Save, Trash2, Crown } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,9 @@ import {
   useDeleteWorkspaceMutation,
   useGetMyWorkspaceMembershipQuery,
 } from "@/features/workspace/workspaceApi";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import LeaveWorkspaceDialog from "@/features/workspace/components/LeaveWorkspaceDialog";
+import TransferOwnership from "@/features/workspace/components/TransferOwnership";
 
 const WorkspaceSettings = () => {
   const { workspaceId } = useParams();
@@ -46,12 +49,15 @@ const WorkspaceSettings = () => {
 
   const currentUserRole = membershipData?.data?.role;
 
-  console.log(currentUserRole)
+  const isOwner = currentUserRole === "owner";
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [logo, setLogo] = useState("");
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
+  const [isTransferDialogOpen, setIsTransferDialogOpen] = useState(false);
 
   const workspace = data?.data;
 
@@ -79,7 +85,7 @@ const WorkspaceSettings = () => {
 
     try {
       await updateWorkspace({
-        workspaceId,
+        id: workspaceId,
         data: {
           name: trimmedName,
           description: trimmedDescription,
@@ -92,6 +98,7 @@ const WorkspaceSettings = () => {
         description: "Workspace settings were updated successfully.",
       });
     } catch (error) {
+      console.log(error);
       toast.add({
         type: "error",
         title:
@@ -213,19 +220,54 @@ const WorkspaceSettings = () => {
               <h2 className="text-sm font-semibold">General</h2>
 
               <p className="mt-1 text-xs text-muted-foreground">
-                Update the basic information for this workspace.
+                {isOwner
+                  ? "Update the basic information for this workspace."
+                  : "View the basic information for this workspace."}
               </p>
             </div>
 
             <div className="space-y-5 px-4 py-5 sm:px-5">
-              <Field data-disabled={isUpdating}>
+              <Field data-disabled={!isOwner || isUpdating}>
+                <FieldLabel>Workspace logo</FieldLabel>
+
+                <div className="flex items-center gap-4">
+                  <Avatar className="size-12 rounded-xl">
+                    <AvatarImage
+                      src={logo || undefined}
+                      alt={`${name || "Workspace"} logo`}
+                    />
+                    <AvatarFallback className="rounded-xl">
+                      {name?.charAt(0).toUpperCase() || "W"}
+                    </AvatarFallback>
+                  </Avatar>
+
+                  {isOwner && (
+                    <div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        disabled={isUpdating}
+                        className="cursor-pointer"
+                      >
+                        Upload logo
+                      </Button>
+
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        Use a square image for the best result.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </Field>
+
+              <Field data-disabled={!isOwner || isUpdating}>
                 <FieldLabel htmlFor="workspace-name">Workspace name</FieldLabel>
 
                 <Input
                   id="workspace-name"
                   value={name}
                   onChange={(event) => setName(event.target.value)}
-                  disabled={isUpdating}
+                  disabled={!isOwner || isUpdating}
                   maxLength={100}
                 />
 
@@ -234,7 +276,7 @@ const WorkspaceSettings = () => {
                 </FieldDescription>
               </Field>
 
-              <Field data-disabled={isUpdating}>
+              <Field data-disabled={!isOwner || isUpdating}>
                 <FieldLabel htmlFor="workspace-description">
                   Description
                 </FieldLabel>
@@ -243,7 +285,7 @@ const WorkspaceSettings = () => {
                   id="workspace-description"
                   value={description}
                   onChange={(event) => setDescription(event.target.value)}
-                  disabled={isUpdating}
+                  disabled={!isOwner || isUpdating}
                   maxLength={500}
                   className="min-h-24 resize-none"
                 />
@@ -254,27 +296,29 @@ const WorkspaceSettings = () => {
               </Field>
             </div>
 
-            <div className="flex justify-end border-t border-border px-4 py-3 sm:px-5">
-              <Button
-                type="submit"
-                disabled={
-                  isUpdating || isFetching || !hasChanges || !name.trim()
-                }
-                className="cursor-pointer"
-              >
-                {isUpdating ? (
-                  <>
-                    <Spinner data-icon="inline-start" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Save data-icon="inline-start" />
-                    Save changes
-                  </>
-                )}
-              </Button>
-            </div>
+            {isOwner && (
+              <div className="flex justify-end border-t border-border px-4 py-3 sm:px-5">
+                <Button
+                  type="submit"
+                  disabled={
+                    isUpdating || isFetching || !hasChanges || !name.trim()
+                  }
+                  className="cursor-pointer"
+                >
+                  {isUpdating ? (
+                    <>
+                      <Spinner data-icon="inline-start" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save data-icon="inline-start" />
+                      Save changes
+                    </>
+                  )}
+                </Button>
+              </div>
+            )}
           </div>
         </form>
 
@@ -301,9 +345,12 @@ const WorkspaceSettings = () => {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setIsTransferDialogOpen(true)}
-                className="w-full cursor-pointer sm:w-auto"
+                onClick={() => {
+                  setIsTransferDialogOpen(true);
+                }}
+                className="cursor-pointer"
               >
+                <Crown data-icon="inline-start" />
                 Transfer ownership
               </Button>
             </div>
@@ -428,6 +475,18 @@ const WorkspaceSettings = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <LeaveWorkspaceDialog
+        isLeaveDialogOpen={isLeaveDialogOpen}
+        setIsLeaveDialogOpen={setIsLeaveDialogOpen}
+        workspace={workspace}
+      />
+
+      <TransferOwnership
+        open={isTransferDialogOpen}
+        onOpenChange={setIsTransferDialogOpen}
+        workspace={workspace}
+      />
     </>
   );
 };
