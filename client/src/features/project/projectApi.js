@@ -10,6 +10,7 @@ const projectApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["Project", "Activity"],
     }),
+
     updateProject: builder.mutation({
       query: ({ id, data }) => ({
         url: `/api/v1/projects/${id}`,
@@ -18,12 +19,32 @@ const projectApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["Project", "Activity"],
     }),
+
     deleteProject: builder.mutation({
       query: (id) => ({
         url: `/api/v1/projects/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["Project", "Activity"],
+    }),
+
+    getWorkspaceProjects: builder.query({
+      query: ({
+        workspaceId,
+        page = 1,
+        limit = 20,
+        search = "",
+        archived,
+      }) => ({
+        url: `/api/v1/workspaces/${workspaceId}/projects`,
+        params: {
+          page,
+          limit,
+          search,
+          archived,
+        },
+      }),
+      providesTags: ["Project"],
     }),
   }),
 });
@@ -32,4 +53,5 @@ export const {
   useCreateProjectMutation,
   useUpdateProjectMutation,
   useDeleteProjectMutation,
+  useGetWorkspaceProjectsQuery,
 } = projectApi;

@@ -16,6 +16,7 @@ import getActivitiesSchema from "../validators/activity/get-activity.schema.js";
 import activityController from "../controllers/activity.controller.js";
 import getMembersSchema from "../validators/workspace/get-member.schema.js";
 import transferOwnershipSchema from "../validators/workspace/transfer-ownership.schema.js";
+import getProjectsSchema from "../validators/project/get-projects.schema.js";
 
 const router = express.Router();
 
@@ -167,6 +168,9 @@ router.get(
   protect,
   validate({
     params: workspaceIdSchema,
+  }),
+  validate({
+    query: getProjectsSchema,
   }),
   projectController.getWorkspaceProjects,
 );

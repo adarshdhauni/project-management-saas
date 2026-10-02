@@ -85,7 +85,7 @@ const createProject = async (userId, workspaceId, projectData) => {
   }
 };
 
-const getWorkspaceProjects = async (userId, workspaceId) => {
+const getWorkspaceProjects = async (userId, workspaceId, filters = {}) => {
   const workspace = await workspaceRepository.findById(workspaceId);
 
   if (!workspace) {
@@ -101,7 +101,10 @@ const getWorkspaceProjects = async (userId, workspaceId) => {
     throw new ApiError(403, "You do not have access to this workspace.");
   }
 
-  const projects = await projectRepository.findAllByWorkspace(workspaceId);
+  const projects = await projectRepository.findAllByWorkspace(
+    workspaceId,
+    filters,
+  );
 
   return projects;
 };
