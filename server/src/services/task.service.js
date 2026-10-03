@@ -4,6 +4,7 @@ import workspaceMemberRepository from "../repositories/workspace-member.reposito
 import ApiError from "../utils/ApiError.js";
 import activityService from "./activity.service.js";
 import userRepository from "../repositories/user.repository.js";
+import mongoose from "mongoose";
 
 const createTask = async (userId, projectId, taskData) => {
   const project = await projectRepository.findById(projectId);

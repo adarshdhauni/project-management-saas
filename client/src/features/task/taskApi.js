@@ -15,7 +15,7 @@ const taskApi = apiSlice.injectEndpoints({
       query: ({
         projectId,
         page = 1,
-        limit = 20,
+        limit = 50,
         status,
         priority,
         assignee,
@@ -79,6 +79,7 @@ const taskApi = apiSlice.injectEndpoints({
 export const {
   useCreateTaskMutation,
   useGetProjectTasksQuery,
+  useLazyGetProjectTasksQuery,
   useGetTaskByIdQuery,
   useUpdateTaskMutation,
   useDeleteTaskMutation,

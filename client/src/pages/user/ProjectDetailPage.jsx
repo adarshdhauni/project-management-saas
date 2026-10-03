@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
+
 import {
   ArrowLeft,
   CalendarDays,
@@ -7,15 +8,34 @@ import {
   ChevronDown,
   Clock3,
   FolderKanban,
+  Loader2,
   MoreHorizontal,
   Pencil,
+  Plus,
   Search,
   Trash2,
   UserRound,
 } from "lucide-react";
 
+import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  arrayMove,
+} from "@dnd-kit/sortable";
+
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+
 import {
   Select,
   SelectContent,
@@ -23,6 +43,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,47 +51,60 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
+
 import { Skeleton } from "@/components/ui/skeleton";
+
 import ErrorState from "@/components/feedback/error/ErrorState";
 
 import { useGetProjectByIdQuery } from "@/features/project/projectApi";
-import { useGetProjectTasksQuery } from "@/features/task/taskApi";
+
+import {
+  useLazyGetProjectTasksQuery,
+  useMoveTaskMutation,
+} from "@/features/task/taskApi";
+
+import TaskDialog from "@/features/task/components/TaskDialog";
+import SortableTaskRow from "@/features/task/components/SortableTaskRow";
 
 import ProjectDialog from "@/features/project/components/ProjectDialog";
 import DeleteDialog from "@/features/project/components/DeleteDialog";
 
 import { projectColors, projectIcons } from "@/constants/projectOptions";
+
 import { formatRelativeTime } from "@/utils/date";
+
+const TASKS_PER_LOAD = 50;
 
 const ProjectDetailPage = () => {
   const { workspaceId, projectId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const searchParam = searchParams.get("search") ?? "";
-
   const statusParam = searchParams.get("status") ?? "";
   const priorityParam = searchParams.get("priority") ?? "";
-
+  const assigneeParam = searchParams.get("assignee") ?? "";
   const sortByParam = searchParams.get("sortBy") ?? "position";
-
   const sortOrderParam = searchParams.get("sortOrder") ?? "asc";
 
-  const pageParam = Number(searchParams.get("page"));
-
-  const page = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
-
   const [search, setSearch] = useState(searchParam);
+
+  const [tasks, setTasks] = useState([]);
+  const [loadedPages, setLoadedPages] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [isRefreshingTasks, setIsRefreshingTasks] = useState(false);
+
+  const [activeTaskId, setActiveTaskId] = useState(null);
+  const [isReordering, setIsReordering] = useState(false);
 
   const [isProjectDialogOpen, setIsProjectDialogOpen] = useState(false);
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+  const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
+
+  const [selectedTask, setSelectedTask] = useState(null);
 
   const {
     data: projectData,
@@ -81,34 +115,35 @@ const ProjectDetailPage = () => {
     skip: !projectId,
   });
 
-  const {
-    data: taskData,
-    isLoading: isTasksLoading,
-    isFetching: isTasksFetching,
-    isError: isTasksError,
-    error,
-    refetch: refetchTasks,
-  } = useGetProjectTasksQuery(
-    {
-      projectId,
-      page,
-      limit: 20,
-      status: statusParam || undefined,
-      priority: priorityParam || undefined,
-      search: searchParam,
-      sortBy: sortByParam,
-      sortOrder: sortOrderParam,
-    },
-    {
-      skip: !projectId,
-    },
-  );
+  const [
+    fetchProjectTasks,
+    { isFetching: isTasksFetching, isError: isTasksError },
+  ] = useLazyGetProjectTasksQuery();
 
-  console.log(error)
+  const [moveTask] = useMoveTaskMutation();
 
   const project = projectData?.data;
-  const tasks = taskData?.data?.tasks ?? [];
-  const pagination = taskData?.data?.pagination;
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 6,
+      },
+    }),
+  );
+
+  const canReorder =
+    !searchParam &&
+    !statusParam &&
+    !priorityParam &&
+    !assigneeParam &&
+    sortByParam === "position" &&
+    sortOrderParam === "asc";
+
+  const activeTask = useMemo(
+    () => tasks.find((task) => task._id === activeTaskId),
+    [tasks, activeTaskId],
+  );
 
   const getProjectIcon = (iconValue) => {
     const iconOption = projectIcons.find((item) => item.value === iconValue);
@@ -123,63 +158,118 @@ const ProjectDetailPage = () => {
     );
   };
 
-  const getStatusLabel = (status) => {
-    const labels = {
-      todo: "To do",
-      in_progress: "In progress",
-      in_review: "In review",
-      done: "Done",
+  const resetTaskList = () => {
+    setTasks([]);
+    setLoadedPages(0);
+    setHasMore(false);
+  };
+
+  const loadTasks = async (page, replace = false) => {
+    if (!projectId) return;
+
+    try {
+      const result = await fetchProjectTasks({
+        projectId,
+        page,
+        limit: TASKS_PER_LOAD,
+        status: statusParam || undefined,
+        priority: priorityParam || undefined,
+        assignee: assigneeParam || undefined,
+        search: searchParam || undefined,
+        sortBy: sortByParam,
+        sortOrder: sortOrderParam,
+      }).unwrap();
+
+      const incomingTasks = result?.data?.tasks ?? [];
+      const pagination = result?.data?.pagination;
+
+      setTasks((previous) => {
+        if (replace) {
+          return incomingTasks;
+        }
+
+        const existingIds = new Set(previous.map((task) => task._id));
+
+        const uniqueIncoming = incomingTasks.filter(
+          (task) => !existingIds.has(task._id),
+        );
+
+        return [...previous, ...uniqueIncoming];
+      });
+
+      setLoadedPages(page);
+
+      setHasMore(Boolean(pagination?.hasNextPage));
+    } catch {
+      if (replace) {
+        setTasks([]);
+        setLoadedPages(0);
+      }
+
+      throw new Error("Failed to load tasks.");
+    }
+  };
+
+  useEffect(() => {
+    if (!projectId) return;
+
+    let cancelled = false;
+
+    const run = async () => {
+      setIsRefreshingTasks(true);
+
+      try {
+        const result = await fetchProjectTasks({
+          projectId,
+          page: 1,
+          limit: TASKS_PER_LOAD,
+          status: statusParam || undefined,
+          priority: priorityParam || undefined,
+          assignee: assigneeParam || undefined,
+          search: searchParam || undefined,
+          sortBy: sortByParam,
+          sortOrder: sortOrderParam,
+        }).unwrap();
+
+        if (cancelled) return;
+
+        setTasks(result?.data?.tasks ?? []);
+        setLoadedPages(1);
+        setHasMore(Boolean(result?.data?.pagination?.hasNextPage));
+      } catch {
+        if (!cancelled) {
+          setTasks([]);
+          setLoadedPages(0);
+          setHasMore(false);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsRefreshingTasks(false);
+        }
+      }
     };
 
-    return labels[status] ?? status;
-  };
+    run();
 
-  const getPriorityLabel = (priority) => {
-    const labels = {
-      low: "Low",
-      medium: "Medium",
-      high: "High",
-      urgent: "Urgent",
+    return () => {
+      cancelled = true;
     };
-
-    return labels[priority] ?? priority;
-  };
-
-  const getStatusBadgeClass = (status) => {
-    const classes = {
-      todo: "bg-muted text-muted-foreground",
-      in_progress: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
-      in_review: "bg-purple-500/10 text-purple-600 dark:text-purple-400",
-      done: "bg-green-500/10 text-green-600 dark:text-green-400",
-    };
-
-    return classes[status] ?? "bg-muted text-muted-foreground";
-  };
-
-  const getPriorityBadgeClass = (priority) => {
-    const classes = {
-      low: "bg-muted text-muted-foreground",
-      medium: "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400",
-      high: "bg-orange-500/10 text-orange-600 dark:text-orange-400",
-      urgent: "bg-red-500/10 text-red-600 dark:text-red-400",
-    };
-
-    return classes[priority] ?? "bg-muted text-muted-foreground";
-  };
-
-  const formatDueDate = (date) => {
-    if (!date) return "No due date";
-
-    return new Intl.DateTimeFormat("en", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    }).format(new Date(date));
-  };
+  }, [
+    projectId,
+    searchParam,
+    statusParam,
+    priorityParam,
+    assigneeParam,
+    sortByParam,
+    sortOrderParam,
+    fetchProjectTasks,
+  ]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
       const trimmedSearch = search.trim();
+
+      if (trimmedSearch === searchParam) return;
 
       setSearchParams((params) => {
         if (trimmedSearch) {
@@ -188,19 +278,15 @@ const ProjectDetailPage = () => {
           params.delete("search");
         }
 
-        params.delete("page");
-
         return params;
       });
     }, 400);
 
     return () => clearTimeout(timeout);
-  }, [search, setSearchParams]);
+  }, [search, searchParam, setSearchParams]);
 
   const handleFilterChange = (key, value) => {
     setSearchParams((params) => {
-      params.delete("page");
-
       if (value === "all") {
         params.delete(key);
       } else {
@@ -213,8 +299,6 @@ const ProjectDetailPage = () => {
 
   const handleSortChange = (value) => {
     setSearchParams((params) => {
-      params.delete("page");
-
       if (value === "position") {
         params.delete("sortBy");
         params.delete("sortOrder");
@@ -227,22 +311,97 @@ const ProjectDetailPage = () => {
     });
   };
 
-  const handlePageChange = (nextPage) => {
-    setSearchParams((params) => {
-      if (nextPage === 1) {
-        params.delete("page");
-      } else {
-        params.set("page", String(nextPage));
-      }
+  const handleLoadMore = async () => {
+    if (isLoadingMore || !hasMore || loadedPages === 0) {
+      return;
+    }
 
-      return params;
-    });
+    setIsLoadingMore(true);
+
+    try {
+      await loadTasks(loadedPages + 1);
+    } finally {
+      setIsLoadingMore(false);
+    }
   };
 
   const handleRetry = async () => {
     try {
-      await Promise.all([refetchProject().unwrap(), refetchTasks().unwrap()]);
-    } catch {}
+      await refetchProject();
+
+      setIsRefreshingTasks(true);
+
+      const result = await fetchProjectTasks({
+        projectId,
+        page: 1,
+        limit: TASKS_PER_LOAD,
+        status: statusParam || undefined,
+        priority: priorityParam || undefined,
+        assignee: assigneeParam || undefined,
+        search: searchParam || undefined,
+        sortBy: sortByParam,
+        sortOrder: sortOrderParam,
+      }).unwrap();
+
+      setTasks(result?.data?.tasks ?? []);
+      setLoadedPages(1);
+      setHasMore(Boolean(result?.data?.pagination?.hasNextPage));
+    } catch {
+      // Error state remains visible.
+    } finally {
+      setIsRefreshingTasks(false);
+    }
+  };
+
+  const openCreateTask = () => {
+    setSelectedTask(null);
+    setIsTaskDialogOpen(true);
+  };
+
+  const handleDragStart = ({ active }) => {
+    if (!canReorder || isReordering) return;
+
+    setActiveTaskId(active.id);
+  };
+
+  const handleDragCancel = () => {
+    setActiveTaskId(null);
+  };
+
+  const handleDragEnd = async ({ active, over }) => {
+    setActiveTaskId(null);
+
+    if (!canReorder || !over || active.id === over.id) {
+      return;
+    }
+
+    const oldIndex = tasks.findIndex((task) => task._id === active.id);
+
+    const newIndex = tasks.findIndex((task) => task._id === over.id);
+
+    if (oldIndex === -1 || newIndex === -1) {
+      return;
+    }
+
+    const reorderedTasks = arrayMove(tasks, oldIndex, newIndex);
+
+    const movedTask = reorderedTasks[newIndex];
+
+    const beforeTask = reorderedTasks[newIndex + 1] ?? null;
+
+    setTasks(reorderedTasks);
+    setIsReordering(true);
+
+    try {
+      await moveTask({
+        taskId: movedTask._id,
+        beforeTaskId: beforeTask?._id ?? null,
+      }).unwrap();
+    } catch {
+      setTasks(tasks);
+    } finally {
+      setIsReordering(false);
+    }
   };
 
   if (isProjectError) {
@@ -290,7 +449,8 @@ const ProjectDetailPage = () => {
                   <Skeleton className="h-3 w-32" />
                 </div>
 
-                <Skeleton className="h-6 w-20 rounded-full" />
+                <Skeleton className="hidden h-6 w-20 rounded-full sm:block" />
+                <Skeleton className="hidden h-6 w-20 rounded-full md:block" />
               </div>
             ))}
           </div>
@@ -304,7 +464,6 @@ const ProjectDetailPage = () => {
   return (
     <>
       <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* Back */}
         <Link
           to={`/dashboard/workspaces/${workspaceId}/projects`}
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
@@ -313,7 +472,6 @@ const ProjectDetailPage = () => {
           Projects
         </Link>
 
-        {/* Project header */}
         <section className="mt-5 rounded-xl border border-border bg-card p-5 sm:p-6">
           <div className="flex items-start justify-between gap-4">
             <div className="flex min-w-0 items-start gap-4">
@@ -386,38 +544,42 @@ const ProjectDetailPage = () => {
           </div>
         </section>
 
-        {/* Tasks */}
         <section className="mt-6 rounded-xl border border-border bg-card">
           <div className="border-b border-border p-5 sm:p-6">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <div>
-                <h2 className="text-base font-semibold">Tasks</h2>
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                  <h2 className="text-base font-semibold">Tasks</h2>
 
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Manage tasks in this project.
-                </p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Manage tasks in this project.
+                  </p>
+                </div>
+
+                <Button onClick={openCreateTask} className="w-full sm:w-auto">
+                  <Plus className="size-4" />
+                  Create task
+                </Button>
               </div>
 
-              <div className="flex flex-col gap-3 sm:flex-row">
-                {/* Search */}
-                <div className="relative w-full sm:w-64">
+              <div className="flex flex-col gap-3 lg:flex-row">
+                <div className="relative w-full lg:w-64">
                   <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
 
                   <Input
                     value={search}
                     onChange={(event) => setSearch(event.target.value)}
                     placeholder="Search tasks..."
-                    disabled={isTasksLoading}
+                    disabled={isRefreshingTasks}
                     className="pl-9"
                   />
                 </div>
 
-                {/* Status */}
                 <Select
                   value={statusParam || "all"}
                   onValueChange={(value) => handleFilterChange("status", value)}
                 >
-                  <SelectTrigger className="w-full cursor-pointer sm:w-36">
+                  <SelectTrigger className="w-full cursor-pointer sm:w-40">
                     <SelectValue />
                   </SelectTrigger>
 
@@ -430,14 +592,13 @@ const ProjectDetailPage = () => {
                   </SelectContent>
                 </Select>
 
-                {/* Priority */}
                 <Select
                   value={priorityParam || "all"}
                   onValueChange={(value) =>
                     handleFilterChange("priority", value)
                   }
                 >
-                  <SelectTrigger className="w-full cursor-pointer sm:w-36">
+                  <SelectTrigger className="w-full cursor-pointer sm:w-40">
                     <SelectValue />
                   </SelectTrigger>
 
@@ -450,9 +611,8 @@ const ProjectDetailPage = () => {
                   </SelectContent>
                 </Select>
 
-                {/* Sort */}
                 <Select value={sortByParam} onValueChange={handleSortChange}>
-                  <SelectTrigger className="w-full cursor-pointer sm:w-36">
+                  <SelectTrigger className="w-full cursor-pointer sm:w-40">
                     <SelectValue />
                   </SelectTrigger>
 
@@ -465,29 +625,31 @@ const ProjectDetailPage = () => {
                   </SelectContent>
                 </Select>
               </div>
+
+              {!canReorder && tasks.length > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  Drag-and-drop is available when viewing all tasks in position
+                  order.
+                </p>
+              )}
             </div>
           </div>
 
-          {isTasksError ? (
+          {isTasksError && tasks.length === 0 ? (
             <div className="p-6">
               <ErrorState
                 title="Unable to load tasks"
                 description="Something went wrong while loading the tasks."
-                onRetry={async () => {
-                  try {
-                    await refetchTasks().unwrap();
-                  } catch {}
-                }}
+                onRetry={handleRetry}
               />
             </div>
-          ) : isTasksLoading ? (
+          ) : isRefreshingTasks && tasks.length === 0 ? (
             <div className="divide-y divide-border">
               {Array.from({ length: 5 }).map((_, index) => (
-                <div
-                  key={index}
-                  className="flex items-center gap-4 px-5 py-4 sm:px-6"
-                >
-                  <Skeleton className="size-4 rounded" />
+                <div key={index} className="flex items-center gap-4 px-5 py-4">
+                  <Skeleton className="size-5 rounded" />
+
+                  <Skeleton className="size-8 rounded-full" />
 
                   <div className="min-w-0 flex-1 space-y-2">
                     <Skeleton className="h-4 w-56" />
@@ -499,7 +661,7 @@ const ProjectDetailPage = () => {
                 </div>
               ))}
             </div>
-          ) : tasks.length === 0 && !isTasksFetching ? (
+          ) : tasks.length === 0 ? (
             <div className="flex min-h-56 flex-col items-center justify-center px-6 text-center">
               <div className="flex size-11 items-center justify-center rounded-full bg-muted">
                 <CheckCircle2 className="size-5 text-muted-foreground" />
@@ -508,162 +670,94 @@ const ProjectDetailPage = () => {
               <h3 className="mt-4 text-sm font-semibold">No tasks found</h3>
 
               <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-                {searchParam || statusParam || priorityParam
+                {searchParam || statusParam || priorityParam || assigneeParam
                   ? "Try adjusting your filters."
                   : "There are no tasks in this project yet."}
               </p>
+
+              {!searchParam &&
+                !statusParam &&
+                !priorityParam &&
+                !assigneeParam && (
+                  <Button
+                    variant="outline"
+                    className="mt-4"
+                    onClick={openCreateTask}
+                  >
+                    <Plus className="size-4" />
+                    Create task
+                  </Button>
+                )}
             </div>
           ) : (
             <>
-              <div className="divide-y divide-border">
-                {tasks.map((task) => (
-                  <Link
-                    key={task._id}
-                    to={`/dashboard/workspaces/${workspaceId}/projects/${projectId}/tasks/${task._id}`}
-                    className="group block px-5 py-4 transition-colors hover:bg-muted/40 sm:px-6"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`flex size-8 shrink-0 items-center justify-center rounded-full ${
-                          task.status === "done"
-                            ? "bg-green-500/10 text-green-600 dark:text-green-400"
-                            : "bg-muted text-muted-foreground"
-                        }`}
-                      >
-                        <CheckCircle2 className="size-4" />
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragStart={handleDragStart}
+                onDragCancel={handleDragCancel}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext
+                  items={tasks.map((task) => task._id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <div className="divide-y divide-border">
+                    {tasks.map((task) => (
+                      <SortableTaskRow
+                        key={task._id}
+                        task={task}
+                        workspaceId={workspaceId}
+                        projectId={projectId}
+                        isDraggingDisabled={
+                          !canReorder || isReordering || isTasksFetching
+                        }
+                      />
+                    ))}
+                  </div>
+                </SortableContext>
+
+                <DragOverlay>
+                  {activeTask ? (
+                    <div className="rounded-lg border border-border bg-card px-5 py-4 shadow-xl">
+                      <div className="flex items-center gap-3">
+                        <CheckCircle2 className="size-4 text-muted-foreground" />
+
+                        <span className="text-sm font-medium">
+                          {activeTask.title}
+                        </span>
                       </div>
-
-                      <div className="min-w-0 flex-1">
-                        <div className="flex min-w-0 items-center gap-2">
-                          <h3 className="truncate text-sm font-medium">
-                            {task.title}
-                          </h3>
-                        </div>
-
-                        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                          {task.assignee ? (
-                            <span className="inline-flex items-center gap-1">
-                              <UserRound className="size-3.5" />
-                              {task.assignee.name ?? "Assigned"}
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1">
-                              <UserRound className="size-3.5" />
-                              Unassigned
-                            </span>
-                          )}
-
-                          <span className="inline-flex items-center gap-1">
-                            <CalendarDays className="size-3.5" />
-                            {formatDueDate(task.dueDate)}
-                          </span>
-                        </div>
-                      </div>
-
-                      <Badge
-                        variant="secondary"
-                        className={`hidden shrink-0 sm:inline-flex ${getStatusBadgeClass(
-                          task.status,
-                        )}`}
-                      >
-                        {getStatusLabel(task.status)}
-                      </Badge>
-
-                      <Badge
-                        variant="secondary"
-                        className={`hidden shrink-0 md:inline-flex ${getPriorityBadgeClass(
-                          task.priority,
-                        )}`}
-                      >
-                        {getPriorityLabel(task.priority)}
-                      </Badge>
-
-                      <ChevronDown className="size-4 shrink-0 -rotate-90 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
                     </div>
-                  </Link>
-                ))}
-              </div>
+                  ) : null}
+                </DragOverlay>
+              </DndContext>
 
-              {pagination && pagination.totalPages > 1 && (
-                <div className="flex flex-col gap-4 border-t border-border px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-                  <p className="text-xs text-muted-foreground">
-                    Page {pagination.page} of {pagination.totalPages}
-                  </p>
+              {isReordering && (
+                <div className="flex items-center justify-center gap-2 border-t border-border px-5 py-3 text-xs text-muted-foreground">
+                  <Loader2 className="size-3.5 animate-spin" />
+                  Saving new task order...
+                </div>
+              )}
 
-                  <Pagination className="mx-0 w-auto sm:justify-end">
-                    <PaginationContent>
-                      <PaginationItem>
-                        <PaginationPrevious
-                          href="#"
-                          onClick={(event) => {
-                            event.preventDefault();
+              {hasMore && (
+                <div className="flex justify-center border-t border-border px-5 py-5">
+                  <Button
+                    variant="outline"
+                    onClick={handleLoadMore}
+                    disabled={isLoadingMore || isReordering}
+                  >
+                    {isLoadingMore && (
+                      <Loader2 className="size-4 animate-spin" />
+                    )}
 
-                            if (
-                              pagination.hasPreviousPage &&
-                              !isTasksFetching
-                            ) {
-                              handlePageChange(page - 1);
-                            }
-                          }}
-                          aria-disabled={
-                            !pagination.hasPreviousPage || isTasksFetching
-                          }
-                          className={
-                            !pagination.hasPreviousPage || isTasksFetching
-                              ? "pointer-events-none opacity-50"
-                              : "cursor-pointer"
-                          }
-                        />
-                      </PaginationItem>
+                    {isLoadingMore ? "Loading..." : "Load more tasks"}
+                  </Button>
+                </div>
+              )}
 
-                      {Array.from(
-                        {
-                          length: pagination.totalPages,
-                        },
-                        (_, index) => index + 1,
-                      ).map((pageNumber) => (
-                        <PaginationItem key={pageNumber}>
-                          <button
-                            type="button"
-                            onClick={() => handlePageChange(pageNumber)}
-                            disabled={isTasksFetching}
-                            className={`inline-flex size-9 cursor-pointer items-center justify-center rounded-md text-sm ${
-                              pageNumber === pagination.page
-                                ? "bg-primary text-primary-foreground"
-                                : "hover:bg-muted"
-                            } ${
-                              isTasksFetching
-                                ? "pointer-events-none opacity-50"
-                                : ""
-                            }`}
-                          >
-                            {pageNumber}
-                          </button>
-                        </PaginationItem>
-                      ))}
-
-                      <PaginationItem>
-                        <PaginationNext
-                          href="#"
-                          onClick={(event) => {
-                            event.preventDefault();
-
-                            if (pagination.hasNextPage && !isTasksFetching) {
-                              handlePageChange(page + 1);
-                            }
-                          }}
-                          aria-disabled={
-                            !pagination.hasNextPage || isTasksFetching
-                          }
-                          className={
-                            !pagination.hasNextPage || isTasksFetching
-                              ? "pointer-events-none opacity-50"
-                              : "cursor-pointer"
-                          }
-                        />
-                      </PaginationItem>
-                    </PaginationContent>
-                  </Pagination>
+              {!hasMore && tasks.length > 0 && (
+                <div className="border-t border-border px-5 py-4 text-center text-xs text-muted-foreground">
+                  You've reached the end of the task list.
                 </div>
               )}
             </>
@@ -682,6 +776,14 @@ const ProjectDetailPage = () => {
         isDeleteDialogOpen={isDeleteDialogOpen}
         setIsDeleteDialogOpen={setIsDeleteDialogOpen}
         selectedProject={project}
+      />
+
+      <TaskDialog
+        open={isTaskDialogOpen}
+        onOpenChange={setIsTaskDialogOpen}
+        projectId={projectId}
+        workspaceId={workspaceId}
+        task={selectedTask}
       />
     </>
   );
