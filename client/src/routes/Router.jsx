@@ -15,6 +15,7 @@ const Projects = lazy(() => import("@/pages/user/Projects"));
 const Activity = lazy(() => import("@/pages/user/Activity"));
 const MembersPage = lazy(() => import("@/pages/user/MembersPage"));
 const WorkspaceSettings = lazy(() => import("@/pages/user/WorkspaceSettings"));
+const ProjectDetailPage = lazy(() => import("@/pages/user/ProjectDetailPage"));
 
 import ProtectedRoute from "./ProtectedRoute";
 
@@ -92,6 +93,10 @@ const router = createBrowserRouter([
                       {
                         path: "projects",
                         element: <Projects />,
+                      },
+                      {
+                        path: "projects/:projectId",
+                        element: <ProjectDetailPage />,
                       },
                       {
                         path: "activity",

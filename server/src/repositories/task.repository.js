@@ -43,13 +43,13 @@ const findAllByProject = async (projectId, filters = {}, options = {}) => {
       {
         title: {
           $regex: search,
-          options: "i",
+          $options: "i",
         },
       },
       {
         description: {
           $regex: search,
-          options: "i",
+          $options: "i",
         },
       },
     ];
@@ -142,7 +142,7 @@ const taskRepository = {
   findLastByProject,
   updateById,
   deleteById,
-  countByWorkspace
+  countByWorkspace,
 };
 
 export default taskRepository;

@@ -46,6 +46,13 @@ const projectApi = apiSlice.injectEndpoints({
       }),
       providesTags: ["Project"],
     }),
+    getProjectById: builder.query({
+      query: (projectId) => ({
+        url: `/api/v1/projects/${projectId}`,
+        method: "GET",
+      }),
+      providesTags: ["Project"],
+    }),
   }),
 });
 
@@ -54,4 +61,5 @@ export const {
   useUpdateProjectMutation,
   useDeleteProjectMutation,
   useGetWorkspaceProjectsQuery,
+  useGetProjectByIdQuery
 } = projectApi;

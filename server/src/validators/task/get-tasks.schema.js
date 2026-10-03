@@ -17,7 +17,12 @@ const getTasksSchema = z.object({
     })
     .optional(),
 
-  search: z.string().trim().min(1).max(100).optional(),
+  search: z
+    .string()
+    .trim()
+    .max(100)
+    .optional()
+    .transform((value) => value || undefined),
 
   sortBy: z
     .enum(["position", "createdAt", "dueDate", "priority", "title"])

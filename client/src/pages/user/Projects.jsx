@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import {
+  Clock3,
   FolderKanban,
   MoreHorizontal,
   Pencil,
@@ -46,11 +47,11 @@ import { projectColors, projectIcons } from "@/constants/projectOptions";
 import { formatRelativeTime } from "@/utils/date";
 
 const ProjectsPage = () => {
+  const { workspaceId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const { workspaceId } = useParams();
-
   const searchParam = searchParams.get("search") ?? "";
+
   const pageParam = Number(searchParams.get("page"));
 
   const page = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
@@ -58,23 +59,28 @@ const ProjectsPage = () => {
   const archivedParam = searchParams.get("archived");
 
   const archived =
-    archivedParam === "true" ? true : archivedParam === "false" ? false : false;
+    archivedParam === "true"
+      ? true
+      : archivedParam === "false"
+        ? false
+        : undefined;
 
   const filterValue =
     archivedParam === "true"
       ? "archived"
       : archivedParam === "false"
         ? "active"
-        : "active";
+        : "all";
 
   const [search, setSearch] = useState(searchParam);
 
   const [isProjectDialogOpen, setIsProjectDialogOpen] = useState(false);
+
   const [selectedProject, setSelectedProject] = useState(null);
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-  const { data, isLoading, isFetching, isError, error, refetch } =
+  const { data, isLoading, isFetching, isError, refetch } =
     useGetWorkspaceProjectsQuery(
       {
         workspaceId,
@@ -88,10 +94,12 @@ const ProjectsPage = () => {
       },
     );
 
-  const { data: membershipData, isLoading: isMembershipLoading } =
-    useGetMyWorkspaceMembershipQuery(workspaceId, {
+  const { data: membershipData } = useGetMyWorkspaceMembershipQuery(
+    workspaceId,
+    {
       skip: !workspaceId,
-    });
+    },
+  );
 
   const projects = data?.data?.projects ?? [];
   const pagination = data?.data?.pagination;
@@ -176,7 +184,7 @@ const ProjectsPage = () => {
     return iconOption?.icon ?? FolderKanban;
   };
 
-  const getProjectColor = (colorValue) => {
+  const getProjectColorClass = (colorValue) => {
     return (
       projectColors.find((item) => item.value === colorValue)?.className ??
       "bg-muted text-muted-foreground"
@@ -198,6 +206,7 @@ const ProjectsPage = () => {
   return (
     <>
       <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+        {/* Header */}
         <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">Projects</h1>
@@ -217,6 +226,7 @@ const ProjectsPage = () => {
           </Button>
         </div>
 
+        {/* Search + filter */}
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative w-full sm:max-w-sm">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -237,36 +247,42 @@ const ProjectsPage = () => {
 
             <SelectContent>
               <SelectItem value="active">Active</SelectItem>
+
               <SelectItem value="archived">Archived</SelectItem>
+
               <SelectItem value="all">All projects</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
+        {/* Projects */}
         <section className="mt-6 overflow-hidden rounded-xl border border-border bg-card">
           {isLoading ? (
             <div className="divide-y divide-border">
               {Array.from({ length: 5 }).map((_, index) => (
-                <div
-                  key={index}
-                  className="flex items-center gap-4 px-4 py-4 sm:px-5"
-                >
-                  <Skeleton className="h-10 w-10 shrink-0 rounded-lg" />
+                <div key={index} className="px-5 py-4 sm:px-6">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start gap-3">
+                        <Skeleton className="size-9 shrink-0 rounded-lg" />
 
-                  <div className="min-w-0 flex-1 space-y-2">
-                    <Skeleton className="h-4 w-40" />
-                    <Skeleton className="h-3 w-64 max-w-full" />
+                        <div className="min-w-0 flex-1 space-y-2">
+                          <Skeleton className="h-4 w-40" />
+                          <Skeleton className="h-3 w-64 max-w-full" />
+                        </div>
+                      </div>
+
+                      <Skeleton className="mt-3 h-3 w-28" />
+                    </div>
+
+                    <Skeleton className="size-8 shrink-0 rounded-lg" />
                   </div>
-
-                  <Skeleton className="hidden h-4 w-20 md:block" />
-
-                  <Skeleton className="h-8 w-8 rounded-md" />
                 </div>
               ))}
             </div>
           ) : projects.length === 0 && !isFetching ? (
             <div className="flex min-h-56 flex-col items-center justify-center px-6 text-center">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-muted">
+              <div className="flex size-11 items-center justify-center rounded-full bg-muted">
                 <FolderKanban className="size-5 text-muted-foreground" />
               </div>
 
@@ -296,89 +312,104 @@ const ProjectsPage = () => {
             <>
               <div className="divide-y divide-border">
                 {projects.map((project) => {
-                  const ProjectIcon = getProjectIcon(project.icon);
-                  const projectColor = getProjectColor(project.color);
+                  const Icon = getProjectIcon(project.icon);
 
                   return (
                     <div
                       key={project._id}
-                      className="flex items-center gap-3 px-4 py-4 sm:gap-4 sm:px-5"
+                      className="group px-5 py-4 transition-colors hover:bg-muted/40 sm:px-6"
                     >
-                      <Link
-                        to={`/dashboard/workspaces/${workspaceId}/projects/${project._id}`}
-                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${projectColor}`}
-                      >
-                        <ProjectIcon className="size-5" />
-                      </Link>
+                      <div className="flex items-start justify-between gap-4">
+                        {/* Clickable project */}
+                        <Link
+                          to={`/dashboard/workspaces/${workspaceId}/projects/${project._id}`}
+                          className="min-w-0 flex-1"
+                        >
+                          <div className="flex min-w-0 items-start gap-3">
+                            <div
+                              className={`flex size-9 shrink-0 items-center justify-center rounded-lg ${getProjectColorClass(
+                                project.color,
+                              )}`}
+                            >
+                              <Icon className="size-4" />
+                            </div>
 
-                      <div className="min-w-0 flex-1">
-                        <div className="flex min-w-0 items-center gap-2">
-                          <Link
-                            to={`/dashboard/workspaces/${workspaceId}/projects/${project._id}`}
-                            className="truncate text-sm font-medium hover:underline"
-                          >
-                            {project.name}
-                          </Link>
+                            <div className="min-w-0">
+                              <div className="flex min-w-0 items-center gap-2">
+                                <h3 className="truncate text-sm font-medium">
+                                  {project.name}
+                                </h3>
 
-                          {project.isArchived && (
-                            <Badge variant="secondary" className="shrink-0">
-                              Archived
-                            </Badge>
-                          )}
-                        </div>
+                                {project.isArchived && (
+                                  <Badge
+                                    variant="secondary"
+                                    className="shrink-0"
+                                  >
+                                    Archived
+                                  </Badge>
+                                )}
+                              </div>
 
-                        <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                          {project.description || "No description"}
-                        </p>
+                              <p className="mt-1 truncate text-xs text-muted-foreground">
+                                {project.description || "No description"}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="mt-3 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                            <Clock3 className="size-3.5" />
+                            Updated {formatRelativeTime(project.updatedAt)}
+                          </div>
+                        </Link>
+
+                        {/* Actions */}
+                        {canManageProjects && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger
+                              render={
+                                <button
+                                  type="button"
+                                  aria-label={`Actions for ${project.name}`}
+                                  className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                                />
+                              }
+                            >
+                              <MoreHorizontal className="size-4" />
+                            </DropdownMenuTrigger>
+
+                            <DropdownMenuContent
+                              align="end"
+                              className="w-40 rounded-xl p-1.5"
+                            >
+                              <DropdownMenuItem
+                                onClick={() => handleEditProject(project)}
+                                className="cursor-pointer gap-2 rounded-lg px-2.5 py-2"
+                              >
+                                <Pencil className="size-4" />
+                                <span>Edit project</span>
+                              </DropdownMenuItem>
+
+                              <DropdownMenuSeparator className="my-1.5" />
+
+                              <DropdownMenuItem
+                                onClick={() => handleDeleteProject(project)}
+                                className="cursor-pointer gap-2 rounded-lg px-2.5 py-2 text-destructive focus:text-destructive"
+                              >
+                                <Trash2 className="size-4" />
+                                <span>Delete project</span>
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
                       </div>
-
-                      <p className="hidden w-24 text-right text-xs text-muted-foreground md:block">
-                        {formatRelativeTime(project.updatedAt)}
-                      </p>
-
-                      {canManageProjects && !isMembershipLoading && (
-                        <DropdownMenu>
-                          <DropdownMenuTrigger
-                            render={
-                              <button
-                                type="button"
-                                className="inline-flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-md text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
-                                aria-label={`Actions for ${project.name}`}
-                              />
-                            }
-                          >
-                            <MoreHorizontal className="size-4" />
-                          </DropdownMenuTrigger>
-
-                          <DropdownMenuContent align="end" className="w-44">
-                            <DropdownMenuItem
-                              onClick={() => handleEditProject(project)}
-                              className="cursor-pointer"
-                            >
-                              <Pencil data-icon="inline-start" />
-                              Edit project
-                            </DropdownMenuItem>
-
-                            <DropdownMenuSeparator />
-
-                            <DropdownMenuItem
-                              variant="destructive"
-                              onClick={() => handleDeleteProject(project)}
-                              className="cursor-pointer"
-                            >
-                              <Trash2 data-icon="inline-start" />
-                              Delete project
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      )}
                     </div>
                   );
                 })}
               </div>
 
-              {pagination && pagination.totalPages > 0 && (
-                <div className="flex flex-col gap-4 border-t border-border px-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+              {/* Pagination */}
+              {pagination && pagination.totalPages > 1 && (
+                <div className="flex flex-col gap-4 border-t border-border px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                   <p className="text-xs text-muted-foreground">
                     Page {pagination.page} of {pagination.totalPages}
                   </p>
@@ -407,7 +438,9 @@ const ProjectsPage = () => {
                       </PaginationItem>
 
                       {Array.from(
-                        { length: pagination.totalPages },
+                        {
+                          length: pagination.totalPages,
+                        },
                         (_, index) => index + 1,
                       ).map((pageNumber) => (
                         <PaginationItem key={pageNumber}>
