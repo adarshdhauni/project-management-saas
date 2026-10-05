@@ -214,7 +214,8 @@ const TaskDetailPage = () => {
       } else {
         refetchComments();
       }
-    } catch {
+    } catch (error) {
+      console.log(error)
       // Keep the entered content if creation fails.
     }
   };

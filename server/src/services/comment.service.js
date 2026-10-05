@@ -4,6 +4,7 @@ import workspaceMemberRepository from "../repositories/workspace-member.reposito
 import commentRepository from "../repositories/comment.repository.js";
 import ApiError from "../utils/ApiError.js";
 import activityService from "./activity.service.js";
+import mongoose from "mongoose";
 
 const createComment = async (userId, taskId, content) => {
   const task = await taskRepository.findById(taskId);
