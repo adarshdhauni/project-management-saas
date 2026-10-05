@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSelector } from "react-redux";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import {
@@ -7,6 +8,8 @@ import {
   CheckCircle2,
   Clock3,
   Loader2,
+  MessageCircle,
+  MoreHorizontal,
   Pencil,
   Trash2,
   UserRound,
@@ -26,14 +29,41 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+
 import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
 
 import ErrorState from "@/components/feedback/error/ErrorState";
+
+import {
+  useCreateCommentMutation,
+  useDeleteCommentMutation,
+  useGetTaskCommentsQuery,
+  useUpdateCommentMutation,
+} from "@/features/comment/commentApi";
 
 import {
   useDeleteTaskMutation,
   useGetTaskByIdQuery,
 } from "@/features/task/taskApi";
+
+import { useGetMyWorkspaceMembershipQuery } from "@/features/workspace/workspaceApi";
 
 import TaskDialog from "@/features/task/components/TaskDialog";
 
@@ -77,12 +107,35 @@ const formatDueDate = (date) => {
   }).format(new Date(date));
 };
 
+const getInitials = (name) => {
+  if (!name) return "U";
+
+  return name
+    .trim()
+    .split(/\s+/)
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+};
+
 const TaskDetailPage = () => {
   const { workspaceId, projectId, taskId } = useParams();
   const navigate = useNavigate();
 
+  const currentUser = useSelector((state) => state.auth.user);
+  const currentUserId = currentUser?._id;
+
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
+  const [commentPage, setCommentPage] = useState(1);
+  const [commentContent, setCommentContent] = useState("");
+
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editingContent, setEditingContent] = useState("");
+
+  const [deletingCommentId, setDeletingCommentId] = useState(null);
 
   const { data, isLoading, isError, refetch } = useGetTaskByIdQuery(taskId, {
     skip: !taskId,
@@ -92,6 +145,43 @@ const TaskDetailPage = () => {
 
   const task = data?.data;
 
+  const {
+    data: commentsData,
+    isLoading: isCommentsLoading,
+    isError: isCommentsError,
+    refetch: refetchComments,
+  } = useGetTaskCommentsQuery(
+    {
+      taskId,
+      page: commentPage,
+      limit: 20,
+    },
+    {
+      skip: !taskId,
+    },
+  );
+
+  const { data: membershipData } = useGetMyWorkspaceMembershipQuery(
+    workspaceId,
+    {
+      skip: !workspaceId,
+    },
+  );
+
+  const currentUserRole = membershipData?.data?.role;
+
+  const [createComment, { isLoading: isCreatingComment }] =
+    useCreateCommentMutation();
+
+  const [updateComment, { isLoading: isUpdatingComment }] =
+    useUpdateCommentMutation();
+
+  const [deleteComment, { isLoading: isDeletingComment }] =
+    useDeleteCommentMutation();
+
+  const comments = commentsData?.data?.comments ?? [];
+  const commentPagination = commentsData?.data?.pagination;
+
   const handleDelete = async () => {
     try {
       await deleteTask(taskId).unwrap();
@@ -100,6 +190,85 @@ const TaskDetailPage = () => {
     } catch {
       // Keep dialog open if deletion fails.
     }
+  };
+
+  const handleCreateComment = async (event) => {
+    event.preventDefault();
+
+    const content = commentContent.trim();
+
+    if (!content) return;
+
+    try {
+      await createComment({
+        taskId,
+        data: {
+          content,
+        },
+      }).unwrap();
+
+      setCommentContent("");
+
+      if (commentPage !== 1) {
+        setCommentPage(1);
+      } else {
+        refetchComments();
+      }
+    } catch {
+      // Keep the entered content if creation fails.
+    }
+  };
+
+  const handleStartEditing = (comment) => {
+    setEditingCommentId(comment._id);
+    setEditingContent(comment.content);
+  };
+
+  const handleCancelEditing = () => {
+    setEditingCommentId(null);
+    setEditingContent("");
+  };
+
+  const handleUpdateComment = async (commentId) => {
+    const content = editingContent.trim();
+
+    if (!content) return;
+
+    try {
+      await updateComment({
+        commentId,
+        data: {
+          content,
+        },
+      }).unwrap();
+
+      handleCancelEditing();
+    } catch {
+      // Keep edit mode open if updating fails.
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    try {
+      await deleteComment(commentId).unwrap();
+
+      setDeletingCommentId(null);
+
+      if (comments.length === 1 && commentPage > 1) {
+        setCommentPage((page) => page - 1);
+      }
+    } catch {
+      // Keep dialog open if deletion fails.
+    }
+  };
+
+  const canDeleteComment = (comment) => {
+    const isAuthor = comment.user?._id === currentUserId;
+
+    const isAdminOrOwner =
+      currentUserRole === "admin" || currentUserRole === "owner";
+
+    return isAuthor || isAdminOrOwner;
   };
 
   if (isError) {
@@ -146,6 +315,7 @@ const TaskDetailPage = () => {
           Back to project
         </Link>
 
+        {/* Task */}
         <section className="mt-5 rounded-xl border border-border bg-card">
           <div className="flex flex-col gap-5 border-b border-border p-5 sm:p-6">
             <div className="flex items-start justify-between gap-4">
@@ -208,13 +378,11 @@ const TaskDetailPage = () => {
             <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs text-muted-foreground">
               <span className="inline-flex items-center gap-1.5">
                 <UserRound className="size-3.5" />
-
                 {task.assignee?.name ?? "Unassigned"}
               </span>
 
               <span className="inline-flex items-center gap-1.5">
                 <CalendarDays className="size-3.5" />
-
                 {formatDueDate(task.dueDate)}
               </span>
 
@@ -233,8 +401,274 @@ const TaskDetailPage = () => {
             </div>
           </div>
         </section>
+
+        {/* Comments */}
+        <section className="mt-5 rounded-xl border border-border bg-card">
+          <div className="border-b border-border px-5 py-4 sm:px-6">
+            <div className="flex items-center gap-2">
+              <MessageCircle className="size-4 text-muted-foreground" />
+
+              <h2 className="text-sm font-semibold">Comments</h2>
+
+              {commentPagination?.total > 0 && (
+                <span className="text-xs text-muted-foreground">
+                  ({commentPagination.total})
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className="p-5 sm:p-6">
+            {/* Create comment */}
+            <form onSubmit={handleCreateComment}>
+              <Textarea
+                value={commentContent}
+                onChange={(event) => setCommentContent(event.target.value)}
+                placeholder="Write a comment..."
+                maxLength={2000}
+                disabled={isCreatingComment}
+                className="min-h-24 resize-none"
+              />
+
+              <div className="mt-3 flex items-center justify-between gap-3">
+                <p className="text-xs text-muted-foreground">
+                  {commentContent.length}/2000
+                </p>
+
+                <Button
+                  type="submit"
+                  size="sm"
+                  disabled={isCreatingComment || !commentContent.trim()}
+                >
+                  {isCreatingComment && (
+                    <Loader2 className="size-4 animate-spin" />
+                  )}
+                  Comment
+                </Button>
+              </div>
+            </form>
+
+            {/* Comments list */}
+            <div className="mt-6">
+              {isCommentsLoading ? (
+                <div className="space-y-6">
+                  {Array.from({ length: 3 }).map((_, index) => (
+                    <div key={index} className="flex gap-3">
+                      <Skeleton className="size-9 shrink-0 rounded-full" />
+
+                      <div className="min-w-0 flex-1 space-y-2">
+                        <Skeleton className="h-4 w-32" />
+                        <Skeleton className="h-4 w-full max-w-xl" />
+                        <Skeleton className="h-4 w-2/3 max-w-md" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : isCommentsError ? (
+                <ErrorState
+                  title="Unable to load comments"
+                  description="Something went wrong while loading the comments."
+                  onRetry={refetchComments}
+                />
+              ) : comments.length === 0 ? (
+                <div className="py-8 text-center">
+                  <MessageCircle className="mx-auto size-8 text-muted-foreground/60" />
+
+                  <p className="mt-3 text-sm font-medium">No comments yet</p>
+
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Start the conversation about this task.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {comments.map((comment) => {
+                    const isAuthor = comment.user?._id === currentUserId;
+
+                    const canDelete = canDeleteComment(comment);
+
+                    const isEditing = editingCommentId === comment._id;
+
+                    return (
+                      <div key={comment._id} className="flex gap-3">
+                        <Avatar className="size-9 shrink-0">
+                          <AvatarImage
+                            src={comment.user?.avatar ?? undefined}
+                            alt={comment.user?.name ?? "User"}
+                          />
+
+                          <AvatarFallback>
+                            {getInitials(comment.user?.name)}
+                          </AvatarFallback>
+                        </Avatar>
+
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium">
+                                {comment.user?.name ?? "Unknown user"}
+                              </p>
+
+                              <p className="text-xs text-muted-foreground">
+                                {formatRelativeTime(comment.createdAt)}
+
+                                {comment.updatedAt !== comment.createdAt && (
+                                  <span> · edited</span>
+                                )}
+                              </p>
+                            </div>
+
+                            {(isAuthor || canDelete) && !isEditing && (
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="size-8 shrink-0"
+                                  >
+                                    <MoreHorizontal className="size-4" />
+
+                                    <span className="sr-only">
+                                      Comment actions
+                                    </span>
+                                  </Button>
+                                </DropdownMenuTrigger>
+
+                                <DropdownMenuContent align="end">
+                                  {isAuthor && (
+                                    <DropdownMenuItem
+                                      onClick={() =>
+                                        handleStartEditing(comment)
+                                      }
+                                    >
+                                      <Pencil className="size-4" />
+                                      Edit
+                                    </DropdownMenuItem>
+                                  )}
+
+                                  {canDelete && (
+                                    <DropdownMenuItem
+                                      variant="destructive"
+                                      onClick={() =>
+                                        setDeletingCommentId(comment._id)
+                                      }
+                                    >
+                                      <Trash2 className="size-4" />
+                                      Delete
+                                    </DropdownMenuItem>
+                                  )}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            )}
+                          </div>
+
+                          {isEditing ? (
+                            <div className="mt-3">
+                              <Textarea
+                                value={editingContent}
+                                onChange={(event) =>
+                                  setEditingContent(event.target.value)
+                                }
+                                maxLength={2000}
+                                disabled={isUpdatingComment}
+                                className="min-h-24 resize-none"
+                              />
+
+                              <div className="mt-2 flex justify-end gap-2">
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={handleCancelEditing}
+                                  disabled={isUpdatingComment}
+                                >
+                                  Cancel
+                                </Button>
+
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  onClick={() =>
+                                    handleUpdateComment(comment._id)
+                                  }
+                                  disabled={
+                                    isUpdatingComment || !editingContent.trim()
+                                  }
+                                >
+                                  {isUpdatingComment && (
+                                    <Loader2 className="size-4 animate-spin" />
+                                  )}
+                                  Save
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-foreground/90">
+                              {comment.content}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Comment pagination */}
+              {commentPagination && commentPagination.totalPages > 1 && (
+                <div className="mt-6 flex flex-col gap-4 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-xs text-muted-foreground">
+                    Page {commentPagination.page} of{" "}
+                    {commentPagination.totalPages}
+                  </p>
+
+                  <Pagination className="mx-0 w-auto sm:justify-end">
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious
+                          href="#"
+                          onClick={(event) => {
+                            event.preventDefault();
+
+                            if (commentPagination.hasPreviousPage) {
+                              setCommentPage((page) => page - 1);
+                            }
+                          }}
+                          className={
+                            !commentPagination.hasPreviousPage
+                              ? "pointer-events-none opacity-50"
+                              : ""
+                          }
+                        />
+                      </PaginationItem>
+
+                      <PaginationItem>
+                        <PaginationNext
+                          href="#"
+                          onClick={(event) => {
+                            event.preventDefault();
+
+                            if (commentPagination.hasNextPage) {
+                              setCommentPage((page) => page + 1);
+                            }
+                          }}
+                          className={
+                            !commentPagination.hasNextPage
+                              ? "pointer-events-none opacity-50"
+                              : ""
+                          }
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
       </div>
 
+      {/* Edit task */}
       <TaskDialog
         open={isEditOpen}
         onOpenChange={setIsEditOpen}
@@ -243,6 +677,7 @@ const TaskDetailPage = () => {
         task={task}
       />
 
+      {/* Delete task */}
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -264,6 +699,42 @@ const TaskDetailPage = () => {
             >
               {isDeleting && <Loader2 className="size-4 animate-spin" />}
               Delete task
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete comment */}
+      <AlertDialog
+        open={Boolean(deletingCommentId)}
+        onOpenChange={(open) => {
+          if (!open && !isDeletingComment) {
+            setDeletingCommentId(null);
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete comment?</AlertDialogTitle>
+
+            <AlertDialogDescription>
+              This comment will be permanently deleted. This action cannot be
+              undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeletingComment}>
+              Cancel
+            </AlertDialogCancel>
+
+            <AlertDialogAction
+              onClick={() => handleDeleteComment(deletingCommentId)}
+              disabled={isDeletingComment || !deletingCommentId}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeletingComment && <Loader2 className="size-4 animate-spin" />}
+              Delete comment
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

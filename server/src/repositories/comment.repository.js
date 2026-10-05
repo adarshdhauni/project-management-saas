@@ -21,6 +21,7 @@ const findAllByTask = async (taskId, filters = {}, options = {}) => {
 
   const [comments, total] = await Promise.all([
     Comment.find(query, null, options)
+      .populate("user", "name email avatar")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit),
