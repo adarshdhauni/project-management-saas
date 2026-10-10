@@ -94,6 +94,14 @@ const expireIfPendingAndExpired = (invitationId, options = {}) => {
   );
 };
 
+const findStatusesByIds = (invitationIds, options = {}) => {
+  return WorkspaceInvitation.find(
+    { _id: { $in: invitationIds } },
+    { _id: 1, status: 1, expiresAt: 1 },
+    options,
+  ).lean();
+};
+
 const workspaceInvitationRepository = {
   create,
   findById,
@@ -105,6 +113,7 @@ const workspaceInvitationRepository = {
   updateMany,
   updatePendingById,
   expireIfPendingAndExpired,
+  findStatusesByIds,
 };
 
 export default workspaceInvitationRepository;

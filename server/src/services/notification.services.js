@@ -1,6 +1,6 @@
 import ApiError from "../utils/ApiError.js";
 import notificationRepository from "../repositories/notification.repository.js";
-import workspaceMemberRepository from "../repositories/workspace-member.repository.js";
+import workspaceInvitationRepository from "../repositories/workspace-invitation.repository.js";
 
 const createNotification = async (notificationData, options = {}) => {
   const notification = await notificationRepository.create(
@@ -12,7 +12,50 @@ const createNotification = async (notificationData, options = {}) => {
 };
 
 const getNotifications = async (userId, filters = {}) => {
-  return notificationRepository.findAllByRecipient(userId, filters);
+  const result = await notificationRepository.findAllByRecipient(
+    userId,
+    filters,
+  );
+
+  const invitationIds = result.notifications
+    .filter((notification) => notification.type === "workspace.invited")
+    .map((notification) => notification.metadata?.invitationId)
+    .filter(Boolean);
+
+  const invitations =
+    await workspaceInvitationRepository.findStatusesByIds(invitationIds);
+
+  const now = new Date();
+
+  const invitationStatusById = new Map(
+    invitations.map((invitation) => {
+      const effectiveStatus =
+        invitation.status === "pending" && invitation.expiresAt <= now
+          ? "expired"
+          : invitation.status;
+
+      return [invitation._id.toString(), effectiveStatus];
+    }),
+  );
+
+  return {
+    ...result,
+    notifications: result.notifications.map((notification) => {
+      const item = notification.toObject();
+
+      if (item.type !== "workspace.invited") {
+        return item;
+      }
+
+      const invitationId = item.metadata?.invitationId?.toString();
+
+      return {
+        ...item,
+        invitationStatus:
+          invitationStatusById.get(invitationId) ?? "unavailable",
+      };
+    }),
+  };
 };
 
 const getNotificationById = async (userId, notificationId) => {
@@ -83,7 +126,7 @@ const notificationService = {
   getNotificationById,
   markNotificationAsRead,
   markAllNotificationsAsRead,
-  deleteNotification
+  deleteNotification,
 };
 
 export default notificationService;

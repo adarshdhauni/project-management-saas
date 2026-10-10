@@ -11,12 +11,15 @@ const NotificationItem = ({
   onDecline,
   isAccepting = false,
   isDeclining = false,
-  isInvitationHandled = false,
   variant = "default",
 }) => {
   const { title, description } = getNotificationContent(notification);
 
   const isInvitation = notification.type === "workspace.invited";
+
+  const canRespondToInvitation =
+    isInvitation && notification.invitationStatus === "pending";
+
   const isCompact = variant === "compact";
 
   return (
@@ -97,7 +100,7 @@ const NotificationItem = ({
             </p>
           )}
 
-          {isInvitation && !isInvitationHandled && (
+          {canRespondToInvitation && (
             <div
               className="mt-2 flex gap-2"
               onClick={(event) => event.stopPropagation()}
