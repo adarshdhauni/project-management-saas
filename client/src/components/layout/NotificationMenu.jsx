@@ -39,6 +39,8 @@ const NotificationMenu = () => {
 
   const [decliningNotificationId, setDecliningNotificationId] = useState(null);
 
+  const [open, setOpen] = useState(false);
+
   const { data, isLoading, isError, refetch } = useGetNotificationsQuery({
     page: 1,
     limit: 5,
@@ -56,8 +58,6 @@ const NotificationMenu = () => {
   const notifications = data?.data?.notifications ?? [];
   const unreadCount = data?.data?.unreadCount ?? 0;
 
-  console.log(notifications)
-
   const isNotificationsPage = location.pathname === "/dashboard/notifications";
 
   const handleRetryNotifications = async () => {
@@ -66,6 +66,11 @@ const NotificationMenu = () => {
     try {
       await refetch().unwrap();
     } catch {
+      toast.add({
+        type: "error",
+        title: "Failed to load notifications.",
+        priority: "high",
+      });
     } finally {
       setIsRetryingNotifications(false);
     }
@@ -74,6 +79,12 @@ const NotificationMenu = () => {
   const handleMarkAllAsRead = async () => {
     try {
       await markAllNotificationsAsRead().unwrap();
+
+      toast.add({
+        type: "success",
+        title: "All notifications marked as read.",
+        priority: "high",
+      });
     } catch (error) {
       toast.add({
         type: "error",
@@ -84,22 +95,76 @@ const NotificationMenu = () => {
   };
 
   const handleNotificationClick = async (notification) => {
+    await markAsReadSafely(notification);
+
+    if (notification.type === "workspace.invited") {
+      switch (notification.invitationStatus) {
+        case "pending":
+          toast.add({
+            type: "info",
+            title: "Workspace invitation",
+            description: "Use Accept or Decline to respond to this invitation.",
+          });
+          return;
+
+        case "accepted":
+          break;
+
+        case "rejected":
+          toast.add({
+            type: "info",
+            title: "Invitation declined",
+            description: "You declined this workspace invitation.",
+          });
+          return;
+
+        case "expired":
+          toast.add({
+            type: "info",
+            title: "Invitation expired",
+            description: "This workspace invitation has expired.",
+          });
+          return;
+
+        default:
+          toast.add({
+            type: "info",
+            title: "Invitation unavailable",
+            description: "This invitation is no longer available.",
+          });
+          return;
+      }
+    }
+
+    const path = getNotificationPath(notification);
+
+    if (path) {
+      setOpen(false);
+      navigate(path);
+    } else {
+      toast.add({
+        type: "info",
+        title: "No destination available",
+        description: "There is no page to open for this notification.",
+      });
+    }
+  };
+
+  const markAsReadSafely = async (notification) => {
+    if (notification.read) return true;
+
     try {
-      if (!notification.read) {
-        await markNotificationAsRead(notification._id).unwrap();
-      }
-
-      const path = getNotificationPath(notification);
-
-      if (path) {
-        navigate(path);
-      }
-    } catch (error) {
+      await markNotificationAsRead(notification._id).unwrap();
+      return true;
+    } catch {
       toast.add({
         type: "error",
-        title: error?.data?.message || "Failed to update notification.",
+        title:
+          "Action completed, but notification could not be marked as read.",
         priority: "high",
       });
+
+      return false;
     }
   };
 
@@ -127,9 +192,12 @@ const NotificationMenu = () => {
         priority: "high",
       });
 
-      await markNotificationAsRead(notification._id).unwrap();
+      await markAsReadSafely(notification);
 
-      navigate(`/dashboard/workspaces/${notification.workspace}`);
+      const path = `/dashboard/workspaces/${notification.workspace?._id ?? notification.workspace}`;
+
+      setOpen(false);
+      navigate(path);
     } catch (error) {
       toast.add({
         type: "error",
@@ -159,13 +227,15 @@ const NotificationMenu = () => {
     try {
       await declineInvitation(invitationId).unwrap();
 
+      setOpen(false);
+
       toast.add({
         type: "success",
         title: "Invitation declined.",
         priority: "high",
       });
 
-      await markNotificationAsRead(notification._id).unwrap();
+      await markAsReadSafely(notification);
     } catch (error) {
       toast.add({
         type: "error",
@@ -178,7 +248,7 @@ const NotificationMenu = () => {
   };
 
   return (
-    <DropdownMenu>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger
         render={
           <button

@@ -15,6 +15,7 @@ import {
   useGetNotificationsQuery,
   useMarkNotificationAsReadMutation,
   useMarkAllNotificationsAsReadMutation,
+  useDeleteNotificationMutation,
 } from "@/features/notification/notificationApi";
 import {
   useAcceptInvitationMutation,
@@ -25,6 +26,7 @@ import NotificationItem from "@/features/notification/components/NotificationIte
 import { toast } from "@/components/ui/toast";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { getNotificationPath } from "@/utils/notification";
+import { useState } from "react";
 
 const Notifications = () => {
   const navigate = useNavigate();
@@ -51,11 +53,15 @@ const Notifications = () => {
   const [markAllNotificationsAsRead, { isLoading: isMarkingAllRead }] =
     useMarkAllNotificationsAsReadMutation();
 
-  const [acceptInvitation, { isLoading: isAccepting }] =
-    useAcceptInvitationMutation();
+  const [acceptInvitation] = useAcceptInvitationMutation();
+  const [declineInvitation] = useDeclineInvitationMutation();
+  const [deleteNotification] = useDeleteNotificationMutation();
 
-  const [declineInvitation, { isLoading: isDeclining }] =
-    useDeclineInvitationMutation();
+  const [acceptingNotificationId, setAcceptingNotificationId] = useState(null);
+
+  const [decliningNotificationId, setDecliningNotificationId] = useState(null);
+
+  const [deletingNotificationId, setDeletingNotificationId] = useState(null);
 
   const notifications = data?.data?.notifications ?? [];
   const unreadCount = data?.data?.unreadCount ?? 0;
@@ -64,6 +70,12 @@ const Notifications = () => {
   const handleMarkAllAsRead = async () => {
     try {
       await markAllNotificationsAsRead().unwrap();
+
+      toast.add({
+        type: "success",
+        title: "All notifications marked as read.",
+        priority: "high",
+      });
     } catch (error) {
       toast.add({
         type: "error",
@@ -73,22 +85,75 @@ const Notifications = () => {
     }
   };
 
-  const handleNotificationClick = async (notification) => {
+  const markAsReadSafely = async (notification) => {
+    if (notification.read) return;
+
     try {
-      if (!notification.read) {
-        await markNotificationAsRead(notification._id).unwrap();
-      }
-
-      const path = getNotificationPath(notification);
-
-      if (path) {
-        navigate(path);
-      }
+      await markNotificationAsRead(notification._id).unwrap();
     } catch (error) {
+      // Another surface may already have marked it as read.
+      if (error?.status !== 409) {
+        toast.add({
+          type: "error",
+          title:
+            "The action succeeded, but the notification could not be marked as read.",
+          priority: "high",
+        });
+      }
+    }
+  };
+
+  const handleNotificationClick = async (notification) => {
+    await markAsReadSafely(notification);
+
+    if (notification.type === "workspace.invited") {
+      switch (notification.invitationStatus) {
+        case "pending":
+          toast.add({
+            type: "info",
+            title: "Workspace invitation",
+            description: "Use Accept or Decline to respond to this invitation.",
+          });
+          return;
+
+        case "accepted":
+          break;
+
+        case "rejected":
+          toast.add({
+            type: "info",
+            title: "Invitation declined",
+            description: "You declined this workspace invitation.",
+          });
+          return;
+
+        case "expired":
+          toast.add({
+            type: "info",
+            title: "Invitation expired",
+            description: "This workspace invitation has expired.",
+          });
+          return;
+
+        default:
+          toast.add({
+            type: "info",
+            title: "Invitation unavailable",
+            description: "This invitation is no longer available.",
+          });
+          return;
+      }
+    }
+
+    const path = getNotificationPath(notification);
+
+    if (path) {
+      navigate(path);
+    } else {
       toast.add({
-        type: "error",
-        title: error?.data?.message || "Failed to update notification.",
-        priority: "high",
+        type: "info",
+        title: "No destination available",
+        description: "There is no page to open for this notification.",
       });
     }
   };
@@ -105,6 +170,8 @@ const Notifications = () => {
       return;
     }
 
+    setAcceptingNotificationId(notification._id);
+
     try {
       await acceptInvitation(invitationId).unwrap();
 
@@ -114,15 +181,24 @@ const Notifications = () => {
         priority: "high",
       });
 
-      await markNotificationAsRead(notification._id).unwrap();
+      await markAsReadSafely(notification);
 
-      navigate(`/dashboard/workspaces/${notification.workspace}`);
+      const workspaceId =
+        typeof notification.workspace === "object"
+          ? notification.workspace?._id
+          : notification.workspace;
+
+      if (workspaceId) {
+        navigate(`/dashboard/workspaces/${workspaceId}`);
+      }
     } catch (error) {
       toast.add({
         type: "error",
         title: error?.data?.message || "Failed to accept invitation.",
         priority: "high",
       });
+    } finally {
+      setAcceptingNotificationId(null);
     }
   };
 
@@ -138,6 +214,8 @@ const Notifications = () => {
       return;
     }
 
+    setDecliningNotificationId(notification._id);
+
     try {
       await declineInvitation(invitationId).unwrap();
 
@@ -147,13 +225,46 @@ const Notifications = () => {
         priority: "high",
       });
 
-      await markNotificationAsRead(notification._id).unwrap();
+      await markAsReadSafely(notification);
     } catch (error) {
       toast.add({
         type: "error",
         title: error?.data?.message || "Failed to decline invitation.",
         priority: "high",
       });
+    } finally {
+      setDecliningNotificationId(null);
+    }
+  };
+
+  const handleDeleteNotification = async (notification) => {
+    setDeletingNotificationId(notification._id);
+
+    try {
+      await deleteNotification(notification._id).unwrap();
+
+      toast.add({
+        type: "success",
+        title: "Notification deleted.",
+        priority: "high",
+      });
+
+      // Avoid leaving the user on an empty page after deleting
+      // its last item. Page one is already the default.
+      if (notifications.length === 1 && page > 1) {
+        setSearchParams((params) => {
+          params.set("page", String(page - 1));
+          return params;
+        });
+      }
+    } catch (error) {
+      toast.add({
+        type: "error",
+        title: error?.data?.message || "Failed to delete notification.",
+        priority: "high",
+      });
+    } finally {
+      setDeletingNotificationId(null);
     }
   };
 
@@ -296,8 +407,10 @@ const Notifications = () => {
                   onClick={handleNotificationClick}
                   onAccept={handleAcceptInvitation}
                   onDecline={handleDeclineInvitation}
-                  isAccepting={isAccepting}
-                  isDeclining={isDeclining}
+                  onDelete={handleDeleteNotification}
+                  isAccepting={acceptingNotificationId === notification._id}
+                  isDeclining={decliningNotificationId === notification._id}
+                  isDeleting={deletingNotificationId === notification._id}
                 />
               ))}
             </div>

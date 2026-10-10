@@ -18,8 +18,11 @@ import { toast } from "@/components/ui/toast";
 
 import { useCreateWorkspaceMutation } from "@/features/workspace/workspaceApi";
 import focusField from "@/utils/focusField";
+import { useNavigate } from "react-router-dom";
 
 const CreateWorkspaceDialog = ({ open, onOpenChange }) => {
+  const navigate = useNavigate();
+
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
