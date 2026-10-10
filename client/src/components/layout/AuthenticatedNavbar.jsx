@@ -18,33 +18,35 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Skeleton } from "../ui/skeleton";
+import { Spinner } from "../ui/spinner";
+import { toast } from "../ui/toast";
 
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useGetWorkspacesQuery } from "@/features/workspace/workspaceApi";
-
-import ThemeToggle from "../common/ThemeToggle";
-import { Skeleton } from "../ui/skeleton";
-import { Spinner } from "../ui/spinner";
-import { useState } from "react";
-import CreateWorkspaceDialog from "@/features/workspace/components/CreateWorkspaceDialog";
 import { useLogoutMutation } from "@/features/auth/authApi";
 import { clearCredentials } from "@/features/auth/authSlice";
-import { toast } from "../ui/toast";
+
+import ThemeToggle from "../common/ThemeToggle";
+import { useState } from "react";
+import CreateWorkspaceDialog from "@/features/workspace/components/CreateWorkspaceDialog";
 import NotificationMenu from "./NotificationMenu";
 import getWorkspaceInitials from "@/utils/workspaceInitials";
+import getUserInitials from "@/utils/userInitials";
 
 const AuthenticatedNavbar = () => {
-  const user = useSelector((state) => state.auth.user);
-
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
+  const user = useSelector((state) => state.auth.user);
+
   const [isCreateWorkspaceOpen, setIsCreateWorkspaceOpen] = useState(false);
 
-  const { data, isLoading, isFetching, isError, refetch } =
-    useGetWorkspacesQuery();
+  const [isRetryingWorkspaces, setIsRetryingWorkspaces] = useState(false);
+
+  const { data, isLoading, isError, refetch } = useGetWorkspacesQuery();
 
   const [logout, { isLoading: isLoggingOut }] = useLogoutMutation();
 
@@ -54,18 +56,22 @@ const AuthenticatedNavbar = () => {
     /^\/dashboard\/workspaces\/([^/]+)/,
   )?.[1];
 
-  const isDashboardHome = location.pathname === "/dashboard";
-
   const currentWorkspace = workspaces.find(
     (workspace) => workspace._id === workspaceId,
   );
 
-  const initials = user?.name
-    ?.split(/\s+/)
-    .map((name) => name[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
+  const isDashboardHome = location.pathname === "/dashboard";
+
+  const handleRetryWorkspaces = async () => {
+    setIsRetryingWorkspaces(true);
+
+    try {
+      await refetch().unwrap();
+    } catch {
+    } finally {
+      setIsRetryingWorkspaces(false);
+    }
+  };
 
   const handleWorkspaceSelect = (id) => {
     navigate(`/dashboard/workspaces/${id}`);
@@ -114,18 +120,18 @@ const AuthenticatedNavbar = () => {
             </Link>
           )}
 
-          {isLoading ? (
+          {isLoading && !isRetryingWorkspaces ? (
             <Skeleton className="h-9 w-32 rounded-lg sm:h-10 sm:w-44" />
-          ) : isError ? (
+          ) : isError || isRetryingWorkspaces ? (
             <button
               type="button"
-              onClick={refetch}
-              disabled={isFetching}
-              aria-label={isFetching ? "Retrying" : "Retry"}
+              onClick={handleRetryWorkspaces}
+              disabled={isRetryingWorkspaces}
+              aria-label={isRetryingWorkspaces ? "Retrying" : "Retry"}
               className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-lg text-destructive transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-50 sm:h-10 sm:w-auto sm:gap-2 sm:px-2.5"
             >
               <div className="flex h-6 w-6 items-center justify-center rounded-md bg-muted">
-                {isFetching ? (
+                {isRetryingWorkspaces ? (
                   <Spinner className="h-3.5 w-3.5" />
                 ) : (
                   <RefreshCw className="h-3.5 w-3.5" />
@@ -133,7 +139,7 @@ const AuthenticatedNavbar = () => {
               </div>
 
               <span className="hidden text-sm sm:inline">
-                {isFetching ? "Retrying..." : "Retry"}
+                {isRetryingWorkspaces ? "Retrying..." : "Retry"}
               </span>
             </button>
           ) : workspaces.length === 0 ? (
@@ -181,13 +187,6 @@ const AuthenticatedNavbar = () => {
                 className="max-h-80 w-[calc(100vw-1.5rem)] max-w-64 overflow-y-auto rounded-xl p-1.5 sm:w-64"
               >
                 {workspaces.map((workspace) => {
-                  const initials = workspace.name
-                    .split(/\s+/)
-                    .map((word) => word[0])
-                    .join("")
-                    .slice(0, 2)
-                    .toUpperCase();
-
                   const isActive = workspace._id === currentWorkspace?._id;
 
                   return (
@@ -197,7 +196,7 @@ const AuthenticatedNavbar = () => {
                       className="cursor-pointer gap-2 rounded-lg px-2.5 py-2"
                     >
                       <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-muted text-[11px] font-semibold text-foreground/70">
-                        {initials}
+                        {getWorkspaceInitials(workspace.name)}
                       </div>
 
                       <span className="min-w-0 truncate">{workspace.name}</span>
@@ -256,7 +255,7 @@ const AuthenticatedNavbar = () => {
               }
             >
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground">
-                {initials}
+                {getUserInitials(user?.name)}
               </div>
 
               <ChevronDown className="hidden h-3.5 w-3.5 text-muted-foreground sm:block" />

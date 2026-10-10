@@ -1,8 +1,12 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ChevronRight } from "lucide-react";
+import {
+  ArrowRight,
+  ChevronRight,
+} from "lucide-react";
 import React from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
+import ProductMockup from "@/components/landing/ProductMockup";
 
 const Hero = () => {
   const { isAuthenticated, isInitialized } = useSelector((state) => state.auth);
@@ -55,99 +59,7 @@ const Hero = () => {
         </p>
       </div>
 
-      <div className="relative mx-auto max-w-6xl px-5 pb-24 sm:px-8">
-        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_25px_80px_-30px_rgba(0,0,0,0.25)]">
-          <div className="flex h-11 items-center gap-1.5 border-b border-border px-4">
-            <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/20" />
-            <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/20" />
-            <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/20" />
-
-            <div className="mx-auto hidden h-6 w-64 rounded-md bg-muted sm:block" />
-          </div>
-
-          <div className="flex min-h-105">
-            <aside className="hidden w-52 shrink-0 border-r border-border p-4 sm:block">
-              <div className="mb-7 flex items-center gap-2">
-                <div className="h-6 w-6 rounded-md bg-primary" />
-                <div className="h-3 w-20 rounded bg-muted-foreground/20" />
-              </div>
-
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-2 rounded-md bg-muted px-2.5 py-2">
-                  <div className="h-3.5 w-3.5 rounded bg-muted-foreground/40" />
-                  <div className="h-2.5 w-20 rounded bg-muted-foreground/30" />
-                </div>
-
-                <div className="flex items-center gap-2 px-2.5 py-2">
-                  <div className="h-3.5 w-3.5 rounded bg-muted-foreground/20" />
-                  <div className="h-2.5 w-16 rounded bg-muted-foreground/20" />
-                </div>
-
-                <div className="flex items-center gap-2 px-2.5 py-2">
-                  <div className="h-3.5 w-3.5 rounded bg-muted-foreground/20" />
-                  <div className="h-2.5 w-24 rounded bg-muted-foreground/20" />
-                </div>
-              </div>
-
-              <div className="mt-8 h-px bg-border" />
-
-              <div className="mt-5 space-y-3 px-2.5">
-                <div className="h-2 w-14 rounded bg-muted-foreground/20" />
-                <div className="h-2 w-24 rounded bg-muted-foreground/15" />
-                <div className="h-2 w-20 rounded bg-muted-foreground/15" />
-                <div className="h-2 w-28 rounded bg-muted-foreground/15" />
-              </div>
-            </aside>
-
-            <div className="flex-1 p-5 sm:p-8">
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="h-3 w-24 rounded bg-muted-foreground/20" />
-                  <div className="mt-3 h-6 w-44 rounded bg-muted-foreground/30" />
-                </div>
-
-                <div className="h-8 w-24 rounded-md bg-primary" />
-              </div>
-
-              <div className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
-                {[1, 2, 3, 4].map((item) => (
-                  <div
-                    key={item}
-                    className="rounded-xl border border-border p-4"
-                  >
-                    <div className="h-2.5 w-16 rounded bg-muted-foreground/15" />
-                    <div className="mt-3 h-5 w-10 rounded bg-muted-foreground/30" />
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-5 rounded-xl border border-border">
-                <div className="border-b border-border px-4 py-3">
-                  <div className="h-3 w-28 rounded bg-muted-foreground/20" />
-                </div>
-
-                {[1, 2, 3].map((item) => (
-                  <div
-                    key={item}
-                    className="flex items-center justify-between border-b border-border px-4 py-4 last:border-0"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-lg bg-muted" />
-
-                      <div>
-                        <div className="h-2.5 w-28 rounded bg-muted-foreground/25" />
-                        <div className="mt-2 h-2 w-20 rounded bg-muted-foreground/15" />
-                      </div>
-                    </div>
-
-                    <div className="h-2 w-14 rounded bg-muted-foreground/15" />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <ProductMockup />
     </section>
   );
 };

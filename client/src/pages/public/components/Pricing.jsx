@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { PLANS } from "@/constants/pricingPlans";
+import { plans } from "@/constants/pricingPlans";
 import { Check } from "lucide-react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
@@ -30,7 +30,7 @@ const Pricing = () => {
         </div>
 
         <div className="mx-auto mt-14 grid max-w-6xl gap-5 lg:grid-cols-3">
-          {PLANS.map((plan) => (
+          {plans.map((plan) => (
             <div
               key={plan.name}
               className={[

@@ -1,4 +1,4 @@
-export const WORKFLOW_DATA = [
+export const workflowData = [
   "Create your workspace",
   "Invite your team",
   "Create projects",

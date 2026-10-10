@@ -58,6 +58,42 @@ const deleteById = (invitationId, options = {}) => {
   return WorkspaceInvitation.findByIdAndDelete(invitationId, options);
 };
 
+const updateMany = (filter, updateData, options = {}) => {
+  return WorkspaceInvitation.updateMany(filter, updateData, options);
+};
+
+const updatePendingById = (invitationId, updateData, options = {}) => {
+  return WorkspaceInvitation.findOneAndUpdate(
+    {
+      _id: invitationId,
+      status: "pending",
+      expiresAt: { $gt: new Date() },
+    },
+    updateData,
+    {
+      new: true,
+      runValidators: true,
+      ...options,
+    },
+  );
+};
+
+const expireIfPendingAndExpired = (invitationId, options = {}) => {
+  return WorkspaceInvitation.findOneAndUpdate(
+    {
+      _id: invitationId,
+      status: "pending",
+      expiresAt: { $lte: new Date() },
+    },
+    { $set: { status: "expired" } },
+    {
+      new: true,
+      runValidators: true,
+      ...options,
+    },
+  );
+};
+
 const workspaceInvitationRepository = {
   create,
   findById,
@@ -66,6 +102,9 @@ const workspaceInvitationRepository = {
   findAllByWorkspace,
   updateById,
   deleteById,
+  updateMany,
+  updatePendingById,
+  expireIfPendingAndExpired,
 };
 
 export default workspaceInvitationRepository;

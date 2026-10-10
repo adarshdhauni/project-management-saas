@@ -385,7 +385,9 @@ const acceptInvitation = async (userId, invitationId) => {
     throw new ApiError(409, "This invitation has already been processed.");
   }
 
-  if (invitation.expiresAt < new Date()) {
+  if (invitation.expiresAt <= new Date()) {
+    await workspaceInvitationRepository.expireIfPendingAndExpired(invitationId);
+
     throw new ApiError(410, "This invitation has expired.");
   }
 
@@ -413,20 +415,26 @@ const acceptInvitation = async (userId, invitationId) => {
   try {
     session.startTransaction();
 
+    const updatedInvitation =
+      await workspaceInvitationRepository.updatePendingById(
+        invitationId,
+        { $set: { status: "accepted" } },
+        { session },
+      );
+
+    if (!updatedInvitation) {
+      throw new ApiError(
+        409,
+        "This invitation is no longer pending or has expired.",
+      );
+    }
+
     const workspaceMember = await workspaceMemberRepository.create(
       {
         workspace: invitation.workspace,
         user: userId,
         role: invitation.role,
         invitedBy: invitation.invitedBy,
-      },
-      { session },
-    );
-
-    await workspaceInvitationRepository.updateById(
-      invitationId,
-      {
-        status: "accepted",
       },
       { session },
     );
@@ -451,7 +459,9 @@ const acceptInvitation = async (userId, invitationId) => {
 
     return workspaceMember;
   } catch (error) {
-    await session.abortTransaction();
+    if (session.inTransaction()) {
+      await session.abortTransaction();
+    }
 
     if (error.code === 11000) {
       throw new ApiError(409, "User is already a member.");
@@ -474,7 +484,9 @@ const rejectInvitation = async (userId, invitationId) => {
     throw new ApiError(409, "This invitation has already been processed.");
   }
 
-  if (invitation.expiresAt < new Date()) {
+  if (invitation.expiresAt <= new Date()) {
+    await workspaceInvitationRepository.expireIfPendingAndExpired(invitationId);
+
     throw new ApiError(410, "This invitation has expired.");
   }
 
@@ -493,13 +505,19 @@ const rejectInvitation = async (userId, invitationId) => {
   try {
     session.startTransaction();
 
-    await workspaceInvitationRepository.updateById(
-      invitationId,
-      {
-        status: "rejected",
-      },
-      { session },
-    );
+    const updatedInvitation =
+      await workspaceInvitationRepository.updatePendingById(
+        invitationId,
+        { $set: { status: "rejected" } },
+        { session },
+      );
+
+    if (!updatedInvitation) {
+      throw new ApiError(
+        409,
+        "This invitation is no longer pending or has expired.",
+      );
+    }
 
     await activityService.createActivity(
       {
@@ -519,7 +537,13 @@ const rejectInvitation = async (userId, invitationId) => {
 
     await session.commitTransaction();
   } catch (error) {
-    await session.abortTransaction();
+    if (session.inTransaction()) {
+      await session.abortTransaction();
+    }
+
+    if (error.code === 11000) {
+      throw new ApiError(409, "User is already a member.");
+    }
 
     throw error;
   } finally {
@@ -1006,6 +1030,20 @@ const transferWorkspaceOwnership = async (userId, workspaceId, memberId) => {
   }
 };
 
+const expireWorkspaceInvitations = async () => {
+  const result = await workspaceInvitationRepository.updateMany(
+    {
+      status: "pending",
+      expiresAt: { $lte: new Date() },
+    },
+    {
+      $set: { status: "expired" },
+    },
+  );
+
+  return result.modifiedCount;
+};
+
 const workspaceService = {
   createWorkspace,
   getUserWorkspaces,
@@ -1023,6 +1061,7 @@ const workspaceService = {
   getWorkspaceOverview,
   getMyWorkspaceMembership,
   transferWorkspaceOwnership,
+  expireWorkspaceInvitations,
 };
 
 export default workspaceService;

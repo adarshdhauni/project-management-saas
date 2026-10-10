@@ -27,32 +27,49 @@ import {
 import { toast } from "../ui/toast";
 import NotificationItem from "@/features/notification/components/NotificationItem";
 import { getNotificationPath } from "@/utils/notification";
+import { useState } from "react";
 
 const NotificationMenu = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { data, isLoading, isError, isFetching, refetch } =
-    useGetNotificationsQuery({
-      page: 1,
-      limit: 5,
-    });
+  const [isRetryingNotifications, setIsRetryingNotifications] = useState(false);
+
+  const [acceptingNotificationId, setAcceptingNotificationId] = useState(null);
+
+  const [decliningNotificationId, setDecliningNotificationId] = useState(null);
+
+  const { data, isLoading, isError, refetch } = useGetNotificationsQuery({
+    page: 1,
+    limit: 5,
+  });
 
   const [markNotificationAsRead] = useMarkNotificationAsReadMutation();
 
   const [markAllNotificationsAsRead, { isLoading: isMarkingAllRead }] =
     useMarkAllNotificationsAsReadMutation();
 
-  const [acceptInvitation, { isLoading: isAccepting }] =
-    useAcceptInvitationMutation();
+  const [acceptInvitation] = useAcceptInvitationMutation();
 
-  const [declineInvitation, { isLoading: isDeclining }] =
-    useDeclineInvitationMutation();
+  const [declineInvitation] = useDeclineInvitationMutation();
 
   const notifications = data?.data?.notifications ?? [];
   const unreadCount = data?.data?.unreadCount ?? 0;
 
+  console.log(notifications)
+
   const isNotificationsPage = location.pathname === "/dashboard/notifications";
+
+  const handleRetryNotifications = async () => {
+    setIsRetryingNotifications(true);
+
+    try {
+      await refetch().unwrap();
+    } catch {
+    } finally {
+      setIsRetryingNotifications(false);
+    }
+  };
 
   const handleMarkAllAsRead = async () => {
     try {
@@ -87,6 +104,7 @@ const NotificationMenu = () => {
   };
 
   const handleAcceptInvitation = async (notification) => {
+    const notificationId = notification._id;
     const invitationId = notification.metadata?.invitationId;
 
     if (!invitationId) {
@@ -97,6 +115,8 @@ const NotificationMenu = () => {
       });
       return;
     }
+
+    setAcceptingNotificationId(notificationId);
 
     try {
       await acceptInvitation(invitationId).unwrap();
@@ -116,10 +136,13 @@ const NotificationMenu = () => {
         title: error?.data?.message || "Failed to accept invitation.",
         priority: "high",
       });
+    } finally {
+      setAcceptingNotificationId(null);
     }
   };
 
   const handleDeclineInvitation = async (notification) => {
+    const notificationId = notification._id;
     const invitationId = notification.metadata?.invitationId;
 
     if (!invitationId) {
@@ -130,6 +153,8 @@ const NotificationMenu = () => {
       });
       return;
     }
+
+    setDecliningNotificationId(notificationId);
 
     try {
       await declineInvitation(invitationId).unwrap();
@@ -147,6 +172,8 @@ const NotificationMenu = () => {
         title: error?.data?.message || "Failed to decline invitation.",
         priority: "high",
       });
+    } finally {
+      setDecliningNotificationId(null);
     }
   };
 
@@ -211,32 +238,36 @@ const NotificationMenu = () => {
 
         <DropdownMenuSeparator className="my-1.5" />
 
-        {isLoading ? (
+        {isLoading && !isRetryingNotifications ? (
           <div className="space-y-2 px-2.5 py-3">
             {[1, 2, 3].map((item) => (
               <div
                 key={item}
-                className="flex items-start gap-3 rounded-lg px-2.5 py-2.5"
+                className="flex animate-pulse items-start gap-3 rounded-lg px-2.5 py-2.5"
               >
                 <Skeleton className="mt-0.5 h-8 w-8 shrink-0 rounded-full" />
 
-                <div className="min-w-0 flex-1 space-y-2">
-                  <div className="flex items-center justify-between gap-2">
-                    <Skeleton className="h-3.5 w-4/5 rounded-md" />
-                    <Skeleton className="h-3 w-9 shrink-0 rounded-md" />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start gap-2">
+                    <Skeleton className="h-4 min-w-0 flex-1 rounded-md" />
+
+                    <div className="flex shrink-0 items-center gap-1.5">
+                      <Skeleton className="h-3 w-12 rounded-md" />
+                      <Skeleton className="h-1.5 w-1.5 rounded-full" />
+                    </div>
                   </div>
 
-                  <Skeleton className="h-3 w-3/5 rounded-md" />
+                  <Skeleton className="mt-1 h-3 w-3/4 rounded-md" />
                 </div>
               </div>
             ))}
           </div>
-        ) : isError ? (
+        ) : isError || isRetryingNotifications ? (
           <ErrorState
             title="Couldn't load notifications"
             description="We couldn't load your notifications. Please try again."
-            onRetry={refetch}
-            isRetrying={isFetching}
+            onRetry={handleRetryNotifications}
+            isRetrying={isRetryingNotifications}
             className="px-4 py-8"
           />
         ) : notifications.length === 0 ? (
@@ -258,26 +289,29 @@ const NotificationMenu = () => {
                 onClick={handleNotificationClick}
                 onAccept={handleAcceptInvitation}
                 onDecline={handleDeclineInvitation}
-                isAccepting={isAccepting}
-                isDeclining={isDeclining}
+                isAccepting={acceptingNotificationId === notification._id}
+                isDeclining={decliningNotificationId === notification._id}
                 variant="compact"
               />
             ))}
           </div>
         )}
 
-        {!isLoading && !isError && !isNotificationsPage && (
-          <>
-            <DropdownMenuSeparator className="my-1.5" />
+        {!isLoading &&
+          !isError &&
+          !isNotificationsPage &&
+          !isRetryingNotifications && (
+            <>
+              <DropdownMenuSeparator className="my-1.5" />
 
-            <DropdownMenuItem
-              onClick={() => navigate("/dashboard/notifications")}
-              className="cursor-pointer justify-center rounded-lg text-sm font-medium"
-            >
-              View all notifications
-            </DropdownMenuItem>
-          </>
-        )}
+              <DropdownMenuItem
+                onClick={() => navigate("/dashboard/notifications")}
+                className="cursor-pointer justify-center rounded-lg text-sm font-medium"
+              >
+                View all notifications
+              </DropdownMenuItem>
+            </>
+          )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

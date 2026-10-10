@@ -97,8 +97,19 @@ const CreateWorkspaceDialog = ({ open, onOpenChange }) => {
     }
   };
 
-  const nameValid = name.length >= 3 && name.length <= 100;
-  const descriptionValid = description.length <= 500;
+  const trimmedName = name.trim();
+
+  const nameValid = trimmedName.length >= 3 && trimmedName.length <= 100;
+
+  const nameError =
+    trimmedName.length < 3
+      ? "Workspace name must be at least 3 characters."
+      : trimmedName.length > 100
+        ? "Workspace name cannot exceed 100 characters."
+        : "";
+
+  const descriptionError =
+    description.length > 500 ? "Description cannot exceed 500 characters." : "";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -116,7 +127,7 @@ const CreateWorkspaceDialog = ({ open, onOpenChange }) => {
           <div className="space-y-5">
             <Field
               data-disabled={isLoading}
-              data-invalid={!nameValid && name.trim() !== ""}
+              data-invalid={nameError !== "" && trimmedName !== ""}
             >
               <FieldLabel htmlFor="workspace-name">
                 Workspace name <span className="text-destructive">*</span>
@@ -130,25 +141,25 @@ const CreateWorkspaceDialog = ({ open, onOpenChange }) => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 disabled={isLoading}
-                aria-invalid={!nameValid && name.trim() !== ""}
+                aria-invalid={nameError !== "" && trimmedName !== ""}
+                maxLength={100}
                 required
               />
-              {name.trim() !== "" && !nameValid && (
-                <p className="text-xs text-destructive">Invalid name</p>
+
+              {trimmedName !== "" && nameError && (
+                <p className="text-xs text-destructive">{nameError}</p>
               )}
 
               <FieldDescription>
-                Choose a name for your workspace.
+                Use a name between 3 and 100 characters.
               </FieldDescription>
             </Field>
-
             <Field
               data-disabled={isLoading}
-              data-invalid={!descriptionValid && description.trim() !== ""}
+              data-invalid={descriptionError !== ""}
             >
               <FieldLabel htmlFor="workspace-description">
-                Description{" "}
-                <span className="text-muted-foreground">(optional)</span>
+                Description
               </FieldLabel>
 
               <Textarea
@@ -157,15 +168,16 @@ const CreateWorkspaceDialog = ({ open, onOpenChange }) => {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 disabled={isLoading}
-                className="resize-none"
-                aria-invalid={!descriptionValid && description.trim() !== ""}
+                aria-invalid={descriptionError !== ""}
+                maxLength={500}
               />
-              {description.trim() !== "" && !descriptionValid && (
-                <p className="text-xs text-destructive">Invalid description</p>
+
+              {descriptionError && (
+                <p className="text-xs text-destructive">{descriptionError}</p>
               )}
 
               <FieldDescription>
-                Add a short description to help identify your workspace.
+                Briefly describe your workspace (up to 500 characters).
               </FieldDescription>
             </Field>
           </div>
@@ -183,7 +195,7 @@ const CreateWorkspaceDialog = ({ open, onOpenChange }) => {
 
             <Button
               type="submit"
-              disabled={isLoading || !name.trim()}
+              disabled={isLoading || !nameValid}
               className="cursor-pointer"
             >
               {isLoading ? (

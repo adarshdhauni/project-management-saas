@@ -1,10 +1,15 @@
 import { Button } from "@/components/ui/button";
-import { WORKFLOW_DATA } from "@/constants/workflowData";
+import { workflowData } from "@/constants/workflowData";
 import { ArrowRight, Check } from "lucide-react";
 import React from "react";
+import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
 const Workflow = () => {
+  const { isAuthenticated, isInitialized } = useSelector((state) => state.auth);
+
+  const isLoggedIn = isInitialized && isAuthenticated;
+
   return (
     <section
       id="workflow"
@@ -32,16 +37,18 @@ const Workflow = () => {
               nativeButton={false}
               size="lg"
               variant="link"
-              className="group mt-8 h-auto px-0"
-              render={<Link to="/auth/register" />}
+              className="group mt-8 h-auto cursor-pointer px-0"
+              render={
+                <Link to={isLoggedIn ? "/dashboard" : "/auth/register"} />
+              }
             >
-              Start building today
+              {isLoggedIn ? "Go to dashboard" : "Start building today"}
               <ArrowRight className="transition-transform group-hover:translate-x-1" />
             </Button>
           </div>
 
           <div className="space-y-3">
-            {WORKFLOW_DATA.map((item, index) => (
+            {workflowData.map((item, index) => (
               <div
                 key={item}
                 className="flex items-center gap-4 rounded-xl border border-border bg-card p-4"

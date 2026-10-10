@@ -12,7 +12,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { NAV_LINKS } from "@/constants/publicNavigation";
+import { navLinks } from "@/constants/publicNavigation";
 import { useSelector } from "react-redux";
 
 const PublicNavbar = () => {
@@ -54,7 +54,7 @@ const PublicNavbar = () => {
 
         <nav className="hidden sm:flex">
           <ul className="flex items-center gap-8">
-            {NAV_LINKS.map((link) => {
+            {navLinks.map((link) => {
               const isActive = activeSection === link.id;
 
               return (
@@ -160,7 +160,7 @@ const PublicNavbar = () => {
                   </p>
 
                   <nav className="space-y-1">
-                    {NAV_LINKS.map((link) => {
+                    {navLinks.map((link) => {
                       const isActive = activeSection === link.id;
 
                       return (

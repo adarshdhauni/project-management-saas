@@ -11,6 +11,7 @@ const NotificationItem = ({
   onDecline,
   isAccepting = false,
   isDeclining = false,
+  isInvitationHandled = false,
   variant = "default",
 }) => {
   const { title, description } = getNotificationContent(notification);
@@ -96,7 +97,7 @@ const NotificationItem = ({
             </p>
           )}
 
-          {isInvitation && (
+          {isInvitation && !isInvitationHandled && (
             <div
               className="mt-2 flex gap-2"
               onClick={(event) => event.stopPropagation()}
