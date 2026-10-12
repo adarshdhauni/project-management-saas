@@ -1,4 +1,12 @@
-import { Bell, UserPlus, Trash2 } from "lucide-react";
+import {
+  Bell,
+  UserPlus,
+  Trash2,
+  CheckCircle2,
+  Clock3,
+  XCircle,
+  AlertCircle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { getNotificationContent } from "@/utils/notification";
@@ -7,24 +15,30 @@ import { formatRelativeTime } from "@/utils/date";
 const invitationStatuses = {
   pending: {
     label: "Pending",
+    Icon: Clock3,
     className:
       "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300",
   },
   accepted: {
     label: "Accepted",
+    Icon: CheckCircle2,
     className:
       "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
   },
   rejected: {
     label: "Declined",
-    className: "border-border bg-muted text-muted-foreground",
+    Icon: XCircle,
+    className:
+      "border-rose-500/30 bg-rose-500/10 text-rose-700 dark:text-rose-300",
   },
   expired: {
     label: "Expired",
+    Icon: Clock3,
     className: "border-border bg-muted text-muted-foreground",
   },
   unavailable: {
     label: "Unavailable",
+    Icon: AlertCircle,
     className: "border-border bg-muted text-muted-foreground",
   },
 };
@@ -42,7 +56,9 @@ const NotificationItem = ({
 }) => {
   const { title, description } = getNotificationContent(notification);
 
+  const isCompact = variant === "compact";
   const isInvitation = notification.type === "workspace.invited";
+
   const invitationStatus = isInvitation
     ? (invitationStatuses[notification.invitationStatus ?? "unavailable"] ??
       invitationStatuses.unavailable)
@@ -51,106 +67,106 @@ const NotificationItem = ({
   const canRespondToInvitation =
     isInvitation && notification.invitationStatus === "pending";
 
-  const isCompact = variant === "compact";
   const isBusy = isAccepting || isDeclining || isDeleting;
+  const { Icon: StatusIcon } = invitationStatus ?? {};
 
   return (
-    <div
-      className={`group relative transition-colors duration-150 ${
-        isCompact ? "rounded-lg px-2.5 py-2.5" : "px-3 py-4 sm:px-4"
+    <article
+      className={`group relative isolate overflow-hidden rounded-xl border transition-colors duration-150 ${
+        isCompact ? "p-3" : "p-4 sm:p-5"
       } ${
         notification.read
-          ? "bg-transparent hover:bg-muted/60"
-          : "bg-muted/50 hover:bg-muted"
+          ? "border-transparent bg-transparent hover:border-border/70 hover:bg-muted/50"
+          : "border-primary/10 bg-muted/50 hover:border-primary/20 hover:bg-muted"
       }`}
     >
-      <div className="flex items-start gap-3">
+      <button
+        type="button"
+        tabIndex={0}
+        aria-label={`Open notification: ${title}${
+          notification.read ? "" : ", unread"
+        }`}
+        disabled={isBusy}
+        onClick={() => onClick(notification)}
+        className="absolute inset-0 z-0 cursor-pointer rounded-xl bg-transparent p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring disabled:cursor-wait"
+      />
+
+      {/* Decorative/content layer lets clicks pass through to the
+          full-card button. Interactive actions opt back into pointer events. */}
+      <div className="relative z-10 flex items-start gap-3 pointer-events-none">
         <div
           aria-hidden="true"
-          className={`mt-0.5 flex shrink-0 items-center justify-center rounded-full bg-background ring-1 ring-border/60 ${
-            isCompact ? "h-8 w-8" : "h-10 w-10"
+          className={`flex shrink-0 items-center justify-center rounded-xl border border-border/60 bg-background text-muted-foreground ${
+            isCompact ? "mt-0.5 h-9 w-9" : "mt-0.5 h-10 w-10"
           }`}
         >
           {isInvitation ? (
-            <UserPlus
-              className={`text-muted-foreground ${
-                isCompact ? "h-4 w-4" : "h-[18px] w-[18px]"
-              }`}
-            />
+            <UserPlus className={isCompact ? "h-4 w-4" : "h-4.5 w-4.5"} />
           ) : (
-            <Bell
-              className={`text-muted-foreground ${
-                isCompact ? "h-4 w-4" : "h-[18px] w-[18px]"
-              }`}
-            />
+            <Bell className={isCompact ? "h-4 w-4" : "h-4.5 w-4.5"} />
           )}
         </div>
 
         <div className="min-w-0 flex-1">
-          <button
-            type="button"
-            onClick={() => onClick(notification)}
-            className="block w-full cursor-pointer rounded-md text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          >
-            <div className="flex items-start gap-2">
-              <p
-                className={`min-w-0 flex-1 text-sm ${
-                  notification.read ? "font-medium" : "font-semibold"
+          <div className="flex items-start gap-3">
+            <p
+              className={`min-w-0 flex-1 text-sm leading-5 ${
+                notification.read
+                  ? "font-medium text-foreground"
+                  : "font-semibold text-foreground"
+              }`}
+            >
+              {title}
+            </p>
+
+            <div className="flex shrink-0 items-center gap-2">
+              <time
+                dateTime={new Date(notification.createdAt).toISOString()}
+                className={`whitespace-nowrap text-muted-foreground ${
+                  isCompact ? "text-[11px]" : "text-xs"
                 }`}
               >
-                {title}
-              </p>
+                {formatRelativeTime(notification.createdAt)}
+              </time>
 
-              <div className="flex shrink-0 items-center gap-1.5">
+              {!notification.read && (
                 <span
-                  className={`text-muted-foreground ${
-                    isCompact ? "text-[10px]" : "text-xs"
-                  }`}
-                >
-                  {formatRelativeTime(notification.createdAt)}
-                </span>
-
-                {!notification.read && (
-                  <span
-                    aria-label="Unread"
-                    title="Unread"
-                    className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary"
-                  />
-                )}
-              </div>
+                  className="h-2 w-2 shrink-0 rounded-full bg-primary ring-2 ring-primary/10"
+                  aria-hidden="true"
+                />
+              )}
             </div>
+          </div>
 
-            {description && (
-              <p
-                className={`mt-1 text-muted-foreground ${
-                  isCompact ? "text-xs" : "text-sm"
-                }`}
-              >
-                {description}
-              </p>
-            )}
-          </button>
+          {description && (
+            <p
+              className={`mt-1.5 leading-relaxed text-muted-foreground ${
+                isCompact ? "line-clamp-2 text-xs" : "text-sm"
+              }`}
+            >
+              {description}
+            </p>
+          )}
 
-          {invitationStatus && (
-            <div className="mt-2">
+          {invitationStatus && StatusIcon && (
+            <div className="mt-3">
               <span
-                className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium ${
-                  invitationStatus.className
-                }`}
+                className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-[11px] font-medium ${invitationStatus.className}`}
               >
+                <StatusIcon className="h-3 w-3" aria-hidden="true" />
                 {invitationStatus.label}
               </span>
             </div>
           )}
 
           {canRespondToInvitation && (
-            <div className="mt-2 flex flex-wrap gap-2">
+            <div className="pointer-events-auto mt-3 flex flex-wrap items-center gap-2">
               <Button
                 type="button"
                 size="sm"
                 disabled={isBusy}
                 onClick={() => onAccept(notification)}
-                className="h-7 cursor-pointer px-2.5 text-xs"
+                className="h-8 cursor-pointer px-3 text-xs font-medium"
               >
                 {isAccepting ? (
                   <>
@@ -158,7 +174,7 @@ const NotificationItem = ({
                     Accepting...
                   </>
                 ) : (
-                  "Accept"
+                  "Accept invitation"
                 )}
               </Button>
 
@@ -168,7 +184,7 @@ const NotificationItem = ({
                 variant="outline"
                 disabled={isBusy}
                 onClick={() => onDecline(notification)}
-                className="h-7 cursor-pointer px-2.5 text-xs"
+                className="h-8 cursor-pointer px-3 text-xs font-medium"
               >
                 {isDeclining ? (
                   <>
@@ -184,25 +200,27 @@ const NotificationItem = ({
         </div>
 
         {!isCompact && onDelete && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            aria-label={`Delete notification: ${title}`}
-            title="Delete notification"
-            disabled={isBusy}
-            onClick={() => onDelete(notification)}
-            className="h-8 w-8 shrink-0 cursor-pointer text-muted-foreground opacity-100 transition-opacity hover:bg-destructive/10 hover:text-destructive sm:opacity-0 sm:group-hover:opacity-100 sm:focus-visible:opacity-100"
-          >
-            {isDeleting ? (
-              <Spinner className="h-4 w-4" />
-            ) : (
-              <Trash2 className="h-4 w-4" />
-            )}
-          </Button>
+          <div className="pointer-events-auto relative -mr-1 -mt-1 shrink-0">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              aria-label={`Delete notification: ${title}`}
+              title="Delete notification"
+              disabled={isBusy}
+              onClick={() => onDelete(notification)}
+              className="h-8 w-8 cursor-pointer text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive focus-visible:opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+            >
+              {isDeleting ? (
+                <Spinner className="h-4 w-4" />
+              ) : (
+                <Trash2 className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
         )}
       </div>
-    </div>
+    </article>
   );
 };
 

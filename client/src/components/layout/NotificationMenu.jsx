@@ -28,6 +28,7 @@ import { toast } from "../ui/toast";
 import NotificationItem from "@/features/notification/components/NotificationItem";
 import { getNotificationPath } from "@/utils/notification";
 import { useState } from "react";
+import NotificationMenuSkeleton from "../feedback/loading/NotificationMenuSkeleton";
 
 const NotificationMenu = () => {
   const navigate = useNavigate();
@@ -309,29 +310,7 @@ const NotificationMenu = () => {
         <DropdownMenuSeparator className="my-1.5" />
 
         {isLoading && !isRetryingNotifications ? (
-          <div className="space-y-2 px-2.5 py-3">
-            {[1, 2, 3].map((item) => (
-              <div
-                key={item}
-                className="flex animate-pulse items-start gap-3 rounded-lg px-2.5 py-2.5"
-              >
-                <Skeleton className="mt-0.5 h-8 w-8 shrink-0 rounded-full" />
-
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-start gap-2">
-                    <Skeleton className="h-4 min-w-0 flex-1 rounded-md" />
-
-                    <div className="flex shrink-0 items-center gap-1.5">
-                      <Skeleton className="h-3 w-12 rounded-md" />
-                      <Skeleton className="h-1.5 w-1.5 rounded-full" />
-                    </div>
-                  </div>
-
-                  <Skeleton className="mt-1 h-3 w-3/4 rounded-md" />
-                </div>
-              </div>
-            ))}
-          </div>
+          <NotificationMenuSkeleton />
         ) : isError || isRetryingNotifications ? (
           <ErrorState
             title="Couldn't load notifications"
