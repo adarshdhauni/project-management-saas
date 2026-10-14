@@ -20,7 +20,6 @@ const NotificationItemSkeleton = ({
       }`}
     >
       <div className="flex items-start gap-3">
-        {/* Matches the real notification icon */}
         <Skeleton
           className={`mt-0.5 shrink-0 rounded-xl ${
             isCompact ? "h-9 w-9" : "h-10 w-10"
@@ -28,7 +27,6 @@ const NotificationItemSkeleton = ({
         />
 
         <div className="min-w-0 flex-1">
-          {/* Title and timestamp/unread indicator */}
           <div className="flex items-start gap-3">
             <Skeleton
               className={`h-4 min-w-0 ${
@@ -45,37 +43,33 @@ const NotificationItemSkeleton = ({
             </div>
           </div>
 
-          {/* Description lines */}
           <div className="mt-1.5 space-y-1.5">
             <Skeleton
               className={`h-3.5 w-full ${
-                isCompact ? "max-w-[220px]" : "max-w-[300px]"
+                isCompact ? "max-w-55" : "max-w-75"
               }`}
             />
             <Skeleton
               className={`h-3.5 ${
-                isCompact ? "w-[65%] max-w-[170px]" : "w-[72%] max-w-[220px]"
+                isCompact ? "w-[65%] max-w-42.5" : "w-[72%] max-w-55"
               }`}
             />
           </div>
 
-          {/* Invitation status badge */}
           {isInvitation && (
             <div className="mt-3">
-              <Skeleton className="h-[22px] w-[76px] rounded-full" />
+              <Skeleton className="h-5.5 w-19 rounded-full" />
             </div>
           )}
 
-          {/* Invitation action buttons */}
           {showActions && (
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              <Skeleton className="h-8 w-[124px] rounded-md" />
-              <Skeleton className="h-8 w-[68px] rounded-md" />
+              <Skeleton className="h-8 w-31 rounded-md" />
+              <Skeleton className="h-8 w-17 rounded-md" />
             </div>
           )}
         </div>
 
-        {/* Delete action placeholder on the full notifications page */}
         {!isCompact && (
           <Skeleton className="-mr-1 -mt-1 h-8 w-8 shrink-0 rounded-md" />
         )}
