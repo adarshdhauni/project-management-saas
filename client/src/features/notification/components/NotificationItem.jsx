@@ -70,6 +70,13 @@ const NotificationItem = ({
   const isBusy = isAccepting || isDeclining || isDeleting;
   const { Icon: StatusIcon } = invitationStatus ?? {};
 
+  const createdAtDate = notification.createdAt
+    ? new Date(notification.createdAt)
+    : null;
+
+  const validCreatedAt =
+    createdAtDate && !Number.isNaN(createdAtDate.getTime());
+
   return (
     <article
       className={`group relative isolate overflow-hidden rounded-xl border transition-colors duration-150 ${
@@ -82,7 +89,6 @@ const NotificationItem = ({
     >
       <button
         type="button"
-        tabIndex={0}
         aria-label={`Open notification: ${title}${
           notification.read ? "" : ", unread"
         }`}
@@ -90,9 +96,6 @@ const NotificationItem = ({
         onClick={() => onClick(notification)}
         className="absolute inset-0 z-0 cursor-pointer rounded-xl bg-transparent p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring disabled:cursor-wait"
       />
-
-      {/* Decorative/content layer lets clicks pass through to the
-          full-card button. Interactive actions opt back into pointer events. */}
       <div className="relative z-10 flex items-start gap-3 pointer-events-none">
         <div
           aria-hidden="true"
@@ -120,15 +123,16 @@ const NotificationItem = ({
             </p>
 
             <div className="flex shrink-0 items-center gap-2">
-              <time
-                dateTime={new Date(notification.createdAt).toISOString()}
-                className={`whitespace-nowrap text-muted-foreground ${
-                  isCompact ? "text-[11px]" : "text-xs"
-                }`}
-              >
-                {formatRelativeTime(notification.createdAt)}
-              </time>
-
+              {validCreatedAt && (
+                <time
+                  dateTime={createdAtDate.toISOString()}
+                  className={`whitespace-nowrap text-muted-foreground ${
+                    isCompact ? "text-[11px]" : "text-xs"
+                  }`}
+                >
+                  {formatRelativeTime(notification.createdAt)}
+                </time>
+              )}
               {!notification.read && (
                 <span
                   className="h-2 w-2 shrink-0 rounded-full bg-primary ring-2 ring-primary/10"
@@ -160,13 +164,13 @@ const NotificationItem = ({
           )}
 
           {canRespondToInvitation && (
-            <div className="pointer-events-auto mt-3 flex flex-wrap items-center gap-2">
+            <div className="pointer-events-none mt-3 flex flex-wrap items-center gap-2">
               <Button
                 type="button"
                 size="sm"
                 disabled={isBusy}
                 onClick={() => onAccept(notification)}
-                className="h-8 cursor-pointer px-3 text-xs font-medium"
+                className="h-8 cursor-pointer px-3 text-xs font-medium pointer-events-auto"
               >
                 {isAccepting ? (
                   <>
@@ -184,7 +188,7 @@ const NotificationItem = ({
                 variant="outline"
                 disabled={isBusy}
                 onClick={() => onDecline(notification)}
-                className="h-8 cursor-pointer px-3 text-xs font-medium"
+                className="h-8 cursor-pointer px-3 text-xs font-medium pointer-events-auto"
               >
                 {isDeclining ? (
                   <>
@@ -200,7 +204,7 @@ const NotificationItem = ({
         </div>
 
         {!isCompact && onDelete && (
-          <div className="pointer-events-auto relative -mr-1 -mt-1 shrink-0">
+          <div className="pointer-events-none relative -mr-1 -mt-1 shrink-0">
             <Button
               type="button"
               variant="ghost"
@@ -209,7 +213,7 @@ const NotificationItem = ({
               title="Delete notification"
               disabled={isBusy}
               onClick={() => onDelete(notification)}
-              className="h-8 w-8 cursor-pointer text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive focus-visible:opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+              className="h-8 w-8 cursor-pointer text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 pointer-events-auto"
             >
               {isDeleting ? (
                 <Spinner className="h-4 w-4" />

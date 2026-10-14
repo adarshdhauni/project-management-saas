@@ -9,7 +9,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import ErrorState from "@/components/feedback/error/ErrorState";
 
@@ -28,7 +27,7 @@ import { toast } from "../ui/toast";
 import NotificationItem from "@/features/notification/components/NotificationItem";
 import { getNotificationPath } from "@/utils/notification";
 import { useState } from "react";
-import NotificationMenuSkeleton from "../feedback/loading/NotificationMenuSkeleton";
+import NotificationItemSkeleton from "../feedback/loading/NotificationItemSkeleton";
 
 const NotificationMenu = () => {
   const navigate = useNavigate();
@@ -310,7 +309,17 @@ const NotificationMenu = () => {
         <DropdownMenuSeparator className="my-1.5" />
 
         {isLoading && !isRetryingNotifications ? (
-          <NotificationMenuSkeleton />
+          <div className="space-y-1">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <NotificationItemSkeleton
+                key={index}
+                variant="compact"
+                isUnread={index < 3}
+                isInvitation={index === 0 || index === 3}
+                showActions={index === 0}
+              />
+            ))}
+          </div>
         ) : isError || isRetryingNotifications ? (
           <ErrorState
             title="Couldn't load notifications"
