@@ -13,35 +13,53 @@ const findById = (notificationId, options = {}) => {
   );
 };
 
-const [notifications, total, unreadCount, allCount] = await Promise.all([
-  Notification.find(query, null, options)
-    .populate("actor", "name")
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(limit),
+const findAllByRecipient = async (recipientId, filters = {}, options = {}) => {
+  const { read, page = 1, limit = 20 } = filters;
 
-  Notification.countDocuments(query),
+  const query = {
+    recipient: recipientId,
+  };
 
-  Notification.countDocuments({
+  if (read !== undefined) {
+    query.read = read;
+  }
+
+  const skip = (page - 1) * limit;
+
+  const unreadQuery = {
     recipient: recipientId,
     read: false,
-  }),
+  };
 
-  Notification.countDocuments({
+  const allQuery = {
     recipient: recipientId,
-  }),
-]);
+  };
 
-return {
-  notifications,
-  unreadCount,
-  allCount,
-  pagination: {
-    page,
-    limit,
-    total,
-    totalPages: Math.ceil(total / limit),
-  },
+  const [notifications, total, unreadCount, allCount] = await Promise.all([
+    Notification.find(query, null, options)
+      .populate("actor", "name")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit),
+
+    Notification.countDocuments(query),
+
+    Notification.countDocuments(unreadQuery),
+
+    Notification.countDocuments(allQuery),
+  ]);
+
+  return {
+    notifications,
+    unreadCount,
+    allCount,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
 };
 
 const updateById = (notificationId, updateData, options = {}) => {
