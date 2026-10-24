@@ -1,8 +1,9 @@
-import { Button } from "@/components/ui/button";
-import { plans } from "@/constants/pricingPlans";
 import { Check } from "lucide-react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+
+import { Button } from "@/components/ui/button";
+import { plans } from "@/constants/pricingPlans";
 
 const Pricing = () => {
   const { isAuthenticated, isInitialized } = useSelector((state) => state.auth);

@@ -1,5 +1,6 @@
-import PageTransition from "@/components/shared/PageTransition";
 import { Outlet } from "react-router-dom";
+
+import PageTransition from "@/components/shared/PageTransition";
 
 export const AuthLayout = () => (
   <div className="flex min-h-screen items-center justify-center bg-background px-5 py-8 text-foreground sm:px-6 sm:py-12">

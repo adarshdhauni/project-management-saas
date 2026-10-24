@@ -1,5 +1,7 @@
+import { Trash2 } from "lucide-react";
 import React from "react";
 
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -8,10 +10,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
-import { Trash2 } from "lucide-react";
 
 import { useRemoveWorkspaceMemberMutation } from "../workspaceApi";
 

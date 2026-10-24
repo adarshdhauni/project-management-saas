@@ -1,13 +1,13 @@
-import { Building2, Plus, ArrowRight } from "lucide-react";
+import { ArrowRight,Building2, Plus } from "lucide-react";
+import { useState } from "react";
+import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
+import ErrorState from "@/components/feedback/error/ErrorState";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import ErrorState from "@/components/feedback/error/ErrorState";
-import { useGetWorkspacesQuery } from "@/features/workspace/workspaceApi";
-import { useSelector } from "react-redux";
-import { useState } from "react";
 import CreateWorkspaceDialog from "@/features/workspace/components/CreateWorkspaceDialog";
+import { useGetWorkspacesQuery } from "@/features/workspace/workspaceApi";
 import getWorkspaceInitials from "@/utils/workspaceInitials";
 
 const Dashboard = () => {

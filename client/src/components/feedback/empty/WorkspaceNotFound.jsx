@@ -1,7 +1,8 @@
-import { Button } from "@/components/ui/button";
 import { FolderKanban } from "lucide-react";
 import React from "react";
 import { useNavigate } from "react-router-dom";
+
+import { Button } from "@/components/ui/button";
 
 const WorkspaceNotFound = () => {
   const navigate = useNavigate()

@@ -1,6 +1,16 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link, useParams, useSearchParams } from "react-router-dom";
-
+import {
+  closestCenter,
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import {
   ArrowLeft,
   CalendarDays,
@@ -16,34 +26,12 @@ import {
   Trash2,
   UserRound,
 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 
-import {
-  DndContext,
-  DragOverlay,
-  PointerSensor,
-  closestCenter,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-  arrayMove,
-} from "@dnd-kit/sortable";
-
-import { Input } from "@/components/ui/input";
+import ErrorState from "@/components/feedback/error/ErrorState";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -51,26 +39,25 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-
-import ErrorState from "@/components/feedback/error/ErrorState";
-
+import { projectColors, projectIcons } from "@/constants/projectOptions";
+import DeleteDialog from "@/features/project/components/DeleteDialog";
+import ProjectDialog from "@/features/project/components/ProjectDialog";
 import { useGetProjectByIdQuery } from "@/features/project/projectApi";
-
+import SortableTaskRow from "@/features/task/components/SortableTaskRow";
+import TaskDialog from "@/features/task/components/TaskDialog";
 import {
   useLazyGetProjectTasksQuery,
   useMoveTaskMutation,
 } from "@/features/task/taskApi";
-
-import TaskDialog from "@/features/task/components/TaskDialog";
-import SortableTaskRow from "@/features/task/components/SortableTaskRow";
-
-import ProjectDialog from "@/features/project/components/ProjectDialog";
-import DeleteDialog from "@/features/project/components/DeleteDialog";
-
-import { projectColors, projectIcons } from "@/constants/projectOptions";
-
 import { formatRelativeTime } from "@/utils/date";
 
 const TASKS_PER_LOAD = 50;

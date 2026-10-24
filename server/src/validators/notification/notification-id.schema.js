@@ -1,6 +1,5 @@
-import { z } from "zod";
-
 import mongoose from "mongoose";
+import { z } from "zod";
 
 const notificationIdSchema = z.object({
   notificationId: z

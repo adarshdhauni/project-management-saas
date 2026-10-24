@@ -1,18 +1,19 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useRegisterUserMutation } from "@/features/auth/authApi";
 import { Eye, EyeOff } from "lucide-react";
-import { toast } from "@/components/ui/toast";
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/Input";
 import { Spinner } from "@/components/ui/spinner";
+import { toast } from "@/components/ui/toast";
+import { useRegisterUserMutation } from "@/features/auth/authApi";
+import { setCredentials } from "@/features/auth/authSlice";
 import PasswordRequirements from "@/features/auth/components/PasswordRequirements";
 import PasswordStrength from "@/features/auth/components/PasswordStrength";
-import { getPasswordValidation } from "@/validations/passwordValidation";
 import focusField from "@/utils/focusField";
-import { useDispatch } from "react-redux";
-import { setCredentials } from "@/features/auth/authSlice";
+import { getPasswordValidation } from "@/validations/passwordValidation";
 
 const Register = () => {
   const navigate = useNavigate();

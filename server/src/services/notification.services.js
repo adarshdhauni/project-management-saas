@@ -1,6 +1,6 @@
-import ApiError from "../utils/ApiError.js";
 import notificationRepository from "../repositories/notification.repository.js";
 import workspaceInvitationRepository from "../repositories/workspace-invitation.repository.js";
+import ApiError from "../utils/ApiError.js";
 
 const createNotification = async (notificationData, options = {}) => {
   const notification = await notificationRepository.create(

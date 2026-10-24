@@ -1,9 +1,10 @@
-import { Button } from "@/components/ui/button";
-import { workflowData } from "@/constants/workflowData";
 import { ArrowRight, Check } from "lucide-react";
 import React from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+
+import { Button } from "@/components/ui/button";
+import { workflowData } from "@/constants/workflowData";
 
 const Workflow = () => {
   const { isAuthenticated, isInitialized } = useSelector((state) => state.auth);

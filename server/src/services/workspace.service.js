@@ -1,16 +1,16 @@
+import mongoose from "mongoose";
 import slugify from "slugify";
 
-import ApiError from "../utils/ApiError.js";
-import workspaceRepository from "../repositories/workspace.repository.js";
-import workspaceMemberRepository from "../repositories/workspace-member.repository.js";
-import workspaceInvitationRepository from "../repositories/workspace-invitation.repository.js";
-import mongoose from "mongoose";
-import userRepository from "../repositories/user.repository.js";
-import activityService from "./activity.service.js";
-import notificationService from "./notification.services.js";
+import activityRepository from "../repositories/activity.repository.js";
 import projectRepository from "../repositories/project.repository.js";
 import taskRepository from "../repositories/task.repository.js";
-import activityRepository from "../repositories/activity.repository.js";
+import userRepository from "../repositories/user.repository.js";
+import workspaceRepository from "../repositories/workspace.repository.js";
+import workspaceInvitationRepository from "../repositories/workspace-invitation.repository.js";
+import workspaceMemberRepository from "../repositories/workspace-member.repository.js";
+import ApiError from "../utils/ApiError.js";
+import activityService from "./activity.service.js";
+import notificationService from "./notification.services.js";
 
 const createWorkspace = async (userId, workspaceData) => {
   const slug = slugify(workspaceData.name, {

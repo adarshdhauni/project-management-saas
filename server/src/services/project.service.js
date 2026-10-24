@@ -1,9 +1,10 @@
+import mongoose from "mongoose";
+
 import projectRepository from "../repositories/project.repository.js";
 import workspaceRepository from "../repositories/workspace.repository.js";
 import workspaceMemberRepository from "../repositories/workspace-member.repository.js";
 import ApiError from "../utils/ApiError.js";
 import activityService from "./activity.service.js";
-import mongoose from "mongoose";
 
 const createProject = async (userId, workspaceId, projectData) => {
   const { name, description, color, icon } = projectData;

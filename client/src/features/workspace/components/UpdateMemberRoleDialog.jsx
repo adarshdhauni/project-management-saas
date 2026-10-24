@@ -1,7 +1,7 @@
+import { Pencil } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { Pencil } from "lucide-react";
-
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -10,9 +10,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
-import { toast } from "@/components/ui/toast";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import {
   Select,
@@ -21,7 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
+import { Spinner } from "@/components/ui/spinner";
+import { toast } from "@/components/ui/toast";
 import { useUpdateMemberRoleMutation } from "@/features/workspace/workspaceApi";
 
 const UpdateMemberRoleDialog = ({

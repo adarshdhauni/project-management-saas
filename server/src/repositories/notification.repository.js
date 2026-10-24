@@ -13,46 +13,35 @@ const findById = (notificationId, options = {}) => {
   );
 };
 
-const findAllByRecipient = async (recipientId, filters = {}, options = {}) => {
-  const { read, page = 1, limit = 20 } = filters;
+const [notifications, total, unreadCount, allCount] = await Promise.all([
+  Notification.find(query, null, options)
+    .populate("actor", "name")
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit),
 
-  const query = {
-    recipient: recipientId,
-  };
+  Notification.countDocuments(query),
 
-  if (read !== undefined) {
-    query.read = read;
-  }
-
-  const skip = (page - 1) * limit;
-
-  const unreadQuery = {
+  Notification.countDocuments({
     recipient: recipientId,
     read: false,
-  };
+  }),
 
-  const [notifications, total, unreadCount] = await Promise.all([
-    Notification.find(query, null, options)
-      .populate("actor", "name")
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit),
+  Notification.countDocuments({
+    recipient: recipientId,
+  }),
+]);
 
-    Notification.countDocuments(query),
-
-    Notification.countDocuments(unreadQuery),
-  ]);
-
-  return {
-    notifications,
-    unreadCount,
-    pagination: {
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
-    },
-  };
+return {
+  notifications,
+  unreadCount,
+  allCount,
+  pagination: {
+    page,
+    limit,
+    total,
+    totalPages: Math.ceil(total / limit),
+  },
 };
 
 const updateById = (notificationId, updateData, options = {}) => {

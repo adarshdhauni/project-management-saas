@@ -1,9 +1,10 @@
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 
-import { useGetMeQuery } from "../authApi";
-import { setCredentials, clearCredentials } from "../authSlice";
 import GlobalLoader from "@/components/feedback/loading/GlobalLoader";
+
+import { useGetMeQuery } from "../authApi";
+import { clearCredentials,setCredentials } from "../authSlice";
 
 const AuthInitializer = ({ children }) => {
   const dispatch = useDispatch();

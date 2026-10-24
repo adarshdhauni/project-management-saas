@@ -1,5 +1,6 @@
-import ScrollToTop from "@/routes/ScrollToTop";
 import { Outlet } from "react-router-dom";
+
+import ScrollToTop from "@/routes/ScrollToTop";
 
 export const AppLayout = () => {
   return (

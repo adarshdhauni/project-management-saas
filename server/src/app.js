@@ -1,19 +1,20 @@
-import express from "express";
-import helmet from "helmet";
-import cors from "cors";
 import compression from "compression";
 import cookieParser from "cookie-parser";
+import cors from "cors";
+import express from "express";
+import helmet from "helmet";
 import morgan from "morgan";
-import rateLimiter from "./middlewares/rateLimiter.js";
+
 import env from "./config/env.js";
-import ApiError from "./utils/ApiError.js";
 import errorHandler from "./middlewares/errorHandler.js";
+import rateLimiter from "./middlewares/rateLimiter.js";
 import authRoutes from "./routes/auth.routes.js";
-import workspaceRoutes from "./routes/workspace.routes.js";
-import projectRoutes from "./routes/project.routes.js";
-import taskRoutes from "./routes/task.routes.js";
 import commentRoutes from "./routes/comment.routes.js";
 import notificationRoutes from "./routes/notification.routes.js";
+import projectRoutes from "./routes/project.routes.js";
+import taskRoutes from "./routes/task.routes.js";
+import workspaceRoutes from "./routes/workspace.routes.js";
+import ApiError from "./utils/ApiError.js";
 
 const app = express();
 

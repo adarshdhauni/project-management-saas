@@ -1,16 +1,17 @@
 import {
+  AlertCircle,
   Bell,
-  UserPlus,
-  Trash2,
   CheckCircle2,
   Clock3,
+  Trash2,
+  UserPlus,
   XCircle,
-  AlertCircle,
 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { getNotificationContent } from "@/utils/notification";
 import { formatRelativeTime } from "@/utils/date";
+import { getNotificationContent } from "@/utils/notification";
 
 const invitationStatuses = {
   pending: {

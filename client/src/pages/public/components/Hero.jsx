@@ -1,12 +1,13 @@
-import { Button } from "@/components/ui/button";
 import {
   ArrowRight,
   ChevronRight,
 } from "lucide-react";
 import React from "react";
-import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
+
 import ProductMockup from "@/components/landing/ProductMockup";
+import { Button } from "@/components/ui/button";
 
 const Hero = () => {
   const { isAuthenticated, isInitialized } = useSelector((state) => state.auth);

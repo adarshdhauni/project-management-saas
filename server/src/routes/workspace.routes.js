@@ -1,22 +1,22 @@
 import express from "express";
 
+import activityController from "../controllers/activity.controller.js";
+import projectController from "../controllers/project.controller.js";
 import workspaceController from "../controllers/workspace.controller.js";
 import { protect } from "../middlewares/protect.js";
 import validate from "../middlewares/validate.js";
-import createWorkspaceSchema from "../validators/workspace/create-workspace.schema.js";
-import workspaceIdSchema from "../validators/workspace/workspace-id.schema.js";
-import updateWorkspaceSchema from "../validators/workspace/update-workspace.schema.js";
-import inviteMemberSchema from "../validators/workspace/invite-member.schema.js";
-import invitationIdSchema from "../validators/workspace/invitation-id.schema.js";
-import workspaceMemberParamsSchema from "../validators/workspace/workspace-member-params.schema.js";
-import updateMemberRoleSchema from "../validators/workspace/update-member-role.schema.js";
-import createProjectSchema from "../validators/project/create-project.schema.js";
-import projectController from "../controllers/project.controller.js";
 import getActivitiesSchema from "../validators/activity/get-activity.schema.js";
-import activityController from "../controllers/activity.controller.js";
-import getMembersSchema from "../validators/workspace/get-member.schema.js";
-import transferOwnershipSchema from "../validators/workspace/transfer-ownership.schema.js";
+import createProjectSchema from "../validators/project/create-project.schema.js";
 import getProjectsSchema from "../validators/project/get-projects.schema.js";
+import createWorkspaceSchema from "../validators/workspace/create-workspace.schema.js";
+import getMembersSchema from "../validators/workspace/get-member.schema.js";
+import invitationIdSchema from "../validators/workspace/invitation-id.schema.js";
+import inviteMemberSchema from "../validators/workspace/invite-member.schema.js";
+import transferOwnershipSchema from "../validators/workspace/transfer-ownership.schema.js";
+import updateMemberRoleSchema from "../validators/workspace/update-member-role.schema.js";
+import updateWorkspaceSchema from "../validators/workspace/update-workspace.schema.js";
+import workspaceIdSchema from "../validators/workspace/workspace-id.schema.js";
+import workspaceMemberParamsSchema from "../validators/workspace/workspace-member-params.schema.js";
 
 const router = express.Router();
 

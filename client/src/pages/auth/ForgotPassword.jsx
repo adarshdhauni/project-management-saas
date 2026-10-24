@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useForgotPasswordMutation } from "@/features/auth/authApi";
-import { toast } from "@/components/ui/toast";
+
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/Input";
 import { Spinner } from "@/components/ui/spinner";
+import { toast } from "@/components/ui/toast";
+import { useForgotPasswordMutation } from "@/features/auth/authApi";
 import focusField from "@/utils/focusField";
 
 const ForgotPassword = () => {

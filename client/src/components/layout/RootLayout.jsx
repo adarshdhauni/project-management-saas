@@ -1,6 +1,7 @@
+import { Outlet } from "react-router-dom";
+
 import AuthenticatedNavbar from "@/components/layout/AuthenticatedNavbar";
 import PageTransition from "@/components/shared/PageTransition";
-import { Outlet } from "react-router-dom";
 
 export const RootLayout = () => {
   return (

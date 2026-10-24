@@ -1,28 +1,29 @@
-import React from "react";
 import {
+  Activity,
   ArrowRight,
   Bell,
   ChevronDown,
-  LayoutDashboard,
-  Search,
-  Sun,
-  Activity,
-  FolderKanban,
-  Settings,
-  Users,
-  Menu,
-  Plus,
   Clock3,
+  FolderKanban,
+  LayoutDashboard,
+  Menu,
   MoreHorizontal,
+  Plus,
+  Search,
+  Settings,
+  Sun,
+  Users,
 } from "lucide-react";
+import React from "react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "../ui/button";
 import {
   recentActivities,
   recentProjects,
   stats,
 } from "@/constants/mockupData";
+
+import { Button } from "../ui/button";
 
 const ProductMockup = () => {
   return (

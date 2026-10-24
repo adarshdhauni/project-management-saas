@@ -1,6 +1,6 @@
-import { cn } from "@/lib/utils";
-import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
+import { cn } from "@/lib/utils";
 
 const ErrorState = ({
   title = "Something went wrong",

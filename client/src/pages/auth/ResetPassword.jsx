@@ -1,16 +1,17 @@
+import { Eye, EyeOff } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useResetPasswordMutation } from "@/features/auth/authApi";
-import { Eye, EyeOff } from "lucide-react";
-import { toast } from "@/components/ui/toast";
+
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/Input";
 import { Spinner } from "@/components/ui/spinner";
+import { toast } from "@/components/ui/toast";
+import { useResetPasswordMutation } from "@/features/auth/authApi";
 import PasswordRequirements from "@/features/auth/components/PasswordRequirements";
 import PasswordStrength from "@/features/auth/components/PasswordStrength";
-import { getPasswordValidation } from "@/validations/passwordValidation";
 import focusField from "@/utils/focusField";
+import { getPasswordValidation } from "@/validations/passwordValidation";
 
 const ResetPassword = () => {
   const { token } = useParams();

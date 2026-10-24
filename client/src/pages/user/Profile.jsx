@@ -1,5 +1,5 @@
-import { useSelector } from "react-redux";
 import { CalendarDays, Mail, User } from "lucide-react";
+import { useSelector } from "react-redux";
 
 const getInitials = (name = "") => {
   return name

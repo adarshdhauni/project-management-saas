@@ -1,11 +1,12 @@
 import express from "express";
-import validate from "../middlewares/validate.js";
-import registerSchema from "../validators/auth/register.schema.js";
-import loginSchema from "../validators/auth/login.schema.js";
-import forgotPasswordSchema from "../validators/auth/forgot-password.schema.js";
-import resetPasswordSchema from "../validators/auth/reset-password.schema.js";
+
 import authController from "../controllers/auth.controller.js";
 import { protect } from "../middlewares/protect.js";
+import validate from "../middlewares/validate.js";
+import forgotPasswordSchema from "../validators/auth/forgot-password.schema.js";
+import loginSchema from "../validators/auth/login.schema.js";
+import registerSchema from "../validators/auth/register.schema.js";
+import resetPasswordSchema from "../validators/auth/reset-password.schema.js";
 
 const router = express.Router();
 

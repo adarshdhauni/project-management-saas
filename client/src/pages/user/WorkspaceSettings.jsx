@@ -1,13 +1,9 @@
+import { Crown,Save, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Save, Trash2, Crown } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 
+import { Avatar, AvatarFallback,AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Spinner } from "@/components/ui/spinner";
-import { Textarea } from "@/components/ui/textarea";
-import { toast } from "@/components/ui/toast";
-import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import {
   Dialog,
   DialogContent,
@@ -16,16 +12,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-
-import {
-  useGetWorkspaceByIdQuery,
-  useUpdateWorkspaceMutation,
-  useDeleteWorkspaceMutation,
-  useGetMyWorkspaceMembershipQuery,
-} from "@/features/workspace/workspaceApi";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/components/ui/toast";
 import LeaveWorkspaceDialog from "@/features/workspace/components/LeaveWorkspaceDialog";
 import TransferOwnership from "@/features/workspace/components/TransferOwnership";
+import {
+  useDeleteWorkspaceMutation,
+  useGetMyWorkspaceMembershipQuery,
+  useGetWorkspaceByIdQuery,
+  useUpdateWorkspaceMutation,
+} from "@/features/workspace/workspaceApi";
 
 const WorkspaceSettings = () => {
   const { workspaceId } = useParams();

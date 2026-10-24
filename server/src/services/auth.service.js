@@ -1,9 +1,10 @@
+import crypto from "crypto";
+import jwt from "jsonwebtoken";
+
 import env from "../config/env.js";
 import userRepository from "../repositories/user.repository.js";
-import ApiError from "../utils/ApiError.js";
-import jwt from "jsonwebtoken";
-import crypto from "crypto";
 import emailService from "../services/email.service.js";
+import ApiError from "../utils/ApiError.js";
 
 const generateTokens = async (user) => {
   const accessToken = user.generateAccessToken();

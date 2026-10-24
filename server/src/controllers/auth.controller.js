@@ -1,10 +1,13 @@
-import authService from "../services/auth.service.js";
-import asyncHandler from "../utils/asyncHandler.js";
-import ApiResponse from "../utils/ApiResponse.js";
+import jwt from "jsonwebtoken";
+
+import env from "../config/env.js";
 import {
   accessTokenCookieOptions,
   refreshTokenCookieOptions,
 } from "../constants/cookieOptions.js";
+import authService from "../services/auth.service.js";
+import ApiResponse from "../utils/ApiResponse.js";
+import asyncHandler from "../utils/asyncHandler.js";
 
 const sendAuthResponse = (
   res,

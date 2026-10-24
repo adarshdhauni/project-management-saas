@@ -1,6 +1,7 @@
 import { Activity as ActivityIcon } from "lucide-react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 
+import ErrorState from "@/components/feedback/error/ErrorState";
 import {
   Pagination,
   PaginationContent,
@@ -9,12 +10,8 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-
 import { Skeleton } from "@/components/ui/skeleton";
-import ErrorState from "@/components/feedback/error/ErrorState";
-
 import { useGetActivitiesQuery } from "@/features/workspace/workspaceApi";
-
 import { getActivityContent } from "@/utils/activity";
 import { formatRelativeTime } from "@/utils/date";
 

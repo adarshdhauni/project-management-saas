@@ -1,6 +1,6 @@
-import ApiError from "../utils/ApiError.js";
 import activityRepository from "../repositories/activity.repository.js";
 import workspaceMemberRepository from "../repositories/workspace-member.repository.js";
+import ApiError from "../utils/ApiError.js";
 
 const createActivity = async (
   { workspaceId, userId, action, entityType, entityId, metadata = {} },

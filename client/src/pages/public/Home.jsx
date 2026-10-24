@@ -1,11 +1,12 @@
 import PublicFooter from "@/components/layout/PublicFooter";
 import PublicNavbar from "@/components/layout/PublicNavbar";
-import Hero from "./components/Hero";
-import Features from "./components/Features";
-import Workflow from "./components/Workflow";
-import Pricing from "./components/Pricing";
-import CTA from "./components/CTA";
 import PageTransition from "@/components/shared/PageTransition";
+
+import CTA from "./components/CTA";
+import Features from "./components/Features";
+import Hero from "./components/Hero";
+import Pricing from "./components/Pricing";
+import Workflow from "./components/Workflow";
 
 const Home = () => {
   return (

@@ -1,15 +1,18 @@
 import {
+  Building2,
+  Check,
   ChevronDown,
+  LayoutDashboard,
+  LogOut,
+  Plus,
+  RefreshCw,
   Search,
   Settings,
   User,
-  LogOut,
-  LayoutDashboard,
-  Check,
-  Plus,
-  RefreshCw,
-  Building2,
 } from "lucide-react";
+import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import {
   DropdownMenu,
@@ -18,22 +21,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useLogoutMutation } from "@/features/auth/authApi";
+import { clearCredentials } from "@/features/auth/authSlice";
+import CreateWorkspaceDialog from "@/features/workspace/components/CreateWorkspaceDialog";
+import { useGetWorkspacesQuery } from "@/features/workspace/workspaceApi";
+import getUserInitials from "@/utils/userInitials";
+import getWorkspaceInitials from "@/utils/workspaceInitials";
+
+import ThemeToggle from "../common/ThemeToggle";
 import { Skeleton } from "../ui/skeleton";
 import { Spinner } from "../ui/spinner";
 import { toast } from "../ui/toast";
-
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { useGetWorkspacesQuery } from "@/features/workspace/workspaceApi";
-import { useLogoutMutation } from "@/features/auth/authApi";
-import { clearCredentials } from "@/features/auth/authSlice";
-
-import ThemeToggle from "../common/ThemeToggle";
-import { useState } from "react";
-import CreateWorkspaceDialog from "@/features/workspace/components/CreateWorkspaceDialog";
 import NotificationMenu from "./NotificationMenu";
-import getWorkspaceInitials from "@/utils/workspaceInitials";
-import getUserInitials from "@/utils/userInitials";
 
 const AuthenticatedNavbar = () => {
   const location = useLocation();
@@ -121,7 +120,19 @@ const AuthenticatedNavbar = () => {
           )}
 
           {isLoading && !isRetryingWorkspaces ? (
-            <Skeleton className="h-9 w-32 rounded-lg sm:h-10 sm:w-44" />
+            <div
+              aria-label="Loading workspace"
+              role="status"
+              className="flex h-9 min-w-0 max-w-36 shrink items-center gap-2 rounded-lg px-2 sm:h-10 sm:max-w-56 sm:px-2.5"
+            >
+              <Skeleton className="h-6 w-6 shrink-0 rounded-md" />
+
+              <Skeleton className="hidden h-3.5 w-24 max-w-full sm:block" />
+
+              <Skeleton className="ml-auto h-3.5 w-3.5 shrink-0 rounded-sm" />
+
+              <span className="sr-only">Loading workspaces...</span>
+            </div>
           ) : isError || isRetryingWorkspaces ? (
             <button
               type="button"
@@ -184,42 +195,50 @@ const AuthenticatedNavbar = () => {
 
               <DropdownMenuContent
                 align="start"
-                className="max-h-80 w-[calc(100vw-1.5rem)] max-w-64 overflow-y-auto rounded-xl p-1.5 sm:w-64"
+                sideOffset={8}
+                collisionPadding={8}
+                className="flex max-h-[min(32rem,calc(100dvh-1rem))] w-[min(20rem,calc(100vw-1rem))] flex-col overflow-hidden rounded-xl p-1.5"
               >
-                {workspaces.map((workspace) => {
-                  const isActive = workspace._id === currentWorkspace?._id;
+                <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+                  {workspaces.map((workspace) => {
+                    const isActive = workspace._id === currentWorkspace?._id;
 
-                  return (
-                    <DropdownMenuItem
-                      key={workspace._id}
-                      onClick={() => handleWorkspaceSelect(workspace._id)}
-                      className="cursor-pointer gap-2 rounded-lg px-2.5 py-2"
-                    >
-                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-muted text-[11px] font-semibold text-foreground/70">
-                        {getWorkspaceInitials(workspace.name)}
-                      </div>
+                    return (
+                      <DropdownMenuItem
+                        key={workspace._id}
+                        onClick={() => handleWorkspaceSelect(workspace._id)}
+                        className="cursor-pointer gap-2 rounded-lg px-2.5 py-2"
+                      >
+                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-muted text-[11px] font-semibold text-foreground/70">
+                          {getWorkspaceInitials(workspace.name)}
+                        </div>
 
-                      <span className="min-w-0 truncate">{workspace.name}</span>
+                        <span className="min-w-0 flex-1 truncate">
+                          {workspace.name}
+                        </span>
 
-                      {isActive && (
-                        <Check className="ml-auto h-4 w-4 shrink-0 text-foreground" />
-                      )}
-                    </DropdownMenuItem>
-                  );
-                })}
+                        {isActive && (
+                          <Check className="h-4 w-4 shrink-0 text-foreground" />
+                        )}
+                      </DropdownMenuItem>
+                    );
+                  })}
+                </div>
 
-                <DropdownMenuSeparator className="my-1.5" />
+                <div className="shrink-0 pt-1.5">
+                  <DropdownMenuSeparator className="my-0 mb-1.5" />
 
-                <DropdownMenuItem
-                  onClick={() => setIsCreateWorkspaceOpen(true)}
-                  className="cursor-pointer gap-2 rounded-lg px-2.5 py-2"
-                >
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-muted">
-                    <Plus className="h-3.5 w-3.5" />
-                  </div>
+                  <DropdownMenuItem
+                    onClick={() => setIsCreateWorkspaceOpen(true)}
+                    className="cursor-pointer gap-2 rounded-lg px-2.5 py-2"
+                  >
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-muted">
+                      <Plus className="h-3.5 w-3.5" />
+                    </div>
 
-                  <span>Create workspace</span>
-                </DropdownMenuItem>
+                    <span>Create workspace</span>
+                  </DropdownMenuItem>
+                </div>
               </DropdownMenuContent>
             </DropdownMenu>
           )}

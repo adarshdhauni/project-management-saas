@@ -1,5 +1,5 @@
-import { createBrowserRouter } from "react-router-dom";
 import React, { lazy } from "react";
+import { createBrowserRouter } from "react-router-dom";
 
 const Register = lazy(() => import("@/pages/auth/Register"));
 const Login = lazy(() => import("@/pages/auth/Login"));
@@ -18,12 +18,12 @@ const WorkspaceSettings = lazy(() => import("@/pages/user/WorkspaceSettings"));
 const ProjectDetailPage = lazy(() => import("@/pages/user/ProjectDetailPage"));
 const TaskDetailPage = lazy(() => import("@/pages/user/TaskDetailPage"));
 
-import ProtectedRoute from "./ProtectedRoute";
-
 import { AppLayout } from "@/components/layout/AppLayout";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { RootLayout } from "@/components/layout/RootLayout";
 import { WorkspaceLayout } from "@/components/layout/WorkspaceLayout";
+
+import ProtectedRoute from "./ProtectedRoute";
 
 const router = createBrowserRouter([
   {

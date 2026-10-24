@@ -1,6 +1,8 @@
-import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -9,16 +11,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Spinner } from "@/components/ui/spinner";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
-
 import { useCreateWorkspaceMutation } from "@/features/workspace/workspaceApi";
 import focusField from "@/utils/focusField";
-import { useNavigate } from "react-router-dom";
 
 const CreateWorkspaceDialog = ({ open, onOpenChange }) => {
   const navigate = useNavigate();

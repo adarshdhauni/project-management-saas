@@ -1,10 +1,10 @@
 import {
-  FolderKanban,
-  Users,
-  Settings,
   CheckSquare,
-  ShoppingBag,
+  FolderKanban,
   Globe,
+  Settings,
+  ShoppingBag,
+  Users,
 } from "lucide-react";
 
 export const stats = [

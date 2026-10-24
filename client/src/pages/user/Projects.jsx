@@ -1,5 +1,3 @@
-import React, { useEffect, useState } from "react";
-import { Link, useParams, useSearchParams } from "react-router-dom";
 import {
   Clock3,
   FolderKanban,
@@ -9,10 +7,12 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import ErrorState from "@/components/feedback/error/ErrorState";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import {
   Pagination,
   PaginationContent,
@@ -27,8 +28,6 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { Skeleton } from "@/components/ui/skeleton";
-import ErrorState from "@/components/feedback/error/ErrorState";
 import {
   Select,
   SelectContent,
@@ -36,14 +35,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-import { useGetMyWorkspaceMembershipQuery } from "@/features/workspace/workspaceApi";
-import { useGetWorkspaceProjectsQuery } from "@/features/project/projectApi";
-
-import ProjectDialog from "@/features/project/components/ProjectDialog";
-import DeleteDialog from "@/features/project/components/DeleteDialog";
-
+import { Skeleton } from "@/components/ui/skeleton";
 import { projectColors, projectIcons } from "@/constants/projectOptions";
+import DeleteDialog from "@/features/project/components/DeleteDialog";
+import ProjectDialog from "@/features/project/components/ProjectDialog";
+import { useGetWorkspaceProjectsQuery } from "@/features/project/projectApi";
+import { useGetMyWorkspaceMembershipQuery } from "@/features/workspace/workspaceApi";
 import { formatRelativeTime } from "@/utils/date";
 
 const ProjectsPage = () => {

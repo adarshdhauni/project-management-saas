@@ -1,4 +1,5 @@
 import { NavLink, useParams } from "react-router-dom";
+
 import { navItems } from "@/constants/workspaceSidebar";
 
 const WorkspaceNavItems = ({ onNavigate }) => {

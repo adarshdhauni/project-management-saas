@@ -1,41 +1,40 @@
 import {
   Activity,
   ArrowRight,
+  CheckSquare,
   Clock3,
   FolderKanban,
   MoreHorizontal,
-  Plus,
-  Users,
-  CheckSquare,
   Pencil,
+  Plus,
   Trash2,
+  Users,
 } from "lucide-react";
+import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
+import WorkspaceNotFound from "@/components/feedback/empty/WorkspaceNotFound";
+import ErrorState from "@/components/feedback/error/ErrorState";
+import WorkspaceSkeleton from "@/components/feedback/loading/WorkspaceSkeleton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-import { useGetWorkspaceOverviewQuery } from "@/features/workspace/workspaceApi";
-import ErrorState from "@/components/feedback/error/ErrorState";
-import getWorkspaceInitials from "@/utils/workspaceInitials";
-import WorkspaceSkeleton from "@/components/feedback/loading/WorkspaceSkeleton";
-import WorkspaceNotFound from "@/components/feedback/empty/WorkspaceNotFound";
-import { getActivityContent } from "@/utils/activity";
-import { formatRelativeTime } from "@/utils/date";
-import { useState } from "react";
-import ProjectDialog from "@/features/project/components/ProjectDialog";
-import {
-  getProjectIcon,
-  getProjectColorClass,
-} from "@/constants/projectOptions";
 import {
   DropdownMenu,
-  DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  getProjectColorClass,
+  getProjectIcon,
+} from "@/constants/projectOptions";
 import DeleteDialog from "@/features/project/components/DeleteDialog";
+import ProjectDialog from "@/features/project/components/ProjectDialog";
+import { useGetWorkspaceOverviewQuery } from "@/features/workspace/workspaceApi";
+import { getActivityContent } from "@/utils/activity";
+import { formatRelativeTime } from "@/utils/date";
+import getWorkspaceInitials from "@/utils/workspaceInitials";
 
 const Workspace = () => {
   const { workspaceId } = useParams();

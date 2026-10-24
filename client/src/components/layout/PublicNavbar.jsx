@@ -1,9 +1,9 @@
 import { ChevronRight, Menu } from "lucide-react";
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import useActiveSection from "@/hooks/useActiveSection";
-import { cn } from "@/lib/utils";
-import ThemeToggle from "../common/ThemeToggle";
+
+import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
@@ -11,9 +11,11 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
 import { navLinks } from "@/constants/publicNavigation";
-import { useSelector } from "react-redux";
+import useActiveSection from "@/hooks/useActiveSection";
+import { cn } from "@/lib/utils";
+
+import ThemeToggle from "../common/ThemeToggle";
 
 const PublicNavbar = () => {
   const [open, setOpen] = useState(false);

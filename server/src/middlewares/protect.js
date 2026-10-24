@@ -1,8 +1,9 @@
-import ApiError from "../utils/ApiError.js";
+import jwt from "jsonwebtoken";
+
 import env from "../config/env.js";
 import userRepository from "../repositories/user.repository.js";
+import ApiError from "../utils/ApiError.js";
 import asyncHandler from "../utils/asyncHandler.js";
-import jwt from "jsonwebtoken";
 
 export const protect = asyncHandler(async (req, res, next) => {
   const accessToken = req.cookies.accessToken;

@@ -1,6 +1,8 @@
-import { useEffect, useState } from "react";
 import { Crown, Search, Users } from "lucide-react";
+import { useEffect, useState } from "react";
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -9,11 +11,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Spinner } from "@/components/ui/spinner";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Pagination,
   PaginationContent,
@@ -22,8 +21,9 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
-import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 
 import {
   useGetWorkspaceMembersQuery,

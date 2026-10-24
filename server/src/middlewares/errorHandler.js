@@ -1,9 +1,9 @@
-import { ZodError } from "zod";
-import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
+import { ZodError } from "zod";
 
-import ApiError from "../utils/ApiError.js";
 import env from "../config/env.js";
+import ApiError from "../utils/ApiError.js";
 
 const errorHandler = (err, req, res, next) => {
   let error = err;

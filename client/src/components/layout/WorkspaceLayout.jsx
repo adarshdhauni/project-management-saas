@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
-import WorkspaceSidebar from "./WorkspaceSidebar";
+
 import MobileWorkspaceSidebar from "./MobileWorkspaceSidebar";
+import WorkspaceSidebar from "./WorkspaceSidebar";
 
 export const WorkspaceLayout = () => {
   return (

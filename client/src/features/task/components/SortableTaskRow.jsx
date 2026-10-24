@@ -1,13 +1,12 @@
-import { Link } from "react-router-dom";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import {
   CalendarDays,
   CheckCircle2,
   GripVertical,
   UserRound,
 } from "lucide-react";
-
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
+import { Link } from "react-router-dom";
 
 import { Badge } from "@/components/ui/badge";
 

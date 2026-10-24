@@ -1,7 +1,8 @@
+import { LogOut } from "lucide-react";
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { LogOut } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -10,7 +11,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 

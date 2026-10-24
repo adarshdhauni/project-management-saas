@@ -1,6 +1,7 @@
+import { Pencil,Plus } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Plus, Pencil } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -9,24 +10,22 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Spinner } from "@/components/ui/spinner";
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
-import { toast } from "@/components/ui/toast";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
+  SelectSeparator,
   SelectTrigger,
   SelectValue,
-  SelectSeparator,
 } from "@/components/ui/select";
-
+import { Spinner } from "@/components/ui/spinner";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/components/ui/toast";
 import { projectColors, projectIcons } from "@/constants/projectOptions";
-
 import focusField from "@/utils/focusField";
+
 import {
   useCreateProjectMutation,
   useUpdateProjectMutation,

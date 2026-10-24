@@ -1,6 +1,6 @@
-import asyncHandler from "../utils/asyncHandler.js";
 import notificationService from "../services/notification.services.js";
 import ApiResponse from "../utils/ApiResponse.js";
+import asyncHandler from "../utils/asyncHandler.js";
 
 const getNotifications = asyncHandler(async (req, res) => {
   const result = await notificationService.getNotifications(

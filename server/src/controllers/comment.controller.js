@@ -1,6 +1,6 @@
 import commentService from "../services/comment.service.js";
-import asyncHandler from "../utils/asyncHandler.js";
 import ApiResponse from "../utils/ApiResponse.js";
+import asyncHandler from "../utils/asyncHandler.js";
 
 const createComment = asyncHandler(async (req, res) => {
   const comment = await commentService.createComment(

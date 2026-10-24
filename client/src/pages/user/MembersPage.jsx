@@ -1,19 +1,26 @@
-import { useEffect, useState } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
 import {
   MoreHorizontal,
+  Pencil,
   Search,
+  Trash2,
   UserPlus,
   Users,
-  Pencil,
-  Trash2,
 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useParams, useSearchParams } from "react-router-dom";
 
+import ErrorState from "@/components/feedback/error/ErrorState";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Pagination,
   PaginationContent,
@@ -22,21 +29,12 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
-
-import ErrorState from "@/components/feedback/error/ErrorState";
-
+import { Skeleton } from "@/components/ui/skeleton";
+import InviteMemberDialog from "@/features/workspace/components/InviteMemberDialog";
+import RemoveMemberDialog from "@/features/workspace/components/RemoveMemberDialog";
+import UpdateMemberRoleDialog from "@/features/workspace/components/UpdateMemberRoleDialog";
 import { useGetWorkspaceMembersQuery } from "@/features/workspace/workspaceApi";
 import { formatRelativeTime } from "@/utils/date";
-import InviteMemberDialog from "@/features/workspace/components/InviteMemberDialog";
-import UpdateMemberRoleDialog from "@/features/workspace/components/UpdateMemberRoleDialog";
-import RemoveMemberDialog from "@/features/workspace/components/RemoveMemberDialog";
 
 const MembersPage = () => {
   const { workspaceId } = useParams();

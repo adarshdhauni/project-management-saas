@@ -1,7 +1,9 @@
 import { Bell, Check } from "lucide-react";
+import { useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+
+import ErrorState from "@/components/feedback/error/ErrorState";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Spinner } from "@/components/ui/spinner";
 import {
   Pagination,
   PaginationContent,
@@ -10,26 +12,28 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import ErrorState from "@/components/feedback/error/ErrorState";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
+import { toast } from "@/components/ui/toast";
+import NotificationItem from "@/features/notification/components/NotificationItem";
 import {
-  useGetNotificationsQuery,
-  useMarkNotificationAsReadMutation,
-  useMarkAllNotificationsAsReadMutation,
   useDeleteNotificationMutation,
+  useGetNotificationsQuery,
+  useMarkAllNotificationsAsReadMutation,
+  useMarkNotificationAsReadMutation,
 } from "@/features/notification/notificationApi";
 import {
   useAcceptInvitationMutation,
   useDeclineInvitationMutation,
 } from "@/features/workspace/workspaceApi";
-
-import NotificationItem from "@/features/notification/components/NotificationItem";
-import { toast } from "@/components/ui/toast";
-import { useNavigate, useSearchParams } from "react-router-dom";
 import { getNotificationPath } from "@/utils/notification";
-import { useState } from "react";
+
+import NotificationItemSkeleton from "@/components/feedback/loading/NotificationItemSkeleton";
 
 const Notifications = () => {
   const navigate = useNavigate();
+
+  const [isRetryingNotifications, setIsRetryingNotifications] = useState(false);
 
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -38,7 +42,6 @@ const Notifications = () => {
 
   const filter = filterParam === "unread" ? "unread" : "all";
   const page = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
-
   const read = filter === "unread" ? false : undefined;
 
   const { data, isLoading, isError, isFetching, refetch } =
@@ -65,7 +68,24 @@ const Notifications = () => {
 
   const notifications = data?.data?.notifications ?? [];
   const unreadCount = data?.data?.unreadCount ?? 0;
+  const allCount = data?.data?.allCount ?? 0;
   const pagination = data?.data?.pagination;
+
+  const handleRetryNotifications = async () => {
+    setIsRetryingNotifications(true);
+
+    try {
+      await refetch().unwrap();
+    } catch {
+      toast.add({
+        type: "error",
+        title: "Failed to load notifications.",
+        priority: "high",
+      });
+    } finally {
+      setIsRetryingNotifications(false);
+    }
+  };
 
   const handleMarkAllAsRead = async () => {
     try {
@@ -86,20 +106,20 @@ const Notifications = () => {
   };
 
   const markAsReadSafely = async (notification) => {
-    if (notification.read) return;
+    if (notification.read) return true;
 
     try {
       await markNotificationAsRead(notification._id).unwrap();
-    } catch (error) {
-      // Another surface may already have marked it as read.
-      if (error?.status !== 409) {
-        toast.add({
-          type: "error",
-          title:
-            "The action succeeded, but the notification could not be marked as read.",
-          priority: "high",
-        });
-      }
+      return true;
+    } catch {
+      toast.add({
+        type: "error",
+        title:
+          "Action completed, but notification could not be marked as read.",
+        priority: "high",
+      });
+
+      return false;
     }
   };
 
@@ -159,6 +179,7 @@ const Notifications = () => {
   };
 
   const handleAcceptInvitation = async (notification) => {
+    const notificationId = notification._id;
     const invitationId = notification.metadata?.invitationId;
 
     if (!invitationId) {
@@ -170,7 +191,7 @@ const Notifications = () => {
       return;
     }
 
-    setAcceptingNotificationId(notification._id);
+    setAcceptingNotificationId(notificationId);
 
     try {
       await acceptInvitation(invitationId).unwrap();
@@ -183,14 +204,9 @@ const Notifications = () => {
 
       await markAsReadSafely(notification);
 
-      const workspaceId =
-        typeof notification.workspace === "object"
-          ? notification.workspace?._id
-          : notification.workspace;
+      const path = `/dashboard/workspaces/${notification.workspace?._id ?? notification.workspace}`;
 
-      if (workspaceId) {
-        navigate(`/dashboard/workspaces/${workspaceId}`);
-      }
+      navigate(path);
     } catch (error) {
       toast.add({
         type: "error",
@@ -203,6 +219,7 @@ const Notifications = () => {
   };
 
   const handleDeclineInvitation = async (notification) => {
+    const notificationId = notification._id;
     const invitationId = notification.metadata?.invitationId;
 
     if (!invitationId) {
@@ -214,7 +231,7 @@ const Notifications = () => {
       return;
     }
 
-    setDecliningNotificationId(notification._id);
+    setDecliningNotificationId(notificationId);
 
     try {
       await declineInvitation(invitationId).unwrap();
@@ -249,8 +266,6 @@ const Notifications = () => {
         priority: "high",
       });
 
-      // Avoid leaving the user on an empty page after deleting
-      // its last item. Page one is already the default.
       if (notifications.length === 1 && page > 1) {
         setSearchParams((params) => {
           params.set("page", String(page - 1));
@@ -271,6 +286,9 @@ const Notifications = () => {
   const handleFilterChange = (value) => {
     setSearchParams(value === "all" ? {} : { filter: value });
   };
+
+  console.log(pagination);
+  console.log(unreadCount);
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
@@ -320,9 +338,9 @@ const Notifications = () => {
             }`}
           >
             All
-            {pagination?.total > 0 && (
+            {allCount > 0 && (
               <span className="ml-1.5 text-xs text-muted-foreground">
-                ({pagination.total})
+                ({allCount})
               </span>
             )}
           </button>
@@ -345,25 +363,18 @@ const Notifications = () => {
           </button>
         </div>
 
-        {isLoading && (
+        {isLoading && !isRetryingNotifications && (
           <div className="divide-y divide-border">
-            {[1, 2, 3, 4, 5].map((item) => (
-              <div
-                key={item}
-                className="flex items-start gap-4 px-3 py-5 sm:px-4"
-              >
-                <Skeleton className="mt-0.5 h-10 w-10 shrink-0 rounded-full" />
-
-                <div className="min-w-0 flex-1 space-y-2">
-                  <div className="flex items-start justify-between gap-4">
-                    <Skeleton className="h-4 w-3/5 rounded-md" />
-                    <Skeleton className="h-3 w-10 shrink-0 rounded-md" />
-                  </div>
-
-                  <Skeleton className="h-3.5 w-2/5 rounded-md" />
-                </div>
-              </div>
-            ))}
+            <div className="space-y-1">
+              {Array.from({ length: 5 }).map((_, index) => (
+                <NotificationItemSkeleton
+                  key={index}
+                  isUnread={index < 3}
+                  isInvitation={index === 0 || index === 3}
+                  showActions={index === 0}
+                />
+              ))}
+            </div>
           </div>
         )}
 

@@ -1,6 +1,8 @@
 import { Bell, Check } from "lucide-react";
+import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
+import ErrorState from "@/components/feedback/error/ErrorState";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,26 +10,21 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
 import { Spinner } from "@/components/ui/spinner";
-import ErrorState from "@/components/feedback/error/ErrorState";
-
+import NotificationItem from "@/features/notification/components/NotificationItem";
 import {
   useGetNotificationsQuery,
   useMarkAllNotificationsAsReadMutation,
   useMarkNotificationAsReadMutation,
 } from "@/features/notification/notificationApi";
-
 import {
   useAcceptInvitationMutation,
   useDeclineInvitationMutation,
 } from "@/features/workspace/workspaceApi";
-
-import { toast } from "../ui/toast";
-import NotificationItem from "@/features/notification/components/NotificationItem";
 import { getNotificationPath } from "@/utils/notification";
-import { useState } from "react";
+
 import NotificationItemSkeleton from "../feedback/loading/NotificationItemSkeleton";
+import { toast } from "../ui/toast";
 
 const NotificationMenu = () => {
   const navigate = useNavigate();
@@ -94,6 +91,24 @@ const NotificationMenu = () => {
     }
   };
 
+  const markAsReadSafely = async (notification) => {
+    if (notification.read) return true;
+
+    try {
+      await markNotificationAsRead(notification._id).unwrap();
+      return true;
+    } catch {
+      toast.add({
+        type: "error",
+        title:
+          "Action completed, but notification could not be marked as read.",
+        priority: "high",
+      });
+
+      return false;
+    }
+  };
+
   const handleNotificationClick = async (notification) => {
     await markAsReadSafely(notification);
 
@@ -147,24 +162,6 @@ const NotificationMenu = () => {
         title: "No destination available",
         description: "There is no page to open for this notification.",
       });
-    }
-  };
-
-  const markAsReadSafely = async (notification) => {
-    if (notification.read) return true;
-
-    try {
-      await markNotificationAsRead(notification._id).unwrap();
-      return true;
-    } catch {
-      toast.add({
-        type: "error",
-        title:
-          "Action completed, but notification could not be marked as read.",
-        priority: "high",
-      });
-
-      return false;
     }
   };
 
@@ -271,14 +268,16 @@ const NotificationMenu = () => {
 
       <DropdownMenuContent
         align="end"
-        className="w-[calc(100vw-1.5rem)] max-w-80 rounded-xl p-1.5 sm:w-80"
+        sideOffset={8}
+        collisionPadding={8}
+        className="flex max-h-[min(32rem,calc(100dvh-1rem))] w-[min(20rem,calc(100vw-1rem))] flex-col overflow-hidden rounded-xl p-1.5"
       >
-        <div className="flex items-center justify-between px-2.5 py-2">
-          <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center justify-between gap-2 px-2.5 py-2">
+          <div className="flex min-w-0 items-center gap-2">
             <p className="text-sm font-semibold">Notifications</p>
 
             {unreadCount > 0 && (
-              <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+              <span className="shrink-0 rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
                 {unreadCount} unread
               </span>
             )}
@@ -289,7 +288,7 @@ const NotificationMenu = () => {
               type="button"
               onClick={handleMarkAllAsRead}
               disabled={isMarkingAllRead}
-              className="flex cursor-pointer items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex shrink-0 cursor-pointer items-center gap-1.5 whitespace-nowrap text-xs font-medium text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isMarkingAllRead ? (
                 <>
@@ -306,61 +305,61 @@ const NotificationMenu = () => {
           )}
         </div>
 
-        <DropdownMenuSeparator className="my-1.5" />
+        <DropdownMenuSeparator className="my-1.5 shrink-0" />
 
-        {isLoading && !isRetryingNotifications ? (
-          <div className="space-y-1">
-            {Array.from({ length: 5 }).map((_, index) => (
-              <NotificationItemSkeleton
-                key={index}
-                variant="compact"
-                isUnread={index < 3}
-                isInvitation={index === 0 || index === 3}
-                showActions={index === 0}
-              />
-            ))}
-          </div>
-        ) : isError || isRetryingNotifications ? (
-          <ErrorState
-            title="Couldn't load notifications"
-            description="We couldn't load your notifications. Please try again."
-            onRetry={handleRetryNotifications}
-            isRetrying={isRetryingNotifications}
-            className="px-4 py-8"
-          />
-        ) : notifications.length === 0 ? (
-          <div className="px-2.5 py-8 text-center">
-            <Bell className="mx-auto h-5 w-5 text-muted-foreground" />
-
-            <p className="mt-2 text-sm font-medium">No notifications</p>
-
-            <p className="mt-1 text-xs text-muted-foreground">
-              You're all caught up.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-1">
-            {notifications.map((notification) => (
-              <NotificationItem
-                key={notification._id}
-                notification={notification}
-                onClick={handleNotificationClick}
-                onAccept={handleAcceptInvitation}
-                onDecline={handleDeclineInvitation}
-                isAccepting={acceptingNotificationId === notification._id}
-                isDeclining={decliningNotificationId === notification._id}
-                variant="compact"
-              />
-            ))}
-          </div>
-        )}
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+          {isLoading && !isRetryingNotifications ? (
+            <div className="space-y-1">
+              {Array.from({ length: 5 }).map((_, index) => (
+                <NotificationItemSkeleton
+                  key={index}
+                  variant="compact"
+                  isUnread={index < 3}
+                  isInvitation={index === 0 || index === 3}
+                  showActions={index === 0}
+                />
+              ))}
+            </div>
+          ) : isError || isRetryingNotifications ? (
+            <ErrorState
+              title="Couldn't load notifications"
+              description="We couldn't load your notifications. Please try again."
+              onRetry={handleRetryNotifications}
+              isRetrying={isRetryingNotifications}
+              className="px-4 py-8"
+            />
+          ) : notifications.length === 0 ? (
+            <div className="px-2.5 py-8 text-center">
+              <Bell className="mx-auto h-5 w-5 text-muted-foreground" />
+              <p className="mt-2 text-sm font-medium">No notifications</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                You're all caught up.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-1">
+              {notifications.map((notification) => (
+                <NotificationItem
+                  key={notification._id}
+                  notification={notification}
+                  onClick={handleNotificationClick}
+                  onAccept={handleAcceptInvitation}
+                  onDecline={handleDeclineInvitation}
+                  isAccepting={acceptingNotificationId === notification._id}
+                  isDeclining={decliningNotificationId === notification._id}
+                  variant="compact"
+                />
+              ))}
+            </div>
+          )}
+        </div>
 
         {!isLoading &&
           !isError &&
           !isNotificationsPage &&
           !isRetryingNotifications && (
-            <>
-              <DropdownMenuSeparator className="my-1.5" />
+            <div className="shrink-0 pt-1.5">
+              <DropdownMenuSeparator className="my-0 mb-1.5" />
 
               <DropdownMenuItem
                 onClick={() => navigate("/dashboard/notifications")}
@@ -368,7 +367,7 @@ const NotificationMenu = () => {
               >
                 View all notifications
               </DropdownMenuItem>
-            </>
+            </div>
           )}
       </DropdownMenuContent>
     </DropdownMenu>

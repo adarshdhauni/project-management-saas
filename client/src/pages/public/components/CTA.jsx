@@ -1,8 +1,9 @@
-import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import React from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+
+import { Button } from "@/components/ui/button";
 
 const CTA = () => {
   const { isAuthenticated, isInitialized } = useSelector((state) => state.auth);

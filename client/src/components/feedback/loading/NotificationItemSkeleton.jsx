@@ -45,9 +45,7 @@ const NotificationItemSkeleton = ({
 
           <div className="mt-1.5 space-y-1.5">
             <Skeleton
-              className={`h-3.5 w-full ${
-                isCompact ? "max-w-55" : "max-w-75"
-              }`}
+              className={`h-3.5 w-full ${isCompact ? "max-w-55" : "max-w-75"}`}
             />
             <Skeleton
               className={`h-3.5 ${
