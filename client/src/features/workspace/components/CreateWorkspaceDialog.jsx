@@ -25,14 +25,28 @@ const CreateWorkspaceDialog = ({ open, onOpenChange }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
-  const [createWorkspace, { isLoading }] = useCreateWorkspaceMutation();
-
   useEffect(() => {
     if (!open) {
       setName("");
       setDescription("");
     }
   }, [open]);
+
+  const [createWorkspace, { isLoading }] = useCreateWorkspaceMutation();
+
+  const trimmedName = name.trim();
+
+  const nameValid = trimmedName.length >= 3 && trimmedName.length <= 100;
+
+  const nameError =
+    trimmedName.length < 3
+      ? "Workspace name must be at least 3 characters."
+      : trimmedName.length > 100
+        ? "Workspace name cannot exceed 100 characters."
+        : "";
+
+  const descriptionError =
+    description.length > 500 ? "Description cannot exceed 500 characters." : "";
 
   const validateForm = () => {
     if (!name.trim()) {
@@ -98,21 +112,6 @@ const CreateWorkspaceDialog = ({ open, onOpenChange }) => {
       });
     }
   };
-
-  const trimmedName = name.trim();
-
-  const nameValid = trimmedName.length >= 3 && trimmedName.length <= 100;
-
-  const nameError =
-    trimmedName.length < 3
-      ? "Workspace name must be at least 3 characters."
-      : trimmedName.length > 100
-        ? "Workspace name cannot exceed 100 characters."
-        : "";
-
-  const descriptionError =
-    description.length > 500 ? "Description cannot exceed 500 characters." : "";
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">

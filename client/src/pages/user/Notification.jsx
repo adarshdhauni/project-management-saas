@@ -4,18 +4,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 
 import ErrorState from "@/components/feedback/error/ErrorState";
 import { Button } from "@/components/ui/button";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
-import NotificationItem from "@/features/notification/components/NotificationItem";
 import {
   useDeleteNotificationMutation,
   useGetNotificationsQuery,
@@ -29,6 +19,8 @@ import {
 import { getNotificationPath } from "@/utils/notification";
 
 import NotificationItemSkeleton from "@/components/feedback/loading/NotificationItemSkeleton";
+import NotificationPagination from "@/features/notification/components/NotificationPagination";
+import NotificationList from "@/features/notification/components/NotificationList";
 
 const Notifications = () => {
   const navigate = useNavigate();
@@ -287,9 +279,6 @@ const Notifications = () => {
     setSearchParams(value === "all" ? {} : { filter: value });
   };
 
-  console.log(pagination);
-  console.log(unreadCount);
-
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -364,162 +353,77 @@ const Notifications = () => {
         </div>
 
         {isLoading && !isRetryingNotifications && (
-          <div className="divide-y divide-border">
-            <div className="space-y-1">
-              {Array.from({ length: 5 }).map((_, index) => (
-                <NotificationItemSkeleton
-                  key={index}
-                  isUnread={index < 3}
-                  isInvitation={index === 0 || index === 3}
-                  showActions={index === 0}
-                />
-              ))}
-            </div>
+          <div className="divide-y divide-border space-y-1">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <NotificationItemSkeleton
+                key={index}
+                isUnread={index < 3}
+                isInvitation={index === 0 || index === 3}
+                showActions={index === 0}
+              />
+            ))}
           </div>
         )}
 
-        {!isLoading && isError && (
+        {(isError || isRetryingNotifications) && (
           <ErrorState
             title="Couldn't load notifications"
             description="We couldn't load your notifications. Please try again."
-            onRetry={refetch}
-            isRetrying={isFetching}
+            onRetry={handleRetryNotifications}
+            isRetrying={isRetryingNotifications}
             className="py-16"
           />
         )}
 
-        {!isLoading && !isError && notifications.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-              <Bell className="h-5 w-5 text-muted-foreground" />
-            </div>
-
-            <p className="mt-4 text-sm font-medium">
-              {filter === "unread"
-                ? "No unread notifications"
-                : "No notifications"}
-            </p>
-
-            <p className="mt-1 max-w-sm text-xs text-muted-foreground">
-              {filter === "unread"
-                ? "You're all caught up."
-                : "You'll see workspace activity and updates here."}
-            </p>
-          </div>
-        )}
-
-        {!isLoading && !isError && notifications.length > 0 && (
-          <>
-            <div className="divide-y divide-border">
-              {notifications.map((notification) => (
-                <NotificationItem
-                  key={notification._id}
-                  notification={notification}
-                  onClick={handleNotificationClick}
-                  onAccept={handleAcceptInvitation}
-                  onDecline={handleDeclineInvitation}
-                  onDelete={handleDeleteNotification}
-                  isAccepting={acceptingNotificationId === notification._id}
-                  isDeclining={decliningNotificationId === notification._id}
-                  isDeleting={deletingNotificationId === notification._id}
-                />
-              ))}
-            </div>
-
-            {pagination?.totalPages > 1 && (
-              <div className="flex flex-col gap-4 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-xs text-muted-foreground">
-                  Page {pagination.page} of {pagination.totalPages}
-                </p>
-
-                <Pagination className="mx-0 w-auto sm:justify-end">
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationPrevious
-                        href="#"
-                        onClick={(event) => {
-                          event.preventDefault();
-
-                          if (page > 1 && !isFetching) {
-                            setSearchParams((params) => {
-                              if (page - 1 === 1) {
-                                params.delete("page");
-                              } else {
-                                params.set("page", String(page - 1));
-                              }
-
-                              return params;
-                            });
-                          }
-                        }}
-                        className={
-                          page === 1 || isFetching
-                            ? "pointer-events-none opacity-50"
-                            : "cursor-pointer"
-                        }
-                      />
-                    </PaginationItem>
-
-                    {Array.from(
-                      { length: pagination.totalPages },
-                      (_, index) => index + 1,
-                    ).map((pageNumber) => (
-                      <PaginationItem key={pageNumber}>
-                        <PaginationLink
-                          href="#"
-                          isActive={page === pageNumber}
-                          onClick={(event) => {
-                            event.preventDefault();
-
-                            if (page !== pageNumber && !isFetching) {
-                              setSearchParams((params) => {
-                                if (pageNumber === 1) {
-                                  params.delete("page");
-                                } else {
-                                  params.set("page", String(pageNumber));
-                                }
-
-                                return params;
-                              });
-                            }
-                          }}
-                          className={
-                            isFetching
-                              ? "pointer-events-none cursor-default opacity-60"
-                              : "cursor-pointer"
-                          }
-                        >
-                          {pageNumber}
-                        </PaginationLink>
-                      </PaginationItem>
-                    ))}
-
-                    <PaginationItem>
-                      <PaginationNext
-                        href="#"
-                        onClick={(event) => {
-                          event.preventDefault();
-
-                          if (page < pagination.totalPages && !isFetching) {
-                            setSearchParams((params) => {
-                              params.set("page", String(page + 1));
-                              return params;
-                            });
-                          }
-                        }}
-                        className={
-                          page === pagination.totalPages || isFetching
-                            ? "pointer-events-none opacity-50"
-                            : "cursor-pointer"
-                        }
-                      />
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
+        {!isLoading &&
+          !isError &&
+          !isRetryingNotifications &&
+          notifications.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+                <Bell className="h-5 w-5 text-muted-foreground" />
               </div>
-            )}
-          </>
-        )}
+
+              <p className="mt-4 text-sm font-medium">
+                {filter === "unread"
+                  ? "No unread notifications"
+                  : "No notifications"}
+              </p>
+
+              <p className="mt-1 max-w-sm text-xs text-muted-foreground">
+                {filter === "unread"
+                  ? "You're all caught up."
+                  : "You'll see workspace activity and updates here."}
+              </p>
+            </div>
+          )}
+
+        {!isLoading &&
+          !isError &&
+          !isRetryingNotifications &&
+          notifications.length > 0 && (
+            <>
+              <NotificationList
+                notifications={notifications}
+                onNotificationClick={handleNotificationClick}
+                onAcceptInvitation={handleAcceptInvitation}
+                onDeclineInvitation={handleDeclineInvitation}
+                onDeleteNotification={handleDeleteNotification}
+                acceptingNotificationId={acceptingNotificationId}
+                decliningNotificationId={decliningNotificationId}
+                deletingNotificationId={deletingNotificationId}
+              />
+
+              {pagination?.totalPages > 1 && (
+                <NotificationPagination
+                  pagination={pagination}
+                  page={page}
+                  isFetching={isFetching}
+                  setSearchParams={setSearchParams}
+                />
+              )}
+            </>
+          )}
       </section>
     </div>
   );

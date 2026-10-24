@@ -269,7 +269,7 @@ const NotificationMenu = () => {
       <DropdownMenuContent
         align="end"
         sideOffset={8}
-        collisionPadding={8}
+        collisionpadding={8}
         className="flex max-h-[min(32rem,calc(100dvh-1rem))] w-[min(20rem,calc(100vw-1rem))] flex-col overflow-hidden rounded-xl p-1.5"
       >
         <div className="flex shrink-0 items-center justify-between gap-2 px-2.5 py-2">
