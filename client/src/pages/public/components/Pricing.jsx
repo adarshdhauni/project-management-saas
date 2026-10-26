@@ -15,7 +15,7 @@ const Pricing = () => {
       id="pricing"
       className="scroll-mt-(--header-offset) border-t border-border bg-background"
     >
-      <div className="mx-auto max-w-7xl px-5 py-24 sm:px-8 sm:py-28">
+      <div className="mx-auto max-w-7xl px-5 py-24 sm:px-8 sm:py-32">
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
             Pricing

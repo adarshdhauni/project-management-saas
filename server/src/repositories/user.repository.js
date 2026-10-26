@@ -22,6 +22,18 @@ const createUser = async (userData, options = {}) => {
   return user;
 };
 
+const updateUser = (userId, updateData, options = {}) => {
+  return User.findByIdAndUpdate(
+    userId,
+    { $set: updateData },
+    {
+      returnDocument: "after",
+      runValidators: true,
+      ...options,
+    },
+  );
+};
+
 const updateRefreshToken = (userId, refreshToken, options = {}) => {
   return User.findByIdAndUpdate(
     userId,
@@ -36,9 +48,7 @@ const updateRefreshToken = (userId, refreshToken, options = {}) => {
 const clearRefreshToken = (userId, options = {}) => {
   return User.findByIdAndUpdate(
     userId,
-    {
-      refreshToken: null,
-    },
+    { refreshToken: null },
     {
       returnDocument: "after",
       ...options,
@@ -82,6 +92,7 @@ const userRepository = {
   findUserById,
   findUserByIdWithRefreshToken,
   createUser,
+  updateUser,
   updateRefreshToken,
   clearRefreshToken,
   updatePasswordResetToken,

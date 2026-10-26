@@ -27,7 +27,7 @@ import { Button } from "../ui/button";
 
 const ProductMockup = () => {
   return (
-    <div className="relative mx-auto max-w-6xl px-5 pb-24 sm:px-8">
+    <div className="relative mx-auto max-w-6xl px-5 py-24 sm:px-8 sm:py-32">
       <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[0_25px_80px_-30px_rgba(0,0,0,0.25)]">
         <div className="flex h-10 items-center gap-1.5 border-b border-border px-4">
           <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/20" />

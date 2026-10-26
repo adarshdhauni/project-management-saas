@@ -41,7 +41,6 @@ const login = async (userData) => {
   }
 
   const isMatch = await user.comparePassword(userData.password);
-  console.log(isMatch)
 
   if (!isMatch) {
     throw new ApiError(401, "Invalid email or password.");
@@ -57,7 +56,6 @@ const login = async (userData) => {
 };
 
 const refreshAccessToken = async (incomingRefreshToken) => {
-  console.log(incomingRefreshToken)
   if (!incomingRefreshToken) {
     throw new ApiError(401, "Invalid refresh token.");
   }

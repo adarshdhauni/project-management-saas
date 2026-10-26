@@ -1,19 +1,11 @@
 import { CalendarDays, Mail, User } from "lucide-react";
 import { useSelector } from "react-redux";
-
-const getInitials = (name = "") => {
-  return name
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
-};
+import getUserInitials from "@/utils/userInitials";
 
 const Profile = () => {
   const user = useSelector((state) => state.auth.user);
 
-  const initials = getInitials(user?.name);
+  const initials = getUserInitials(user?.name);
 
   const memberSince = user?.createdAt
     ? new Date(user.createdAt).toLocaleDateString(undefined, {
@@ -37,7 +29,7 @@ const Profile = () => {
           {user?.avatar ? (
             <img
               src={user.avatar}
-              alt={`${user.name}'s avatar`}
+              alt={user.name ? `${user.name}'s avatar` : "User avatar"}
               className="h-16 w-16 shrink-0 rounded-full object-cover"
             />
           ) : (
@@ -48,7 +40,7 @@ const Profile = () => {
 
           <div className="min-w-0">
             <h2 className="truncate text-lg font-semibold tracking-tight">
-              {user?.name}
+              {user?.name || "User"}
             </h2>
 
             <div className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
@@ -85,7 +77,7 @@ const Profile = () => {
             </div>
           </div>
 
-          <div className="flex flex-col gap-1.5 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+          <div className="px-5 py-4 sm:px-6">
             <div className="flex items-center gap-3">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted">
                 <Mail className="h-4 w-4 text-muted-foreground" />

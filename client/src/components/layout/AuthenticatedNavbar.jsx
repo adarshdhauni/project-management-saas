@@ -196,7 +196,7 @@ const AuthenticatedNavbar = () => {
               <DropdownMenuContent
                 align="start"
                 sideOffset={8}
-                collisionPadding={8}
+                collisionpadding={8}
                 className="flex max-h-[min(32rem,calc(100dvh-1rem))] w-[min(20rem,calc(100vw-1rem))] flex-col overflow-hidden rounded-xl p-1.5"
               >
                 <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
@@ -282,7 +282,9 @@ const AuthenticatedNavbar = () => {
 
             <DropdownMenuContent
               align="end"
-              className="w-[calc(100vw-1.5rem)] max-w-56 rounded-xl p-1.5"
+              sideOffset={8}
+              collisionpadding={8}
+              className="w-[min(14rem,calc(100vw-1rem))] rounded-xl p-1.5"
             >
               <div className="px-2.5 py-2">
                 <p className="truncate text-sm font-medium">{user?.name}</p>
@@ -334,4 +336,3 @@ const AuthenticatedNavbar = () => {
 };
 
 export default AuthenticatedNavbar;
-s;
