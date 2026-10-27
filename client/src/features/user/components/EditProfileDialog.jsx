@@ -21,7 +21,9 @@ const EditProfileDialog = ({ open, onOpenChange, user }) => {
   const [name, setName] = useState(user?.name || "");
   const [email, setEmail] = useState(user?.email || "");
 
-  const [updateUser, { isLoading }] = useUpdateUserMutation();
+  const [updateUser, { isLoading, error }] = useUpdateUserMutation();
+
+  console.log(error)
 
   useEffect(() => {
     if (open) {
