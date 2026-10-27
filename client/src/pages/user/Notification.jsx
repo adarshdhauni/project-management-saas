@@ -3,9 +3,12 @@ import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import ErrorState from "@/components/feedback/error/ErrorState";
+import NotificationItemSkeleton from "@/components/feedback/loading/NotificationItemSkeleton";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
+import NotificationList from "@/features/notification/components/NotificationList";
+import NotificationPagination from "@/features/notification/components/NotificationPagination";
 import {
   useDeleteNotificationMutation,
   useGetNotificationsQuery,
@@ -17,10 +20,6 @@ import {
   useDeclineInvitationMutation,
 } from "@/features/workspace/workspaceApi";
 import { getNotificationPath } from "@/utils/notification";
-
-import NotificationItemSkeleton from "@/components/feedback/loading/NotificationItemSkeleton";
-import NotificationPagination from "@/features/notification/components/NotificationPagination";
-import NotificationList from "@/features/notification/components/NotificationList";
 
 const Notifications = () => {
   const navigate = useNavigate();

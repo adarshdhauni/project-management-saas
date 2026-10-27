@@ -37,7 +37,13 @@ const authApi = apiSlice.injectEndpoints({
         method: "POST",
       }),
 
-      invalidatesTags: ["User"],
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+        } finally {
+          dispatch(apiSlice.util.resetApiState());
+        }
+      },
     }),
     forgotPassword: builder.mutation({
       query: (userData) => ({
