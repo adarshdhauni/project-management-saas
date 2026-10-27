@@ -8,8 +8,8 @@ const router = express.Router();
 
 router.patch(
   "/me",
-  validate({ body: updateUserSchema }),
   protect,
+  validate({ body: updateUserSchema }),
   userController.updateUser,
 );
 
