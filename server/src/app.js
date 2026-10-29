@@ -6,8 +6,8 @@ import helmet from "helmet";
 import morgan from "morgan";
 
 import env from "./config/env.js";
-import errorHandler from "./middlewares/errorHandler.js";
-import rateLimiter from "./middlewares/rateLimiter.js";
+import errorHandler from "./middlewares/error-handler.middleware.js";
+import rateLimiter from "./middlewares/rate-limiter.middleware..js";
 import authRoutes from "./routes/auth.routes.js";
 import commentRoutes from "./routes/comment.routes.js";
 import notificationRoutes from "./routes/notification.routes.js";

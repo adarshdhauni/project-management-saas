@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
+import multer from "multer";
 import { ZodError } from "zod";
 
 import env from "../config/env.js";
@@ -25,13 +26,15 @@ const errorHandler = (err, req, res, next) => {
     error = new ApiError(400, "Invalid resource identifier.");
   }
 
-  if (error.code === 11000) {
-    const field = Object.keys(error.keyValue)[0];
+  if (error?.code === 11000) {
+    const field = Object.keys(error.keyValue ?? {})[0];
 
-    error = new ApiError(
-      409,
-      `${field.charAt(0).toUpperCase() + field.slice(1)} already exists.`,
-    );
+    if (field) {
+      error = new ApiError(
+        409,
+        `${field.charAt(0).toUpperCase() + field.slice(1)} already exists.`,
+      );
+    }
   }
 
   if (error instanceof jwt.JsonWebTokenError) {
@@ -40,6 +43,18 @@ const errorHandler = (err, req, res, next) => {
 
   if (error instanceof jwt.TokenExpiredError) {
     error = new ApiError(401, "Access token has expired.");
+  }
+
+  if (error instanceof multer.MulterError) {
+    if (error.code === "LIMIT_FILE_SIZE") {
+      error = new ApiError(413, "Avatar image must not exceed 2 MB.");
+    } else if (error.code === "LIMIT_FILE_COUNT") {
+      error = new ApiError(400, "Only one image can be uploaded.");
+    } else if (error.code === "LIMIT_UNEXPECTED_FILE") {
+      error = new ApiError(400, 'Unexpected file field. Use "avatar".');
+    } else {
+      error = new ApiError(400, "Avatar upload failed.");
+    }
   }
 
   if (!(error instanceof ApiError)) {

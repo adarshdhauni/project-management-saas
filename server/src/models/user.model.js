@@ -24,6 +24,7 @@ const userSchema = new mongoose.Schema(
     passwordResetToken: { type: String, select: false },
     passwordResetExpires: { type: Date, select: false },
     avatar: { type: String },
+    avatarPublicId: { type: String },
     refreshToken: { type: String, default: null, select: false },
   },
   { timestamps: true, versionKey: false },

@@ -2,8 +2,8 @@ import express from "express";
 
 import projectController from "../controllers/project.controller.js";
 import taskController from "../controllers/task.controller.js";
-import { protect } from "../middlewares/protect.js";
-import validate from "../middlewares/validate.js";
+import { protect } from "../middlewares/protect.middleware.js";
+import validate from "../middlewares/validate.middleware.js";
 import projectIdSchema from "../validators/project/project-id.schema.js";
 import updateProjectSchema from "../validators/project/update-project.schema.js";
 import createTaskSchema from "../validators/task/create-task.schema.js";

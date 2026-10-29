@@ -11,7 +11,17 @@ const userApi = apiSlice.injectEndpoints({
 
       invalidatesTags: ["User"],
     }),
+
+    uploadAvatar: builder.mutation({
+      query: (formData) => ({
+        url: "/api/v1/users/avatar",
+        method: "PATCH",
+        body: formData,
+      }),
+
+      invalidatesTags: ["User"],
+    }),
   }),
 });
 
-export const { useUpdateUserMutation } = userApi;
+export const { useUpdateUserMutation, useUploadAvatarMutation } = userApi;
