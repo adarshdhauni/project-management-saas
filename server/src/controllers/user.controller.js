@@ -10,7 +10,7 @@ const updateUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(updatedUser, "User updated successfully."));
 });
 
-const updateAvatar = asyncHandler(async (req, res) => {
+const uploadAvatar = asyncHandler(async (req, res) => {
   const updatedUser = await userService.uploadAvatar(
     req.user._id,
     req.file?.buffer,
@@ -31,7 +31,7 @@ const removeAvatar = asyncHandler(async (req, res) => {
 
 const userController = {
   updateUser,
-  updateAvatar,
+  uploadAvatar,
   removeAvatar
 };
 
