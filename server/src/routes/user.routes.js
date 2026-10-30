@@ -14,11 +14,9 @@ router.patch(
   userController.updateUser,
 );
 
-router.patch(
-  "/avatar",
-  protect,
-  upload.single("avatar"),
-  userController.updateAvatar,
-);
+router
+  .route("/avatar")
+  .patch(protect, upload.single("avatar"), userController.uploadAvatar)
+  .delete(protect, userController.removeAvatar);
 
 export default router;

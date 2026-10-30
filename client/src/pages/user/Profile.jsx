@@ -1,14 +1,16 @@
-import { CalendarDays, Camera, Mail, User } from "lucide-react";
+import { CalendarDays, Camera, Mail, Trash2, User } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { Button } from "@/components/ui/button";
 import EditProfileDialog from "@/features/user/components/EditProfileDialog";
 import AvatarCropDialog from "@/features/user/components/AvatarCropDialog";
+import RemoveAvatarDialog from "@/features/user/components/RemoveAvatarDialog";
 import { useUploadAvatarMutation } from "@/features/user/userApi";
 import { setCredentials } from "@/features/auth/authSlice";
 import getUserInitials from "@/utils/userInitials";
 import createCroppedImage from "@/utils/cropImage";
+import { toast } from "@/components/ui/toast";
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024;
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -21,9 +23,9 @@ const Profile = () => {
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [isCropOpen, setIsCropOpen] = useState(false);
   const [sourceImage, setSourceImage] = useState("");
-  const [uploadError, setUploadError] = useState("");
+  const [isRemoveDialogOpen, setIsRemoveDialogOpen] = useState(false);
 
-  const [uploadAvatar, { isLoading }] = useUploadAvatarMutation();
+  const [uploadAvatar] = useUploadAvatarMutation();
 
   const initials = getUserInitials(user?.name);
 
@@ -49,16 +51,22 @@ const Profile = () => {
     if (!file) return;
 
     if (!ALLOWED_TYPES.includes(file.type)) {
-      setUploadError("Choose a JPEG, PNG, or WebP image.");
+      toast.add({
+        type: "error",
+        description: "Choose a JPEG, PNG, or WebP image.",
+        priority: "high",
+      });
       return;
     }
 
     if (file.size > MAX_FILE_SIZE) {
-      setUploadError("The image must not exceed 2 MB.");
+      toast.add({
+        type: "error",
+        description: "The image must not exceed 2 MB.",
+        priority: "high",
+      });
       return;
     }
-
-    setUploadError("");
 
     setSourceImage(URL.createObjectURL(file));
     setIsCropOpen(true);
@@ -68,7 +76,6 @@ const Profile = () => {
     setIsCropOpen(open);
 
     if (!open) {
-      setUploadError("");
       setSourceImage("");
     }
   };
@@ -76,34 +83,22 @@ const Profile = () => {
   const handleAvatarSave = async (pixels) => {
     if (!sourceImage || !pixels) return;
 
-    setUploadError("");
+    const croppedBlob = await createCroppedImage(sourceImage, pixels);
 
-    try {
-      const croppedBlob = await createCroppedImage(sourceImage, pixels);
+    const formData = new FormData();
+    formData.append("avatar", croppedBlob, "avatar.jpg");
 
-      const formData = new FormData();
-      formData.append("avatar", croppedBlob, "avatar.jpg");
+    const response = await uploadAvatar(formData).unwrap();
+    const updatedUser = response.data;
 
-      const response = await uploadAvatar(formData).unwrap();
-      const updatedUser = response.data;
-
-      if (!updatedUser) {
-        throw new Error("The server did not return the updated user.");
-      }
-
-      dispatch(setCredentials(updatedUser));
-
-      setIsCropOpen(false);
-      setSourceImage("");
-    } catch (error) {
-      setUploadError(
-        error?.data?.message ||
-          error?.message ||
-          "Avatar upload failed. Please try again.",
-      );
-
-      throw error;
+    if (!updatedUser) {
+      throw new Error("The server did not return the updated user.");
     }
+
+    dispatch(setCredentials(updatedUser));
+
+    setIsCropOpen(false);
+    setSourceImage("");
   };
 
   return (
@@ -154,15 +149,28 @@ const Profile = () => {
               aria-label="Choose avatar image"
             />
 
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => fileInputRef.current?.click()}
-              className="w-full sm:w-auto cursor-pointer"
-            >
-              <Camera className="mr-2 h-4 w-4" />
-              Choose image
-            </Button>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Camera className="mr-2 h-4 w-4" />
+                Choose image
+              </Button>
+
+              {user?.avatar && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="cursor-pointer text-destructive hover:text-destructive"
+                  onClick={() => setIsRemoveDialogOpen(true)}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Remove photo
+                </Button>
+              )}
+            </div>
 
             <Button
               type="button"
@@ -244,6 +252,11 @@ const Profile = () => {
         onOpenChange={handleCropDialogChange}
         image={sourceImage}
         onConfirm={handleAvatarSave}
+      />
+
+      <RemoveAvatarDialog
+        isRemoveDialogOpen={isRemoveDialogOpen}
+        setIsRemoveDialogOpen={setIsRemoveDialogOpen}
       />
     </div>
   );

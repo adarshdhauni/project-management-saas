@@ -21,9 +21,18 @@ const updateAvatar = asyncHandler(async (req, res) => {
     .json(new ApiResponse(updatedUser, "Avatar updated successfully."));
 });
 
+const removeAvatar = asyncHandler(async (req, res) => {
+  const updatedUser = await userService.removeAvatar(req.user._id);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, updatedUser, "Avatar removed successfully."));
+});
+
 const userController = {
   updateUser,
   updateAvatar,
+  removeAvatar
 };
 
 export default userController;

@@ -91,9 +91,49 @@ const uploadAvatar = async (userId, fileBuffer) => {
   return updatedUser;
 };
 
+const removeAvatar = async (userId) => {
+  const user = await userRepository.findUserById(userId);
+
+  if (!user) {
+    throw new ApiError(404, "User does not exist.");
+  }
+
+  if (!user.avatar && !user.avatarPublicId) {
+    return user;
+  }
+
+  let oldPublicId = user.avatarPublicId;
+
+  user.avatar = null;
+  user.avatarPublicId = null;
+
+  await user.save();
+
+  if (oldPublicId) {
+    try {
+      const deletionResult = await cloudinaryService.deleteImage(oldPublicId);
+
+      if (
+        deletionResult.result !== "ok" &&
+        deletionResult.result !== "not found"
+      ) {
+        console.error(
+          "Previous avatar cleanup was unsuccessful:",
+          deletionResult,
+        );
+      }
+    } catch (cleanupError) {
+      console.error("Failed to delete previous avatar:", cleanupError);
+    }
+  }
+
+  return user;
+};
+
 const userService = {
   updateUser,
   uploadAvatar,
+  removeAvatar
 };
 
 export default userService;

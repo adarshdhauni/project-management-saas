@@ -273,8 +273,16 @@ const AuthenticatedNavbar = () => {
                 />
               }
             >
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-medium text-primary-foreground">
-                {getUserInitials(user?.name)}
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary text-xs font-medium text-primary-foreground">
+                {user?.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt={`${user?.name || "User"}'s profile`}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  getUserInitials(user?.name)
+                )}
               </div>
 
               <ChevronDown className="hidden h-3.5 w-3.5 text-muted-foreground sm:block" />

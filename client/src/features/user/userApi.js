@@ -21,7 +21,19 @@ const userApi = apiSlice.injectEndpoints({
 
       invalidatesTags: ["User"],
     }),
+
+    removeAvatar: builder.mutation({
+      query: () => ({
+        url: "/api/v1/users/avatar",
+        method: "DELETE",
+      }),
+      invalidatesTags: ["User"],
+    }),
   }),
 });
 
-export const { useUpdateUserMutation, useUploadAvatarMutation } = userApi;
+export const {
+  useUpdateUserMutation,
+  useUploadAvatarMutation,
+  useRemoveAvatarMutation,
+} = userApi;
