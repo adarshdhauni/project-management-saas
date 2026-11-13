@@ -43,28 +43,49 @@ const Settings = () => {
 
           <Select value={theme} onValueChange={setTheme}>
             <SelectTrigger className="w-full sm:w-40 cursor-pointer">
-              <SelectValue placeholder="Select theme" />
+              <SelectValue>
+                {(() => {
+                  const selectedTheme = [
+                    { value: "system", label: "System", Icon: Monitor },
+                    { value: "light", label: "Light", Icon: Sun },
+                    { value: "dark", label: "Dark", Icon: Moon },
+                  ].find((item) => item.value === theme);
+
+                  if (!selectedTheme) {
+                    return "Select theme";
+                  }
+
+                  const Icon = selectedTheme.Icon;
+
+                  return (
+                    <div className="flex items-center gap-2">
+                      <Icon className="h-4 w-4" />
+                      <span>{selectedTheme.label}</span>
+                    </div>
+                  );
+                })()}
+              </SelectValue>
             </SelectTrigger>
 
             <SelectContent>
               <SelectItem value="system" className="cursor-pointer">
                 <div className="flex items-center gap-2">
                   <Monitor className="h-4 w-4" />
-                  System
+                  <span>System</span>
                 </div>
               </SelectItem>
 
               <SelectItem value="light" className="cursor-pointer">
                 <div className="flex items-center gap-2">
                   <Sun className="h-4 w-4" />
-                  Light
+                  <span>Light</span>
                 </div>
               </SelectItem>
 
               <SelectItem value="dark" className="cursor-pointer">
                 <div className="flex items-center gap-2">
                   <Moon className="h-4 w-4" />
-                  Dark
+                  <span>Dark</span>
                 </div>
               </SelectItem>
             </SelectContent>

@@ -6,10 +6,11 @@ const resetPasswordSchema = z.object({
   token: z.string().min(1, "Reset token is required."),
   password: z
     .string()
-    .min(8)
+    .min(8, "Password must be at least 8 characters long.")
+    .max(64, "Password cannot exceed 64 characters.")
     .regex(
       PASSWORD_REGEX,
-      "Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character.",
+      "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
     ),
 });
 

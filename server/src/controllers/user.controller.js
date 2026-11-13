@@ -29,10 +29,19 @@ const removeAvatar = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, updatedUser, "Avatar removed successfully."));
 });
 
+const changePassword = asyncHandler(async (req, res) => {
+  await userService.changePassword(req.user._id, req.body);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Password Updated successfully."));
+});
+
 const userController = {
   updateUser,
   uploadAvatar,
-  removeAvatar
+  removeAvatar,
+  changePassword,
 };
 
 export default userController;

@@ -25,7 +25,7 @@ const Profile = () => {
   const [sourceImage, setSourceImage] = useState("");
   const [isRemoveDialogOpen, setIsRemoveDialogOpen] = useState(false);
 
-  const [uploadAvatar] = useUploadAvatarMutation();
+  const [uploadAvatar, { isLoading }] = useUploadAvatarMutation();
 
   const initials = getUserInitials(user?.name);
 
@@ -113,15 +113,15 @@ const Profile = () => {
       <section className="mt-8 rounded-xl border border-border bg-card">
         <div className="flex flex-col gap-5 p-4 sm:flex-row sm:items-center sm:p-6">
           <div className="flex min-w-0 items-center gap-4">
-            <div className="h-16 w-16 shrink-0">
+            <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full bg-muted ring-1 ring-border">
               {user?.avatar ? (
                 <img
                   src={user.avatar}
                   alt={`${user.name || "User"}'s avatar`}
-                  className="h-16 w-16 rounded-full object-cover ring-1 ring-border"
+                  className="h-full w-full object-cover"
                 />
               ) : (
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-lg font-semibold text-primary-foreground ring-1 ring-border">
+                <div className="flex h-full w-full items-center justify-center bg-primary text-lg font-semibold text-primary-foreground">
                   {initials}
                 </div>
               )}
@@ -149,11 +149,17 @@ const Profile = () => {
               aria-label="Choose avatar image"
             />
 
-            <div className="flex flex-wrap items-center gap-2">
+            <div
+              className={`grid gap-2 ${
+                user?.avatar ? "grid-cols-2" : "grid-cols-1"
+              } sm:flex`}
+            >
               <Button
                 type="button"
+                disabled={isLoading}
                 variant="outline"
                 onClick={() => fileInputRef.current?.click()}
+                className="cursor-pointer"
               >
                 <Camera className="mr-2 h-4 w-4" />
                 Choose image
@@ -176,7 +182,7 @@ const Profile = () => {
               type="button"
               variant="outline"
               onClick={() => setIsEditProfileOpen(true)}
-              className="w-full sm:w-auto cursor-pointer"
+              className="w-full cursor-pointer sm:w-auto"
             >
               <User className="mr-2 h-4 w-4" />
               Edit profile
@@ -232,7 +238,7 @@ const Profile = () => {
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted">
             <CalendarDays className="h-4 w-4 text-muted-foreground" />
           </div>
-          <div>
+          <div className="min-w-0">
             <p className="text-sm font-medium">Member since</p>
             <p className="mt-0.5 text-sm text-muted-foreground">
               {memberSince}

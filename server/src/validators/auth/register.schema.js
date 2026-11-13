@@ -7,11 +7,11 @@ const registerSchema = z.object({
   email: z.email().trim().toLowerCase(),
   password: z
     .string()
-    .min(8)
-    .max(64)
+    .min(8, "Password must be at least 8 characters long.")
+    .max(64, "Password cannot exceed 64 characters.")
     .regex(
       PASSWORD_REGEX,
-      "Password must be 8 to 64 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
+      "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
     ),
 });
 

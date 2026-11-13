@@ -130,10 +130,29 @@ const removeAvatar = async (userId) => {
   return user;
 };
 
+const changePassword = async (userId, userData) => {
+  const user = await userRepository.findUserById(userId);
+
+  if (!user) {
+    throw new ApiError(404, "User does not exist.");
+  }
+
+  const isMatch = await user.comparePassword(userData.oldPassword);
+
+  if (!isMatch) {
+    throw new ApiError(401, "Invalid current Password");
+  }
+
+  user.password = userData.newPassword;
+
+  await user.save();
+};
+
 const userService = {
   updateUser,
   uploadAvatar,
-  removeAvatar
+  removeAvatar,
+  changePassword,
 };
 
 export default userService;

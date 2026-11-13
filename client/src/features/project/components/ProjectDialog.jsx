@@ -1,4 +1,4 @@
-import { Pencil,Plus } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -139,7 +139,7 @@ const ProjectDialog = ({ open, onOpenChange, workspaceId, project = null }) => {
 
       onOpenChange(false);
     } catch (error) {
-      console.log(error)
+      console.log(error);
       toast.add({
         type: "error",
         title: error?.data?.message || "Something went wrong",

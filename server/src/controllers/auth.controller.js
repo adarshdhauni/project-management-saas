@@ -99,9 +99,7 @@ const logoutUser = asyncHandler(async (req, res) => {
       const decoded = jwt.verify(refreshToken, env.JWT_REFRESH_SECRET);
 
       await authService.logout(decoded.sub);
-    } catch {
-      // Ignore invalid or expired refresh token.
-    }
+    } catch {}
   }
 
   return res
