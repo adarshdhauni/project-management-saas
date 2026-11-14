@@ -16,6 +16,10 @@ const findUserByIdWithRefreshToken = (id, options = {}) => {
   return User.findById(id, null, options).select("+refreshToken");
 };
 
+const findUserByIdWithPasswordAndRefreshToken = (id, options = {}) => {
+  return User.findById(id, null, options).select("+password +refreshToken");
+};
+
 const createUser = async (userData, options = {}) => {
   const [user] = await User.create([userData], options);
 
@@ -91,6 +95,7 @@ const userRepository = {
   findUserByEmailWithPassword,
   findUserById,
   findUserByIdWithRefreshToken,
+  findUserByIdWithPasswordAndRefreshToken,
   createUser,
   updateUser,
   updateRefreshToken,

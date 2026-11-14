@@ -131,7 +131,8 @@ const removeAvatar = async (userId) => {
 };
 
 const changePassword = async (userId, userData) => {
-  const user = await userRepository.findUserByIdWithRefreshToken(userId);
+  const user =
+    await userRepository.findUserByIdWithPasswordAndRefreshToken(userId);
 
   if (!user) {
     throw new ApiError(404, "User does not exist.");

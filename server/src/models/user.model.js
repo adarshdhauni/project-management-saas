@@ -40,7 +40,11 @@ userSchema.pre("save", async function () {
 });
 
 userSchema.methods.comparePassword = async function (password) {
-  return await bcrypt.compare(password, this.password);
+  if (!password || !this.password) {
+    throw new Error("Password or stored password hash is missing.");
+  }
+
+  return bcrypt.compare(password, this.password);
 };
 
 userSchema.methods.generateAccessToken = function () {

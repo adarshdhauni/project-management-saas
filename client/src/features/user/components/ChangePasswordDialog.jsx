@@ -31,7 +31,9 @@ const ChangePasswordDialog = ({ open, onOpenChange }) => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const [changePassword, { isLoading }] = useChangePasswordMutation();
+  const [changePassword, { isLoading, error }] = useChangePasswordMutation();
+
+  console.log(error);
 
   const { passwordRules, passwordStrength } = getPasswordValidation(
     userData.newPassword,
