@@ -131,7 +131,7 @@ const removeAvatar = async (userId) => {
 };
 
 const changePassword = async (userId, userData) => {
-  const user = await userRepository.findUserById(userId);
+  const user = await userRepository.findUserByIdWithRefreshToken(userId);
 
   if (!user) {
     throw new ApiError(404, "User does not exist.");
@@ -140,10 +140,11 @@ const changePassword = async (userId, userData) => {
   const isMatch = await user.comparePassword(userData.oldPassword);
 
   if (!isMatch) {
-    throw new ApiError(401, "Invalid current Password");
+    throw new ApiError(401, "Invalid current password.");
   }
 
   user.password = userData.newPassword;
+  user.refreshToken = null;
 
   await user.save();
 };

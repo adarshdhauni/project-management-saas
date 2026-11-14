@@ -23,8 +23,6 @@ const EditProfileDialog = ({ open, onOpenChange, user }) => {
 
   const [updateUser, { isLoading, error }] = useUpdateUserMutation();
 
-  console.log(error)
-
   useEffect(() => {
     if (open) {
       setName(user?.name || "");

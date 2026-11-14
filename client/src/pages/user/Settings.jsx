@@ -9,9 +9,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import ChangePasswordDialog from "@/features/user/components/ChangePasswordDialog";
+import { useState } from "react";
 
 const Settings = () => {
   const { theme, setTheme } = useTheme();
+
+  const [isChangePasswordOpen, setisChangePasswordOpen] = useState(false);
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
@@ -114,12 +118,18 @@ const Settings = () => {
           <Button
             type="button"
             variant="outline"
+            onClick={() => setisChangePasswordOpen(true)}
             className="w-full cursor-pointer sm:w-auto"
           >
             Change password
           </Button>
         </div>
       </section>
+
+      <ChangePasswordDialog
+        open={isChangePasswordOpen}
+        onOpenChange={setisChangePasswordOpen}
+      />
     </div>
   );
 };
