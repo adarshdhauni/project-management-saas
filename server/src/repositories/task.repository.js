@@ -1,3 +1,4 @@
+import Project from "../models/project.model.js";
 import Task from "../models/task.model.js";
 
 const create = async (taskData, options = {}) => {
@@ -125,13 +126,17 @@ const deleteById = (taskId, options = {}) => {
   return Task.findByIdAndDelete(taskId, options);
 };
 
-const countByWorkspace = (workspaceId, options = {}) => {
-  return Task.countDocuments(
-    {
-      workspace: workspaceId,
-    },
-    options,
-  );
+const countByWorkspace = async (workspaceId) => {
+  const projects = await Project.find(
+    { workspace: workspaceId },
+    { _id: 1 },
+  ).lean();
+
+  const projectIds = projects.map((project) => project._id);
+
+  return Task.countDocuments({
+    project: { $in: projectIds },
+  });
 };
 
 const taskRepository = {

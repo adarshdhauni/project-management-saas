@@ -21,7 +21,7 @@ const EditProfileDialog = ({ open, onOpenChange, user }) => {
   const [name, setName] = useState(user?.name || "");
   const [email, setEmail] = useState(user?.email || "");
 
-  const [updateUser, { isLoading, error }] = useUpdateUserMutation();
+  const [updateUser, { isLoading }] = useUpdateUserMutation();
 
   useEffect(() => {
     if (open) {
@@ -45,7 +45,7 @@ const EditProfileDialog = ({ open, onOpenChange, user }) => {
     : "";
 
   const validateForm = () => {
-    if (trimmedName.length < 2 || trimmedName.length > 50) {
+    if (nameError) {
       focusField("profile-name");
       return nameError;
     }
@@ -82,7 +82,7 @@ const EditProfileDialog = ({ open, onOpenChange, user }) => {
     try {
       await updateUser({
         name: trimmedName,
-        email: trimmedEmail,
+        email: trimmedEmail.toLowerCase(),
       }).unwrap();
 
       toast.add({

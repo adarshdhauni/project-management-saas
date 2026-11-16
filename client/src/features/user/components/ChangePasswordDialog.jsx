@@ -1,5 +1,5 @@
 import { Eye, EyeOff, LockKeyhole } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -31,9 +31,7 @@ const ChangePasswordDialog = ({ open, onOpenChange }) => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const [changePassword, { isLoading, error }] = useChangePasswordMutation();
-
-  console.log(error);
+  const [changePassword, { isLoading }] = useChangePasswordMutation();
 
   const { passwordRules, passwordStrength } = getPasswordValidation(
     userData.newPassword,
@@ -42,6 +40,20 @@ const ChangePasswordDialog = ({ open, onOpenChange }) => {
   const isPasswordMatch =
     userData.newPassword.length > 0 &&
     userData.newPassword === userData.confirmPassword;
+
+  useEffect(() => {
+    if (open) {
+      setUserData({
+        oldPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+
+      setShowOldPassword(false);
+      setShowNewPassword(false);
+      setShowConfirmPassword(false);
+    }
+  }, [open]);
 
   const validateForm = () => {
     const { oldPassword, newPassword, confirmPassword } = userData;
@@ -60,8 +72,6 @@ const ChangePasswordDialog = ({ open, onOpenChange }) => {
       focusField("confirmPassword");
       return "Confirm your new password.";
     }
-
-    const { passwordRules } = getPasswordValidation(newPassword);
 
     if (!passwordRules.length) {
       focusField("newPassword");
@@ -88,7 +98,7 @@ const ChangePasswordDialog = ({ open, onOpenChange }) => {
       return "Add at least 1 special character.";
     }
 
-    if (newPassword !== confirmPassword) {
+    if (!isPasswordMatch) {
       focusField("confirmPassword");
       return "Passwords do not match.";
     }
@@ -135,6 +145,8 @@ const ChangePasswordDialog = ({ open, onOpenChange }) => {
       setShowOldPassword(false);
       setShowNewPassword(false);
       setShowConfirmPassword(false);
+
+      onOpenChange(false);
     } catch (error) {
       toast.add({
         type: "error",
