@@ -454,6 +454,7 @@ const moveTask = async (userId, taskId, beforeTaskId = null) => {
         metadata: {
           projectId: project._id,
           taskId: task._id,
+          title: task.title,
           fromPosition: task.position,
           toPosition: newPosition,
           beforeTaskId,

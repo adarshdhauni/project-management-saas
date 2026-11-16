@@ -163,7 +163,7 @@ export const getActivityContent = (activity) => {
     case "task.reordered":
       return {
         action: "reordered the task",
-        target: `from position ${metadata.fromPosition} to ${metadata.toPosition}`,
+        target: metadata.title,
         to:
           metadata.projectId && metadata.taskId
             ? `/dashboard/workspaces/${activity.workspace}/projects/${metadata.projectId}/tasks/${metadata.taskId}`

@@ -20,6 +20,11 @@ export const navItems = [
     getTo: (workspaceId) => `/dashboard/workspaces/${workspaceId}/projects`,
   },
   {
+    label: "Tasks",
+    icon: CheckSquare,
+    getTo: (workspaceId) => `/dashboard/workspaces/${workspaceId}/tasks`,
+  },
+  {
     label: "Activity",
     icon: Activity,
     getTo: (workspaceId) => `/dashboard/workspaces/${workspaceId}/activity`,
