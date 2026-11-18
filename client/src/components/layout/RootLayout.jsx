@@ -1,7 +1,6 @@
 import { Outlet } from "react-router-dom";
 
 import AuthenticatedNavbar from "@/components/layout/AuthenticatedNavbar";
-import PageTransition from "@/components/shared/PageTransition";
 
 export const RootLayout = () => {
   return (
@@ -9,9 +8,7 @@ export const RootLayout = () => {
       <AuthenticatedNavbar />
 
       <main>
-        <PageTransition>
-          <Outlet />
-        </PageTransition>
+        <Outlet />
       </main>
     </div>
   );

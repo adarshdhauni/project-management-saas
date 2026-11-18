@@ -45,6 +45,20 @@ const ProjectDialog = ({ open, onOpenChange, workspaceId, project = null }) => {
 
   const isLoading = isCreating || isUpdating;
 
+  const trimmedName = name.trim();
+
+  const nameValid = trimmedName.length >= 3 && trimmedName.length <= 100;
+
+  const nameError =
+    trimmedName.length < 3
+      ? "Project name must be at least 3 characters."
+      : trimmedName.length > 100
+        ? "Project name cannot exceed 100 characters."
+        : "";
+
+  const descriptionError =
+    description.length > 500 ? "Description cannot exceed 500 characters." : "";
+
   useEffect(() => {
     if (!open) {
       setName("");
@@ -68,24 +82,19 @@ const ProjectDialog = ({ open, onOpenChange, workspaceId, project = null }) => {
   }, [open, project]);
 
   const validateForm = () => {
-    if (!name.trim()) {
+    if (!trimmedName) {
       focusField("project-name");
-      return "Enter your project name";
+      return "Enter your project name.";
     }
 
-    if (name.length < 3) {
+    if (nameError) {
       focusField("project-name");
-      return "Project name must be at least 3 characters";
+      return nameError;
     }
 
-    if (name.length > 100) {
-      focusField("project-name");
-      return "Project name cannot exceed 100 characters";
-    }
-
-    if (description.length > 500) {
+    if (descriptionError) {
       focusField("project-description");
-      return "Project cannot exceed 500 characters";
+      return descriptionError;
     }
 
     return null;
@@ -106,7 +115,7 @@ const ProjectDialog = ({ open, onOpenChange, workspaceId, project = null }) => {
     }
 
     const projectData = {
-      name: name.trim(),
+      name: trimmedName,
       description: description.trim() || undefined,
       color:
         color === "none" ? (isEditMode ? null : undefined) : color || undefined,
@@ -139,7 +148,6 @@ const ProjectDialog = ({ open, onOpenChange, workspaceId, project = null }) => {
 
       onOpenChange(false);
     } catch (error) {
-      console.log(error);
       toast.add({
         type: "error",
         title: error?.data?.message || "Something went wrong",
@@ -147,9 +155,6 @@ const ProjectDialog = ({ open, onOpenChange, workspaceId, project = null }) => {
       });
     }
   };
-
-  const nameValid = name.length >= 3 && name.length <= 100;
-  const descriptionValid = description.length <= 500;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -170,7 +175,7 @@ const ProjectDialog = ({ open, onOpenChange, workspaceId, project = null }) => {
           <div className="space-y-5">
             <Field
               data-disabled={isLoading}
-              data-invalid={!nameValid && name.trim() !== ""}
+              data-invalid={nameError !== "" && trimmedName !== ""}
             >
               <FieldLabel htmlFor="project-name">
                 Project name <span className="text-destructive">*</span>
@@ -184,12 +189,12 @@ const ProjectDialog = ({ open, onOpenChange, workspaceId, project = null }) => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 disabled={isLoading}
-                aria-invalid={!nameValid && name.trim() !== ""}
+                aria-invalid={nameError !== "" && trimmedName !== ""}
                 required
               />
 
-              {name.trim() !== "" && !nameValid && (
-                <p className="text-xs text-destructive">Invalid name</p>
+              {trimmedName !== "" && nameError && (
+                <p className="text-xs text-destructive">{nameError}</p>
               )}
 
               <FieldDescription>
@@ -199,7 +204,7 @@ const ProjectDialog = ({ open, onOpenChange, workspaceId, project = null }) => {
 
             <Field
               data-disabled={isLoading}
-              data-invalid={!descriptionValid && description.trim() !== ""}
+              data-invalid={descriptionError !== ""}
             >
               <FieldLabel htmlFor="project-description">
                 Description{" "}
@@ -213,11 +218,11 @@ const ProjectDialog = ({ open, onOpenChange, workspaceId, project = null }) => {
                 onChange={(e) => setDescription(e.target.value)}
                 disabled={isLoading}
                 className="resize-none"
-                aria-invalid={!descriptionValid && description.trim() !== ""}
+                aria-invalid={descriptionError !== ""}
               />
 
-              {description.trim() !== "" && !descriptionValid && (
-                <p className="text-xs text-destructive">Invalid description</p>
+              {descriptionError && (
+                <p className="text-xs text-destructive">{descriptionError}</p>
               )}
 
               <FieldDescription>
@@ -360,7 +365,7 @@ const ProjectDialog = ({ open, onOpenChange, workspaceId, project = null }) => {
 
             <Button
               type="submit"
-              disabled={isLoading || !name.trim()}
+              disabled={isLoading || !nameValid}
               className="cursor-pointer"
             >
               {isLoading ? (

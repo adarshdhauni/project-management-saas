@@ -20,6 +20,7 @@ const TaskDetailPage = lazy(() => import("@/pages/user/TaskDetailPage"));
 
 import { AppLayout } from "@/components/layout/AppLayout";
 import { AuthLayout } from "@/components/layout/AuthLayout";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { RootLayout } from "@/components/layout/RootLayout";
 import { WorkspaceLayout } from "@/components/layout/WorkspaceLayout";
 
@@ -67,34 +68,20 @@ const router = createBrowserRouter([
                 path: "/dashboard",
                 children: [
                   {
-                    index: true,
-                    element: <Dashboard />,
+                    element: <DashboardLayout />,
+                    children: [
+                      { index: true, element: <Dashboard /> },
+                      { path: "notifications", element: <Notification /> },
+                      { path: "profile", element: <Profile /> },
+                      { path: "settings", element: <Settings /> },
+                    ],
                   },
-                  {
-                    path: "notifications",
-                    element: <Notification />,
-                  },
-                  {
-                    path: "profile",
-                    element: <Profile />,
-                  },
-                  {
-                    path: "settings",
-                    element: <Settings />,
-                  },
-
                   {
                     path: "workspaces/:workspaceId",
                     element: <WorkspaceLayout />,
                     children: [
-                      {
-                        index: true,
-                        element: <Workspace />,
-                      },
-                      {
-                        path: "projects",
-                        element: <Projects />,
-                      },
+                      { index: true, element: <Workspace /> },
+                      { path: "projects", element: <Projects /> },
                       {
                         path: "projects/:projectId",
                         element: <ProjectDetailPage />,
@@ -103,26 +90,10 @@ const router = createBrowserRouter([
                         path: "projects/:projectId/tasks/:taskId",
                         element: <TaskDetailPage />,
                       },
-                      {
-                        path: "activity",
-                        element: <Activity />,
-                      },
-                      {
-                        path: "members",
-                        element: <MembersPage />,
-                      },
-                      // {
-                      //   path: "tasks",
-                      //   element: <Tasks />,
-                      // },
-                      // {
-                      //   path: "members",
-                      //   element: <Members />,
-                      // },
-                      {
-                        path: "settings",
-                        element: <WorkspaceSettings />,
-                      },
+                      // { path: "tasks", element: <Tasks /> },
+                      { path: "activity", element: <Activity /> },
+                      { path: "members", element: <MembersPage /> },
+                      { path: "settings", element: <WorkspaceSettings /> },
                     ],
                   },
                 ],

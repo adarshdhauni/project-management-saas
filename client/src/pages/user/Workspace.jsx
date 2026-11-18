@@ -1,5 +1,6 @@
 import {
   Activity,
+  Archive,
   ArrowRight,
   CheckSquare,
   Clock3,
@@ -35,6 +36,7 @@ import { useGetWorkspaceOverviewQuery } from "@/features/workspace/workspaceApi"
 import { getActivityContent } from "@/utils/activity";
 import { formatRelativeTime } from "@/utils/date";
 import getWorkspaceInitials from "@/utils/workspaceInitials";
+import ArchiveDialog from "@/features/workspace/components/ArchiveProjectDialog";
 
 const Workspace = () => {
   const { workspaceId } = useParams();
@@ -42,8 +44,10 @@ const Workspace = () => {
   const [isProjectDialogOpen, setIsProjectDialogOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isArchiveDialogOpen, setIsArchiveDialogOpen] = useState(false);
+  const [isRetryingOverview, setIsRetryingOverview] = useState(false);
 
-  const { data, isLoading, isFetching, isError, error, refetch } =
+  const { data, isLoading, isError, error, refetch } =
     useGetWorkspaceOverviewQuery(workspaceId);
 
   const workspace = data?.data?.workspace;
@@ -90,6 +94,22 @@ const Workspace = () => {
     };
   });
 
+  const handleRetryOverview = async () => {
+    setIsRetryingOverview(true);
+
+    try {
+      await refetch().unwrap();
+    } catch {
+      toast.add({
+        type: "error",
+        title: "Failed to load overview.",
+        priority: "high",
+      });
+    } finally {
+      setIsRetryingOverview(false);
+    }
+  };
+
   const handleEditProject = (project) => {
     setSelectedProject(project);
     setIsProjectDialogOpen(true);
@@ -105,11 +125,16 @@ const Workspace = () => {
     setIsDeleteDialogOpen(true);
   };
 
-  if (isLoading) {
+  const handleArchiveProject = (project) => {
+    setSelectedProject(project);
+    setIsArchiveDialogOpen(true);
+  };
+
+  if (isLoading && !isRetryingOverview) {
     return <WorkspaceSkeleton />;
   }
 
-  if (isError) {
+  if (isError || isRetryingOverview) {
     return (
       <div className="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-6xl items-center justify-center px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         <ErrorState
@@ -118,14 +143,14 @@ const Workspace = () => {
             error?.data?.message ||
             "We couldn't load this workspace. Please try again."
           }
-          onRetry={refetch}
-          isRetrying={isFetching}
+          onRetry={handleRetryOverview}
+          isRetrying={isRetryingOverview}
         />
       </div>
     );
   }
 
-  if (!workspace) {
+  if (!workspace && !isLoading && !isError && !isRetryingOverview) {
     return <WorkspaceNotFound />;
   }
 
@@ -290,14 +315,22 @@ const Workspace = () => {
 
                             <DropdownMenuContent
                               align="end"
-                              className="w-40 rounded-xl p-1.5"
+                              className="w-44 rounded-xl p-1.5"
                             >
                               <DropdownMenuItem
                                 onClick={() => handleEditProject(project)}
                                 className="cursor-pointer gap-2 rounded-lg px-2.5 py-2"
                               >
-                                <Pencil className="h-4 w-4" />
+                                <Pencil className="size-4" />
                                 <span>Edit project</span>
+                              </DropdownMenuItem>
+
+                              <DropdownMenuItem
+                                onClick={() => handleArchiveProject(project)}
+                                className="cursor-pointer gap-2 rounded-lg px-2.5 py-2"
+                              >
+                                <Archive className="size-4" />
+                                <span>Archive project</span>
                               </DropdownMenuItem>
 
                               <DropdownMenuSeparator className="my-1.5" />
@@ -306,7 +339,7 @@ const Workspace = () => {
                                 onClick={() => handleDeleteProject(project)}
                                 className="cursor-pointer gap-2 rounded-lg px-2.5 py-2 text-destructive focus:text-destructive"
                               >
-                                <Trash2 className="h-4 w-4" />
+                                <Trash2 className="size-4" />
                                 <span>Delete project</span>
                               </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -418,6 +451,12 @@ const Workspace = () => {
         onOpenChange={setIsProjectDialogOpen}
         workspaceId={workspaceId}
         project={selectedProject}
+      />
+
+      <ArchiveDialog
+        isArchiveDialogOpen={isArchiveDialogOpen}
+        setIsArchiveDialogOpen={setIsArchiveDialogOpen}
+        selectedProject={selectedProject}
       />
 
       <DeleteDialog

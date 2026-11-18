@@ -28,6 +28,22 @@ const projectApi = apiSlice.injectEndpoints({
       invalidatesTags: ["Project", "Activity"],
     }),
 
+    archiveProject: builder.mutation({
+      query: (projectId) => ({
+        url: `/api/v1/projects/${projectId}/archive`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["Project", "Activity"],
+    }),
+
+    restoreProject: builder.mutation({
+      query: (projectId) => ({
+        url: `/api/v1/projects/${projectId}/restore`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["Project", "Activity"],
+    }),
+
     getWorkspaceProjects: builder.query({
       query: ({
         workspaceId,
@@ -46,6 +62,7 @@ const projectApi = apiSlice.injectEndpoints({
       }),
       providesTags: ["Project"],
     }),
+
     getProjectById: builder.query({
       query: (projectId) => ({
         url: `/api/v1/projects/${projectId}`,
@@ -60,6 +77,8 @@ export const {
   useCreateProjectMutation,
   useUpdateProjectMutation,
   useDeleteProjectMutation,
+  useArchiveProjectMutation,
+  useRestoreProjectMutation,
   useGetWorkspaceProjectsQuery,
-  useGetProjectByIdQuery
+  useGetProjectByIdQuery,
 } = projectApi;

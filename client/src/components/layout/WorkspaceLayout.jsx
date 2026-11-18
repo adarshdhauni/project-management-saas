@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom";
 
+import PageTransition from "@/components/shared/PageTransition";
 import MobileWorkspaceSidebar from "./MobileWorkspaceSidebar";
 import WorkspaceSidebar from "./WorkspaceSidebar";
 
@@ -12,10 +13,11 @@ export const WorkspaceLayout = () => {
         <MobileWorkspaceSidebar />
 
         <main>
-          <Outlet />
+          <PageTransition>
+            <Outlet />
+          </PageTransition>
         </main>
       </div>
     </div>
   );
 };
-

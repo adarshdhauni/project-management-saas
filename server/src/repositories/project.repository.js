@@ -17,11 +17,8 @@ const findAllByWorkspace = async (workspaceId, filters = {}, options = {}) => {
 
   const query = {
     workspace: workspaceId,
+    archivedAt: archived === "true" ? { $ne: null } : null,
   };
-
-  if (archived !== undefined) {
-    query.isArchived = archived === "true";
-  }
 
   if (search.trim()) {
     query.name = {
@@ -37,7 +34,7 @@ const findAllByWorkspace = async (workspaceId, filters = {}, options = {}) => {
       .limit(limit)
       .lean(),
 
-    Project.countDocuments(query),
+    Project.countDocuments(query, options),
   ]);
 
   const totalPages = Math.ceil(total / limit);
@@ -93,6 +90,7 @@ const countByWorkspace = (workspaceId, options = {}) => {
   return Project.countDocuments(
     {
       workspace: workspaceId,
+      archivedAt: null,
     },
     options,
   );
@@ -102,6 +100,7 @@ const findRecentByWorkspace = (workspaceId, limit = 5, options = {}) => {
   return Project.find(
     {
       workspace: workspaceId,
+      archivedAt: null,
     },
     null,
     options,
@@ -109,6 +108,40 @@ const findRecentByWorkspace = (workspaceId, limit = 5, options = {}) => {
     .sort({ updatedAt: -1 })
     .limit(limit)
     .lean();
+};
+
+const archiveById = (projectId, options = {}) => {
+  return Project.findOneAndUpdate(
+    {
+      _id: projectId,
+      archivedAt: null,
+    },
+    {
+      archivedAt: new Date(),
+    },
+    {
+      new: true,
+      runValidators: true,
+      ...options,
+    },
+  );
+};
+
+const restoreById = (projectId, options = {}) => {
+  return Project.findOneAndUpdate(
+    {
+      _id: projectId,
+      archivedAt: { $ne: null },
+    },
+    {
+      archivedAt: null,
+    },
+    {
+      new: true,
+      runValidators: true,
+      ...options,
+    },
+  );
 };
 
 const projectRepository = {
@@ -121,6 +154,8 @@ const projectRepository = {
   findByWorkspaceAndId,
   countByWorkspace,
   findRecentByWorkspace,
+  archiveById,
+  restoreById,
 };
 
 export default projectRepository;

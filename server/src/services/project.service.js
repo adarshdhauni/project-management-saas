@@ -287,12 +287,148 @@ const deleteProject = async (userId, projectId) => {
   }
 };
 
+const archiveProject = async (userId, projectId) => {
+  const project = await projectRepository.findById(projectId);
+
+  if (!project) {
+    throw new ApiError(404, "Project not found.");
+  }
+
+  const membership = await workspaceMemberRepository.findByWorkspaceAndUser(
+    project.workspace,
+    userId,
+  );
+
+  if (!membership) {
+    throw new ApiError(403, "You do not have access to this workspace.");
+  }
+
+  if (!["owner", "admin"].includes(membership.role)) {
+    throw new ApiError(
+      403,
+      "You do not have permission to archive this project.",
+    );
+  }
+
+  if (project.archivedAt) {
+    throw new ApiError(400, "Project is already archived.");
+  }
+
+  const session = await mongoose.startSession();
+
+  try {
+    session.startTransaction();
+
+    const archivedProject = await projectRepository.archiveById(projectId, {
+      session,
+    });
+
+    if (!archivedProject) {
+      throw new ApiError(409, "Project state has changed. Please try again.");
+    }
+
+    await activityService.createActivity(
+      {
+        workspaceId: project.workspace,
+        userId,
+        action: "project.archived",
+        entityType: "Project",
+        entityId: project._id,
+        metadata: {
+          name: project.name,
+          projectId: project._id,
+        },
+      },
+      { session },
+    );
+
+    await session.commitTransaction();
+
+    return archivedProject;
+  } catch (error) {
+    await session.abortTransaction();
+
+    throw error;
+  } finally {
+    await session.endSession();
+  }
+};
+
+const restoreProject = async (userId, projectId) => {
+  const project = await projectRepository.findById(projectId);
+
+  if (!project) {
+    throw new ApiError(404, "Project not found.");
+  }
+
+  const membership = await workspaceMemberRepository.findByWorkspaceAndUser(
+    project.workspace,
+    userId,
+  );
+
+  if (!membership) {
+    throw new ApiError(403, "You do not have access to this workspace.");
+  }
+
+  if (!["owner", "admin"].includes(membership.role)) {
+    throw new ApiError(
+      403,
+      "You do not have permission to restore this project.",
+    );
+  }
+
+  if (!project.archivedAt) {
+    throw new ApiError(400, "Project is not archived.");
+  }
+
+  const session = await mongoose.startSession();
+
+  try {
+    session.startTransaction();
+
+    const restoredProject = await projectRepository.restoreById(projectId, {
+      session,
+    });
+
+    if (!restoredProject) {
+      throw new ApiError(409, "Project state has changed. Please try again.");
+    }
+
+    await activityService.createActivity(
+      {
+        workspaceId: project.workspace,
+        userId,
+        action: "project.restored",
+        entityType: "Project",
+        entityId: project._id,
+        metadata: {
+          name: project.name,
+          projectId: project._id,
+        },
+      },
+      { session },
+    );
+
+    await session.commitTransaction();
+
+    return restoredProject;
+  } catch (error) {
+    await session.abortTransaction();
+
+    throw error;
+  } finally {
+    await session.endSession();
+  }
+};
+
 const projectService = {
   createProject,
   getWorkspaceProjects,
   getProjectById,
   updateProject,
   deleteProject,
+  archiveProject,
+  restoreProject,
 };
 
 export default projectService;

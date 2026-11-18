@@ -57,12 +57,36 @@ const deleteProject = asyncHandler(async (req, res) => {
     .json(new ApiResponse(null, "Project deleted successfully."));
 });
 
+const archiveProject = asyncHandler(async (req, res) => {
+  const archivedProject = await projectService.archiveProject(
+    req.user._id,
+    req.params.projectId,
+  );
+
+  return res
+    .status(200)
+    .json(new ApiResponse(archivedProject, "Project archived successfully."));
+});
+
+const restoreProject = asyncHandler(async (req, res) => {
+  const restoredProject = await projectService.restoreProject(
+    req.user._id,
+    req.params.projectId,
+  );
+
+  return res
+    .status(200)
+    .json(new ApiResponse(restoredProject, "Project restored successfully."));
+});
+
 const projectController = {
   createProject,
   getWorkspaceProjects,
   getProjectById,
   updateProject,
   deleteProject,
+  archiveProject,
+  restoreProject,
 };
 
 export default projectController;

@@ -99,6 +99,26 @@ export const getActivityContent = (activity) => {
         icon: FolderKanban,
       };
 
+    case "project.archived":
+      return {
+        action: "archived the project",
+        target: metadata.name,
+        to: metadata.projectId
+          ? `/dashboard/workspaces/${activity.workspace}/projects/${metadata.projectId}`
+          : null,
+        icon: FolderKanban,
+      };
+
+    case "project.restored":
+      return {
+        action: "restored the project",
+        target: metadata.name,
+        to: metadata.projectId
+          ? `/dashboard/workspaces/${activity.workspace}/projects/${metadata.projectId}`
+          : null,
+        icon: FolderKanban,
+      };
+
     case "task.created":
       return {
         action: "created the task",

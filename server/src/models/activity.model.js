@@ -24,6 +24,8 @@ const activitySchema = new mongoose.Schema(
         "project.created",
         "project.updated",
         "project.deleted",
+        "project.archived",
+        "project.restored",
 
         "task.created",
         "task.updated",

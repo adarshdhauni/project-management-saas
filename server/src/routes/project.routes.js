@@ -65,4 +65,18 @@ router.get(
   taskController.getTasks,
 );
 
+router.patch(
+  "/:projectId/archive",
+  protect,
+  validate * { params: projectIdSchema },
+  projectController.archiveProject,
+);
+
+router.patch(
+  "/:projectId/restore",
+  protect,
+  validate({ params: projectIdSchema }),
+  projectController.restoreProject,
+);
+
 export default router;

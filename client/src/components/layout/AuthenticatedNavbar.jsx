@@ -328,7 +328,7 @@ const AuthenticatedNavbar = () => {
                 className="cursor-pointer gap-2 rounded-lg px-2.5 py-2 text-destructive focus:text-destructive"
               >
                 <LogOut className="h-4 w-4" />
-                {isLoggingOut ? "Logging out..." : "Log out"}
+                <span>{isLoggingOut ? "Logging out..." : "Log out"}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

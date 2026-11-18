@@ -49,7 +49,10 @@ const projectSchema = new mongoose.Schema(
         "smartphone",
       ],
     },
-    isArchived: { type: Boolean, default: false },
+    archivedAt: {
+      type: Date,
+      default: null,
+    },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
