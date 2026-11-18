@@ -68,7 +68,7 @@ router.get(
 router.patch(
   "/:projectId/archive",
   protect,
-  validate * { params: projectIdSchema },
+  validate({ params: projectIdSchema }),
   projectController.archiveProject,
 );
 
